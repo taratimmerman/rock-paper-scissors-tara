@@ -1,0 +1,22 @@
+# Node.js dependencies
+node_modules/
+
+# TypeScript output
+/dist/
+/build/
+
+# Parcel cache
+.parcel-cache/
+
+# TypeScript generated files
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE or editor configurations
+.vscode/
