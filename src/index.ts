@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const message = document.getElementById("message");
-    if (message) {
-        message.textContent = "Hello World!";
-    }
+  console.log("DOM content loaded!");
+  const message = document.getElementById("message");
+  if (message) {
+    message.textContent = "Hello World!";
+  }
 });
