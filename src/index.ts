@@ -1,4 +1,4 @@
-import { Model } from "./model";
+import { Model } from "./model/model";
 import { View } from "./view";
 import { Controller } from "./controller";
 
