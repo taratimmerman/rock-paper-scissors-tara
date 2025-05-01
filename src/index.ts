@@ -1,7 +1,11 @@
+import { Model } from "./model";
+import { View } from "./view";
+import { Controller } from "./controller";
+
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM content loaded!");
-  const message = document.getElementById("message");
-  if (message) {
-    message.textContent = "Hello World!";
-  }
+  const model = new Model();
+  const view = new View();
+  const controller = new Controller(model, view);
+
+  controller.initialize();
 });
