@@ -1,5 +1,6 @@
 import { Model } from "../model/model";
 import { View } from "../view";
+import { Move } from "../utils/dataObjectUtils";
 
 export class Controller {
   private model: Model;
@@ -27,7 +28,7 @@ export class Controller {
       ?.addEventListener("click", () => this.handlePlayerMove("scissors"));
   }
 
-  private handlePlayerMove(move: "rock" | "paper" | "scissors"): void {
+  private handlePlayerMove(move: Move): void {
     this.model.setPlayerMove(move);
     console.log("Player chose:", this.model.getPlayerMove());
   }

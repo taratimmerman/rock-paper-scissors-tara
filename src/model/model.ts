@@ -1,5 +1,7 @@
+import { GameState, Move } from "../utils/dataObjectUtils";
+
 export class Model {
-  private state = {
+  private state: GameState = {
     scores: {
       player: 0,
       computer: 0,
@@ -31,11 +33,11 @@ export class Model {
 
   // ===== Move Methods =====
 
-  setPlayerMove(move: "rock" | "paper" | "scissors") {
+  setPlayerMove(move: Move) {
     this.state.moves.player = move;
   }
 
-  getPlayerMove(): string {
+  getPlayerMove(): Move | "" {
     return this.state.moves.player;
   }
 
