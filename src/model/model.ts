@@ -1,11 +1,15 @@
+import { GameState, Move } from "../utils/dataObjectUtils";
+import { MOVES } from "../utils/dataUtils";
+
 export class Model {
-  private state = {
+  private state: GameState = {
     scores: {
       player: 0,
       computer: 0,
     },
     moves: {
       player: "",
+      computer: "",
     },
   };
 
@@ -31,15 +35,28 @@ export class Model {
 
   // ===== Move Methods =====
 
-  setPlayerMove(move: "rock" | "paper" | "scissors") {
+  setPlayerMove(move: Move) {
     this.state.moves.player = move;
   }
 
-  getPlayerMove(): string {
+  getPlayerMove(): Move | "" {
     return this.state.moves.player;
   }
 
   resetMoves(): void {
     this.state.moves.player = "";
+  }
+
+  setComputerMove(move: Move) {
+    this.state.moves.computer = move;
+  }
+
+  getComputerMove(): Move | "" {
+    return this.state.moves.computer;
+  }
+
+  chooseComputerMove(): void {
+    const randomIndex = Math.floor(Math.random() * MOVES.length);
+    this.setComputerMove(MOVES[randomIndex]);
   }
 }
