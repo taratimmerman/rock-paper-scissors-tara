@@ -54,12 +54,45 @@ describe("Model", () => {
   test("chooseComputerMove picks a valid move from MOVES", () => {
     model.chooseComputerMove();
     const move = model.getComputerMove();
-    expect(MOVES).toContain(move);
+    const validMoveNames = MOVES.map((m) => m.name);
+    expect(validMoveNames).toContain(move);
   });
 
   test("chooseComputerMove sets a non-empty move", () => {
     model.chooseComputerMove();
     const move = model.getComputerMove();
     expect(move).not.toBe("");
+  });
+
+  // ===== Evaluate Round Tests =====
+
+  describe("evaluateRound", () => {
+    test("returns 'Invalid round' if player move is missing", () => {
+      model.setComputerMove("rock");
+      expect(model.evaluateRound()).toBe("Invalid round");
+    });
+
+    test("returns 'Invalid round' if computer move is missing", () => {
+      model.setPlayerMove("paper");
+      expect(model.evaluateRound()).toBe("Invalid round");
+    });
+
+    test("returns 'It's a tie!' if both moves are the same", () => {
+      model.setPlayerMove("scissors");
+      model.setComputerMove("scissors");
+      expect(model.evaluateRound()).toBe("It's a tie!");
+    });
+
+    test("returns 'You win!' if player beats computer", () => {
+      model.setPlayerMove("rock");
+      model.setComputerMove("scissors");
+      expect(model.evaluateRound()).toBe("You win!");
+    });
+
+    test("returns 'Computer wins!' if computer beats player", () => {
+      model.setPlayerMove("paper");
+      model.setComputerMove("scissors");
+      expect(model.evaluateRound()).toBe("Computer wins!");
+    });
   });
 });

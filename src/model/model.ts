@@ -21,7 +21,21 @@ export class Model {
   // ===== General Methods =====
 
   evaluateRound(): string {
-    return "🚧";
+    const playerMove = this.getPlayerMove();
+    const computerMove = this.getComputerMove();
+
+    if (!playerMove || !computerMove) return "Invalid round";
+
+    if (playerMove === computerMove) return "It's a tie!";
+
+    const playerMoveData = MOVES.find((move) => move.name === playerMove);
+    const playerWins = playerMoveData?.beats.includes(computerMove);
+
+    if (playerWins) {
+      return "You win!";
+    } else {
+      return "Computer wins!";
+    }
   }
 
   // ===== Score Methods =====
@@ -63,6 +77,6 @@ export class Model {
 
   chooseComputerMove(): void {
     const randomIndex = Math.floor(Math.random() * MOVES.length);
-    this.setComputerMove(MOVES[randomIndex]);
+    this.setComputerMove(MOVES[randomIndex].name);
   }
 }
