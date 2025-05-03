@@ -12,12 +12,6 @@ export class Controller {
     this.view = view;
   }
 
-  private startGame(): void {
-    this.view.toggleStartButton(false);
-    this.view.toggleMoveButtons(true);
-    this.view.updateRound(this.model.getRoundNumber());
-  }
-
   private updateScoreView(): void {
     this.view.updateScores(
       this.model.getScore("player"),
@@ -25,8 +19,31 @@ export class Controller {
     );
   }
 
-  private handleNextRound(): void {
+  private startGame(): void {
+    this.view.toggleStartButton(false);
+    this.view.toggleMoveButtons(true);
+    this.view.updateRound(this.model.getRoundNumber());
+  }
+
+  private endRound(): void {
+    const playerMove = this.model.getPlayerMove();
+    const computerMove = this.model.getComputerMove();
+    const result = this.model.evaluateRound();
+
+    this.view.showRoundOutcome(playerMove, computerMove, result);
+    this.view.toggleMoveButtons(false);
+    this.view.togglePlayAgain(true);
     this.model.increaseRoundNumber();
+    this.updateScoreView();
+  }
+
+  private handlePlayerMove(move: Move): void {
+    this.model.setPlayerMove(move);
+    this.model.chooseComputerMove();
+    this.endRound();
+  }
+
+  private handleNextRound(): void {
     this.view.updateRound(this.model.getRoundNumber());
     this.view.resetForNextRound();
   }
@@ -51,19 +68,5 @@ export class Controller {
         .getElementById(id)
         ?.addEventListener("click", () => this.handlePlayerMove(id));
     });
-  }
-
-  private handlePlayerMove(move: Move): void {
-    this.model.setPlayerMove(move);
-    this.model.chooseComputerMove();
-
-    const playerMove = this.model.getPlayerMove();
-    const computerMove = this.model.getComputerMove();
-    const result = this.model.evaluateRound();
-
-    this.view.showRoundOutcome(playerMove, computerMove, result);
-    this.view.toggleMoveButtons(false);
-    this.view.togglePlayAgain(true);
-    this.updateScoreView();
   }
 }

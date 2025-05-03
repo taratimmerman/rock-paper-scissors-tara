@@ -1,5 +1,5 @@
 import { GameState, Move } from "../utils/dataObjectUtils";
-import { MOVES } from "../utils/dataUtils";
+import { MOVES, MOVE_MAP } from "../utils/dataUtils";
 
 export class Model {
   private state: GameState = {
@@ -8,8 +8,8 @@ export class Model {
       computer: 0,
     },
     moves: {
-      player: "",
-      computer: "",
+      player: null,
+      computer: null,
     },
     roundNumber: 1,
   };
@@ -22,18 +22,18 @@ export class Model {
 
   // ===== General Methods =====
 
+  doesMoveBeat(a: Move, b: Move): boolean {
+    return MOVE_MAP.get(a)?.beats.includes(b) ?? false;
+  }
+
   evaluateRound(): string {
     const playerMove = this.getPlayerMove();
     const computerMove = this.getComputerMove();
 
-    if (!playerMove || !computerMove) return "Invalid round";
-
+    if (playerMove === null || computerMove === null) return "Invalid round";
     if (playerMove === computerMove) return "It's a tie!";
 
-    const playerMoveData = MOVES.find((move) => move.name === playerMove);
-    const playerWins = playerMoveData?.beats.includes(computerMove);
-
-    if (playerWins) {
+    if (this.doesMoveBeat(playerMove, computerMove)) {
       this.setScore("player", this.getScore("player") + 1);
       return "You win!";
     } else {
@@ -63,19 +63,20 @@ export class Model {
     this.state.moves.player = move;
   }
 
-  getPlayerMove(): Move | "" {
+  getPlayerMove(): Move | null {
     return this.state.moves.player;
   }
 
   resetMoves(): void {
-    this.state.moves.player = "";
+    this.state.moves.player = null;
+    this.state.moves.computer = null;
   }
 
   setComputerMove(move: Move) {
     this.state.moves.computer = move;
   }
 
-  getComputerMove(): Move | "" {
+  getComputerMove(): Move | null {
     return this.state.moves.computer;
   }
 

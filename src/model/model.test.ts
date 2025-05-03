@@ -39,11 +39,11 @@ describe("Model", () => {
     expect(model.getPlayerMove()).toBe("scissors");
 
     model.resetMoves();
-    expect(model.getPlayerMove()).toBe("");
+    expect(model.getPlayerMove()).toBe(null);
   });
 
-  test("getPlayerMove returns empty string before a move is set", () => {
-    expect(model.getPlayerMove()).toBe("");
+  test("getPlayerMove returns null before a move is set", () => {
+    expect(model.getPlayerMove()).toBe(null);
   });
 
   test("setComputerMove and getComputerMove store and retrieve the move", () => {
