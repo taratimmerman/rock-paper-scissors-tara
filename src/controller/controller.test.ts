@@ -32,6 +32,7 @@ describe("Controller", () => {
       togglePlayAgain: jest.fn(),
       toggleStartButton: jest.fn(),
       resetForNextRound: jest.fn(),
+      updateTaraCounts: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -89,5 +90,6 @@ describe("Controller", () => {
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
     expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
+    expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
   });
 });

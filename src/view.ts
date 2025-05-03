@@ -66,4 +66,13 @@ export class View {
     if (this.computerScoreEl)
       this.computerScoreEl.textContent = computer.toString();
   }
+
+  // ===== Tara Methods =====
+
+  updateTaraCounts(playerCount: number, computerCount: number): void {
+    document.getElementById("player-tara")!.textContent =
+      playerCount.toString();
+    document.getElementById("computer-tara")!.textContent =
+      computerCount.toString();
+  }
 }
