@@ -19,11 +19,15 @@ describe("Controller", () => {
       chooseComputerMove: jest.fn(),
       setComputerMove: jest.fn(),
       getComputerMove: jest.fn().mockReturnValue("scissors"),
+      evaluateRound: jest.fn().mockReturnValue("🚧"),
     };
 
     mockView = {
       updateMessage: jest.fn(),
       updateScores: jest.fn(),
+      showMoves: jest.fn(),
+      toggleMoveButtons: jest.fn(),
+      togglePlayAgain: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -35,7 +39,7 @@ describe("Controller", () => {
     expect(mockModel.getScore).toHaveBeenCalledWith("player");
     expect(mockModel.getScore).toHaveBeenCalledWith("computer");
     expect(mockView.updateMessage).toHaveBeenCalledWith(
-      "Ready to play Rock, Paper, Scissors, Tara!"
+      "Rock, Paper, Scissors, Tara"
     );
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
   });
