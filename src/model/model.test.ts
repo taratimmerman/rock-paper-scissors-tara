@@ -1,5 +1,6 @@
 import { Model } from "./model";
 import { MOVES, STANDARD_MOVE_MAP } from "../utils/dataUtils";
+import { Move } from "../utils/dataObjectUtils";
 
 describe("Model", () => {
   let model: Model;
@@ -203,5 +204,47 @@ describe("Model", () => {
 
       expect(model.getTaraCount("computer")).toBe(0);
     });
+  });
+});
+
+// Utility to count frequency over many runs
+function simulateComputerChoices(
+  model: Model,
+  runs = 1000
+): Record<Move, number> {
+  const results: Record<Move, number> = {
+    rock: 0,
+    paper: 0,
+    scissors: 0,
+    tara: 0,
+  };
+
+  for (let i = 0; i < runs; i++) {
+    model.chooseComputerMove();
+    const move = model.getComputerMove();
+    if (move) results[move]++;
+  }
+
+  return results;
+}
+
+describe("Model - chooseComputerMove", () => {
+  it("should never choose tara when tara count is 0", () => {
+    const model = new Model();
+    model.setTaraCount("computer", 0);
+
+    const results = simulateComputerChoices(model, 500);
+
+    expect(results.tara).toBe(0);
+  });
+
+  it("should sometimes choose tara when tara count is > 0", () => {
+    const model = new Model();
+    model.setTaraCount("computer", 5);
+
+    const results = simulateComputerChoices(model, 500);
+
+    // Allow a small chance that tara isn't chosen due to randomness
+    expect(results.tara).toBeGreaterThan(0);
   });
 });
