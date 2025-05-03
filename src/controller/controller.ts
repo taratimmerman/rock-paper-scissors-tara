@@ -1,6 +1,7 @@
 import { Model } from "../model/model";
 import { View } from "../view";
 import { Move } from "../utils/dataObjectUtils";
+import { MOVES } from "../utils/dataUtils";
 
 export class Controller {
   private model: Model;
@@ -11,17 +12,21 @@ export class Controller {
     this.view = view;
   }
 
-  initialize(): void {
-    this.view.updateMessage("Rock, Paper, Scissors, Tara");
+  private updateScoreView(): void {
     this.view.updateScores(
       this.model.getScore("player"),
       this.model.getScore("computer")
     );
+  }
 
-    ["rock", "paper", "scissors"].forEach((id) => {
+  initialize(): void {
+    this.view.updateMessage("Rock, Paper, Scissors, Tara");
+    this.updateScoreView();
+
+    MOVES.map((m) => m.name).forEach((id) => {
       document
         .getElementById(id)
-        ?.addEventListener("click", () => this.handlePlayerMove(id as Move));
+        ?.addEventListener("click", () => this.handlePlayerMove(id));
     });
 
     document
@@ -40,5 +45,6 @@ export class Controller {
     this.view.showMoves(playerMove, computerMove, result);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
+    this.updateScoreView();
   }
 }
