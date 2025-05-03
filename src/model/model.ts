@@ -1,5 +1,5 @@
 import { GameState, Move } from "../utils/dataObjectUtils";
-import { MOVES, MOVE_MAP } from "../utils/dataUtils";
+import { MOVES, MOVE_MAP, STANDARD_MOVES } from "../utils/dataUtils";
 
 export class Model {
   private state: GameState = {
@@ -105,8 +105,11 @@ export class Model {
   }
 
   chooseComputerMove(): void {
-    const randomIndex = Math.floor(Math.random() * MOVES.length);
-    this.setComputerMove(MOVES[randomIndex].name);
+    const hasTara = this.getTaraCount("computer") > 0;
+    const availableMoves = hasTara ? MOVES : STANDARD_MOVES;
+
+    const randomIndex = Math.floor(Math.random() * availableMoves.length);
+    this.setComputerMove(availableMoves[randomIndex].name);
   }
 
   private isStandardMove(move: Move): boolean {
