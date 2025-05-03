@@ -51,6 +51,10 @@ export class Model {
     const computerMove = this.getComputerMove();
 
     if (playerMove === null || computerMove === null) return "Invalid round";
+
+    this.handleTaraMove("player", playerMove);
+    this.handleTaraMove("computer", computerMove);
+
     if (playerMove === computerMove) return "It's a tie!";
 
     if (this.doesMoveBeat(playerMove, computerMove)) {
@@ -132,6 +136,15 @@ export class Model {
 
   private getTaraCountFromStorage(key: "player" | "computer"): number {
     return parseInt(localStorage.getItem(`${key}TaraCount`) || "0", 10);
+  }
+
+  private decrementTaraCount(key: "player" | "computer"): void {
+    const current = this.getTaraCount(key);
+    if (current > 0) this.setTaraCount(key, current - 1);
+  }
+
+  private handleTaraMove(key: "player" | "computer", move: Move): void {
+    if (move === "tara") this.decrementTaraCount(key);
   }
 
   getTaraCount(key: "player" | "computer"): number {

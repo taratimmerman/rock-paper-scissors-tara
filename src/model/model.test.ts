@@ -183,5 +183,25 @@ describe("Model", () => {
       // Should still be the same since Tara doesn't earn Tara
       expect(model.getTaraCount("player")).toBe(initialTaraCount);
     });
+
+    test("Playing Tara decreases Tara count by 1 for player", () => {
+      model.setTaraCount("player", 2);
+      model.setPlayerMove("tara");
+      model.setComputerMove("rock");
+
+      model.evaluateRound();
+
+      expect(model.getTaraCount("player")).toBe(1);
+    });
+
+    test("Computer's Tara count decreases by 1 when it plays Tara", () => {
+      model.setTaraCount("computer", 1);
+      model.setPlayerMove("rock");
+      model.setComputerMove("tara");
+
+      model.evaluateRound();
+
+      expect(model.getTaraCount("computer")).toBe(0);
+    });
   });
 });

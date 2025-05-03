@@ -79,7 +79,6 @@ export class View {
   }
 
   updateTaraButton(isEnabled: boolean): void {
-    console.log(isEnabled);
     if (this.taraBtn instanceof HTMLButtonElement) {
       this.taraBtn.disabled = !isEnabled;
     }
