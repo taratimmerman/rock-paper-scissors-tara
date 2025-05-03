@@ -11,19 +11,39 @@ export class Model {
       player: null,
       computer: null,
     },
+    taras: {
+      player: 0,
+      computer: 0,
+    },
     roundNumber: 1,
   };
 
   constructor() {
     this.state.scores.player = this.getScoreFromStorage("player");
     this.state.scores.computer = this.getScoreFromStorage("computer");
+    this.state.taras.player = this.getTaraCountFromStorage("player");
+    this.state.taras.computer = this.getTaraCountFromStorage("computer");
     this.state.roundNumber = this.getRoundNumberFromStorage();
   }
 
   // ===== General Methods =====
 
-  doesMoveBeat(a: Move, b: Move): boolean {
+  private doesMoveBeat(a: Move, b: Move): boolean {
     return MOVE_MAP.get(a)?.beats.includes(b) ?? false;
+  }
+
+  private handleRoundWin(
+    winner: "player" | "computer",
+    winningMove: Move
+  ): void {
+    this.setScore(winner, this.getScore(winner) + 1);
+
+    if (this.isStandardMove(winningMove)) {
+      const currentTara = this.getTaraCount(winner);
+      if (currentTara < 3) {
+        this.setTaraCount(winner, currentTara + 1);
+      }
+    }
   }
 
   evaluateRound(): string {
@@ -34,10 +54,10 @@ export class Model {
     if (playerMove === computerMove) return "It's a tie!";
 
     if (this.doesMoveBeat(playerMove, computerMove)) {
-      this.setScore("player", this.getScore("player") + 1);
+      this.handleRoundWin("player", playerMove);
       return "You win!";
     } else {
-      this.setScore("computer", this.getScore("computer") + 1);
+      this.handleRoundWin("computer", computerMove);
       return "Computer wins!";
     }
   }
@@ -85,6 +105,10 @@ export class Model {
     this.setComputerMove(MOVES[randomIndex].name);
   }
 
+  private isStandardMove(move: Move): boolean {
+    return move !== "tara";
+  }
+
   // ===== Round Methods =====
 
   private getRoundNumberFromStorage(): number {
@@ -102,5 +126,20 @@ export class Model {
 
   increaseRoundNumber(): void {
     this.setRoundNumber(this.getRoundNumber() + 1);
+  }
+
+  // ===== Tara Methods =====
+
+  private getTaraCountFromStorage(key: "player" | "computer"): number {
+    return parseInt(localStorage.getItem(`${key}TaraCount`) || "0", 10);
+  }
+
+  getTaraCount(key: "player" | "computer"): number {
+    return this.state.taras[key];
+  }
+
+  setTaraCount(key: "player" | "computer", value: number): void {
+    this.state.taras[key] = value;
+    localStorage.setItem(`${key}TaraCount`, value.toString());
   }
 }

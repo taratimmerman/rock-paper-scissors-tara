@@ -16,5 +16,9 @@ export interface GameState {
     player: Move | null;
     computer: Move | null;
   };
+  taras: {
+    player: number;
+    computer: number;
+  };
   roundNumber: number;
 }

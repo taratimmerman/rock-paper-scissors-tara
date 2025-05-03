@@ -1,5 +1,5 @@
 import { Model } from "./model";
-import { MOVES } from "../utils/dataUtils";
+import { MOVES, STANDARD_MOVE_MAP } from "../utils/dataUtils";
 
 describe("Model", () => {
   let model: Model;
@@ -34,12 +34,15 @@ describe("Model", () => {
     expect(model.getPlayerMove()).toBe("paper");
   });
 
-  test("resetMoves clears the player's move", () => {
+  test("resetMoves clears the moves stored in state", () => {
     model.setPlayerMove("scissors");
     expect(model.getPlayerMove()).toBe("scissors");
+    model.setComputerMove("paper");
+    expect(model.getComputerMove()).toBe("paper");
 
     model.resetMoves();
     expect(model.getPlayerMove()).toBe(null);
+    expect(model.getComputerMove()).toBe(null);
   });
 
   test("getPlayerMove returns null before a move is set", () => {
@@ -122,6 +125,63 @@ describe("Model", () => {
       model.setRoundNumber(2);
       model.increaseRoundNumber();
       expect(model.getRoundNumber()).toBe(3);
+    });
+  });
+
+  // ===== Tara Tests =====
+
+  describe("Tara", () => {
+    test("getTaraCount returns 0 by default", () => {
+      expect(model.getTaraCount("player")).toBe(0);
+      expect(model.getTaraCount("computer")).toBe(0);
+    });
+
+    test("setTaraCount updates the Tara count and localStorage", () => {
+      model.setTaraCount("player", 2);
+      expect(model.getTaraCount("player")).toBe(2);
+      expect(localStorage.getItem("playerTaraCount")).toBe("2");
+    });
+
+    test("Tara count persists between model instances", () => {
+      model.setTaraCount("computer", 1);
+      // Recreate model to simulate a page reload
+      model = new Model();
+      expect(model.getTaraCount("computer")).toBe(1);
+    });
+
+    test("Tara does not affect score when played against itself", () => {
+      model.setPlayerMove("tara");
+      model.setComputerMove("tara");
+      expect(model.evaluateRound()).toBe("It's a tie!");
+      expect(model.getScore("player")).toBe(0);
+      expect(model.getScore("computer")).toBe(0);
+    });
+
+    test("Tara beats all standard moves", () => {
+      for (const move of STANDARD_MOVE_MAP.keys()) {
+        model.setPlayerMove("tara");
+        model.setComputerMove(move);
+        expect(model.evaluateRound()).toBe("You win!");
+      }
+    });
+
+    test("Standard moves lose to Tara", () => {
+      for (const move of STANDARD_MOVE_MAP.keys()) {
+        model.setPlayerMove(move);
+        model.setComputerMove("tara");
+        expect(model.evaluateRound()).toBe("Computer wins!");
+      }
+    });
+
+    test("Tara is not granted after winning with Tara", () => {
+      model.setPlayerMove("tara");
+      model.setComputerMove("rock");
+      const initialTaraCount = model.getTaraCount("player");
+
+      model.evaluateRound();
+
+      // Should still be the same since Tara doesn't earn Tara
+      expect(model.getTaraCount("player")).toBe(initialTaraCount);
     });
   });
 });
