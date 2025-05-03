@@ -18,6 +18,12 @@ export class Model {
     this.state.scores.computer = this.getScoreFromStorage("computer");
   }
 
+  // ===== General Methods =====
+
+  evaluateRound(): string {
+    return "🚧";
+  }
+
   // ===== Score Methods =====
 
   private getScoreFromStorage(key: "player" | "computer"): number {

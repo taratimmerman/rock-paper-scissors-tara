@@ -12,31 +12,33 @@ export class Controller {
   }
 
   initialize(): void {
-    const player = this.model.getScore("player");
-    const computer = this.model.getScore("computer");
-    this.view.updateMessage("Ready to play Rock, Paper, Scissors, Tara!");
-    this.view.updateScores(player, computer);
+    this.view.updateMessage("Rock, Paper, Scissors, Tara");
+    this.view.updateScores(
+      this.model.getScore("player"),
+      this.model.getScore("computer")
+    );
+
+    ["rock", "paper", "scissors"].forEach((id) => {
+      document
+        .getElementById(id)
+        ?.addEventListener("click", () => this.handlePlayerMove(id as Move));
+    });
 
     document
-      .getElementById("rock")
-      ?.addEventListener("click", () => this.handlePlayerMove("rock"));
-    document
-      .getElementById("paper")
-      ?.addEventListener("click", () => this.handlePlayerMove("paper"));
-    document
-      .getElementById("scissors")
-      ?.addEventListener("click", () => this.handlePlayerMove("scissors"));
+      .getElementById("play-again")
+      ?.addEventListener("click", () => this.view.resetForNextRound());
   }
 
   private handlePlayerMove(move: Move): void {
-    console.log("===== Round Start =====", this.model.getPlayerMove());
-
     this.model.setPlayerMove(move);
-    console.log("You chose:", this.model.getPlayerMove());
-
     this.model.chooseComputerMove();
-    console.log("Computer chose:", this.model.getComputerMove());
 
-    console.log("===== Round End =====");
+    const playerMove = this.model.getPlayerMove();
+    const computerMove = this.model.getComputerMove();
+    const result = this.model.evaluateRound();
+
+    this.view.showMoves(playerMove, computerMove, result);
+    this.view.toggleMoveButtons(false);
+    this.view.togglePlayAgain(true);
   }
 }
