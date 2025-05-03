@@ -35,6 +35,9 @@ export class Controller {
     this.view.togglePlayAgain(true);
     this.model.increaseRoundNumber();
     this.updateScoreView();
+
+    console.log("Player Taras:", this.model.getTaraCount("player"));
+    console.log("Computer Taras:", this.model.getTaraCount("computer"));
   }
 
   private handlePlayerMove(move: Move): void {

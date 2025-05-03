@@ -21,6 +21,7 @@ describe("Controller", () => {
       getComputerMove: jest.fn().mockReturnValue("scissors"),
       evaluateRound: jest.fn().mockReturnValue("You win!"),
       increaseRoundNumber: jest.fn(),
+      getTaraCount: jest.fn().mockReturnValue(0),
     };
 
     mockView = {
