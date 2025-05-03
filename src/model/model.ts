@@ -1,4 +1,5 @@
 import { GameState, Move } from "../utils/dataObjectUtils";
+import { MOVES } from "../utils/dataUtils";
 
 export class Model {
   private state: GameState = {
@@ -8,6 +9,7 @@ export class Model {
     },
     moves: {
       player: "",
+      computer: "",
     },
   };
 
@@ -43,5 +45,18 @@ export class Model {
 
   resetMoves(): void {
     this.state.moves.player = "";
+  }
+
+  setComputerMove(move: Move) {
+    this.state.moves.computer = move;
+  }
+
+  getComputerMove(): Move | "" {
+    return this.state.moves.computer;
+  }
+
+  chooseComputerMove(): void {
+    const randomIndex = Math.floor(Math.random() * MOVES.length);
+    this.setComputerMove(MOVES[randomIndex]);
   }
 }

@@ -1,4 +1,5 @@
 import { Model } from "./model";
+import { MOVES } from "../utils/dataUtils";
 
 describe("Model", () => {
   let model: Model;
@@ -43,5 +44,22 @@ describe("Model", () => {
 
   test("getPlayerMove returns empty string before a move is set", () => {
     expect(model.getPlayerMove()).toBe("");
+  });
+
+  test("setComputerMove and getComputerMove store and retrieve the move", () => {
+    model.setComputerMove("scissors");
+    expect(model.getComputerMove()).toBe("scissors");
+  });
+
+  test("chooseComputerMove picks a valid move from MOVES", () => {
+    model.chooseComputerMove();
+    const move = model.getComputerMove();
+    expect(MOVES).toContain(move);
+  });
+
+  test("chooseComputerMove sets a non-empty move", () => {
+    model.chooseComputerMove();
+    const move = model.getComputerMove();
+    expect(move).not.toBe("");
   });
 });

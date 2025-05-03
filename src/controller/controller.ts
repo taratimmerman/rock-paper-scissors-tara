@@ -29,7 +29,14 @@ export class Controller {
   }
 
   private handlePlayerMove(move: Move): void {
+    console.log("===== Round Start =====", this.model.getPlayerMove());
+
     this.model.setPlayerMove(move);
-    console.log("Player chose:", this.model.getPlayerMove());
+    console.log("You chose:", this.model.getPlayerMove());
+
+    this.model.chooseComputerMove();
+    console.log("Computer chose:", this.model.getComputerMove());
+
+    console.log("===== Round End =====");
   }
 }

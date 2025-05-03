@@ -5,6 +5,7 @@ export interface GameState {
   };
   moves: {
     player: Move | "";
+    computer: Move | "";
   };
 }
 

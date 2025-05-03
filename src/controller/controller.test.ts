@@ -16,6 +16,9 @@ describe("Controller", () => {
       getScore: jest.fn().mockReturnValue(0),
       setPlayerMove: jest.fn(),
       getPlayerMove: jest.fn().mockReturnValue("rock"),
+      chooseComputerMove: jest.fn(),
+      setComputerMove: jest.fn(),
+      getComputerMove: jest.fn().mockReturnValue("scissors"),
     };
 
     mockView = {
@@ -57,5 +60,12 @@ describe("Controller", () => {
     controller.initialize();
     document.getElementById("scissors")!.click();
     expect(mockModel.setPlayerMove).toHaveBeenCalledWith("scissors");
+  });
+
+  test("clicking a move button triggers computer to choose a move", () => {
+    controller.initialize();
+    document.getElementById("rock")!.click();
+
+    expect(mockModel.chooseComputerMove).toHaveBeenCalled();
   });
 });
