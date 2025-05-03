@@ -5,8 +5,8 @@ describe("Model", () => {
   let model: Model;
 
   beforeEach(() => {
-    model = new Model();
     localStorage.clear();
+    model = new Model();
   });
 
   // ===== Score Tests =====
@@ -77,22 +77,31 @@ describe("Model", () => {
       expect(model.evaluateRound()).toBe("Invalid round");
     });
 
-    test("returns 'It's a tie!' if both moves are the same", () => {
+    test("does not update scores on tie", () => {
       model.setPlayerMove("scissors");
       model.setComputerMove("scissors");
+
       expect(model.evaluateRound()).toBe("It's a tie!");
+      expect(model.getScore("player")).toBe(0);
+      expect(model.getScore("computer")).toBe(0);
     });
 
-    test("returns 'You win!' if player beats computer", () => {
+    test("returns 'You win!' if player beats computer and updates score", () => {
       model.setPlayerMove("rock");
       model.setComputerMove("scissors");
+
       expect(model.evaluateRound()).toBe("You win!");
+      expect(model.getScore("player")).toBe(1);
+      expect(model.getScore("computer")).toBe(0);
     });
 
-    test("returns 'Computer wins!' if computer beats player", () => {
+    test("returns 'Computer wins!' if computer beats player and updates score", () => {
       model.setPlayerMove("paper");
       model.setComputerMove("scissors");
+
       expect(model.evaluateRound()).toBe("Computer wins!");
+      expect(model.getScore("computer")).toBe(1);
+      expect(model.getScore("player")).toBe(0);
     });
   });
 });

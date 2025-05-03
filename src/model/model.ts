@@ -32,8 +32,10 @@ export class Model {
     const playerWins = playerMoveData?.beats.includes(computerMove);
 
     if (playerWins) {
+      this.setScore("player", this.getScore("player") + 1);
       return "You win!";
     } else {
+      this.setScore("computer", this.getScore("computer") + 1);
       return "Computer wins!";
     }
   }
