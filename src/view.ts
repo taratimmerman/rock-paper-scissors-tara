@@ -29,8 +29,8 @@ export class View {
   }
 
   showRoundOutcome(
-    playerMove: Move | "",
-    computerMove: Move | "",
+    playerMove: Move | null,
+    computerMove: Move | null,
     result: string
   ): void {
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
