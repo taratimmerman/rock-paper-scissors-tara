@@ -12,6 +12,12 @@ export class Controller {
     this.view = view;
   }
 
+  private startGame(): void {
+    this.view.toggleStartButton(false);
+    this.view.toggleMoveButtons(true);
+    this.view.updateRound(this.model.getRoundNumber());
+  }
+
   private updateScoreView(): void {
     this.view.updateScores(
       this.model.getScore("player"),
@@ -19,19 +25,32 @@ export class Controller {
     );
   }
 
+  private handleNextRound(): void {
+    this.model.increaseRoundNumber();
+    this.view.updateRound(this.model.getRoundNumber());
+    this.view.resetForNextRound();
+  }
+
   initialize(): void {
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
     this.updateScoreView();
+    this.view.toggleMoveButtons(false);
+    this.view.togglePlayAgain(false);
+    this.view.toggleStartButton(true);
+
+    document
+      .getElementById("start-game")
+      ?.addEventListener("click", () => this.startGame());
+
+    document
+      .getElementById("play-again")
+      ?.addEventListener("click", () => this.handleNextRound());
 
     MOVES.map((m) => m.name).forEach((id) => {
       document
         .getElementById(id)
         ?.addEventListener("click", () => this.handlePlayerMove(id));
     });
-
-    document
-      .getElementById("play-again")
-      ?.addEventListener("click", () => this.view.resetForNextRound());
   }
 
   private handlePlayerMove(move: Move): void {
@@ -42,7 +61,7 @@ export class Controller {
     const computerMove = this.model.getComputerMove();
     const result = this.model.evaluateRound();
 
-    this.view.showMoves(playerMove, computerMove, result);
+    this.view.showRoundOutcome(playerMove, computerMove, result);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
     this.updateScoreView();

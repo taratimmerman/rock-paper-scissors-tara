@@ -15,7 +15,20 @@ export class View {
     }
   }
 
-  showMoves(
+  toggleStartButton(show: boolean): void {
+    const btn = document.getElementById("start-game");
+    if (btn) btn.style.display = show ? "inline" : "none";
+  }
+
+  updateRound(round: number): void {
+    const roundElem = document.getElementById("round");
+    if (roundElem) {
+      roundElem.textContent = `Round ${round}`;
+      roundElem.style.display = "block";
+    }
+  }
+
+  showRoundOutcome(
     playerMove: Move | "",
     computerMove: Move | "",
     result: string
@@ -29,7 +42,7 @@ export class View {
   toggleMoveButtons(show: boolean): void {
     ["rock", "paper", "scissors"].forEach((id) => {
       const btn = document.getElementById(id);
-      if (btn) btn.style.display = show ? "inline-block" : "none";
+      if (btn) btn.style.display = show ? "inline" : "none";
     });
   }
 

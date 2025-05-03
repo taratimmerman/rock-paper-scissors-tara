@@ -11,11 +11,13 @@ export class Model {
       player: "",
       computer: "",
     },
+    roundNumber: 1,
   };
 
   constructor() {
     this.state.scores.player = this.getScoreFromStorage("player");
     this.state.scores.computer = this.getScoreFromStorage("computer");
+    this.state.roundNumber = this.getRoundNumberFromStorage();
   }
 
   // ===== General Methods =====
@@ -80,5 +82,24 @@ export class Model {
   chooseComputerMove(): void {
     const randomIndex = Math.floor(Math.random() * MOVES.length);
     this.setComputerMove(MOVES[randomIndex].name);
+  }
+
+  // ===== Round Methods =====
+
+  private getRoundNumberFromStorage(): number {
+    return parseInt(localStorage.getItem(`roundNumber`) || "1", 10);
+  }
+
+  getRoundNumber(): number {
+    return this.state.roundNumber;
+  }
+
+  setRoundNumber(value: number): void {
+    this.state.roundNumber = value;
+    localStorage.setItem(`roundNumber`, value.toString());
+  }
+
+  increaseRoundNumber(): void {
+    this.setRoundNumber(this.getRoundNumber() + 1);
   }
 }

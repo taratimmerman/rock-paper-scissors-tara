@@ -104,4 +104,24 @@ describe("Model", () => {
       expect(model.getScore("player")).toBe(0);
     });
   });
+
+  // ===== Round Number Tests =====
+
+  describe("Round Number", () => {
+    test("getRoundNumber returns 1 by default if not previously set", () => {
+      expect(model.getRoundNumber()).toBe(1);
+    });
+
+    test("setRoundNumber updates the state and localStorage", () => {
+      model.setRoundNumber(3);
+      expect(model.getRoundNumber()).toBe(3);
+      expect(localStorage.getItem("roundNumber")).toBe("3");
+    });
+
+    test("increaseRoundNumber increments the round number by 1", () => {
+      model.setRoundNumber(2);
+      model.increaseRoundNumber();
+      expect(model.getRoundNumber()).toBe(3);
+    });
+  });
 });

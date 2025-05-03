@@ -7,6 +7,7 @@ export interface GameState {
     player: Move | "";
     computer: Move | "";
   };
+  roundNumber: number;
 }
 
 export type Move = "rock" | "paper" | "scissors";
