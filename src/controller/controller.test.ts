@@ -10,6 +10,7 @@ describe("Controller", () => {
       <button id="rock"></button>
       <button id="paper"></button>
       <button id="scissors"></button>
+      <button id="tara">Tara</button>
     `;
 
     mockModel = {
@@ -22,6 +23,7 @@ describe("Controller", () => {
       evaluateRound: jest.fn().mockReturnValue("You win!"),
       increaseRoundNumber: jest.fn(),
       getTaraCount: jest.fn().mockReturnValue(0),
+      taraIsEnabled: jest.fn(),
     };
 
     mockView = {
@@ -33,6 +35,7 @@ describe("Controller", () => {
       toggleStartButton: jest.fn(),
       resetForNextRound: jest.fn(),
       updateTaraCounts: jest.fn(),
+      updateTaraButton: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -71,6 +74,12 @@ describe("Controller", () => {
     expect(mockModel.setPlayerMove).toHaveBeenCalledWith("scissors");
   });
 
+  test("clicking tara button sets player move to 'tara'", () => {
+    controller.initialize();
+    document.getElementById("tara")!.click();
+    expect(mockModel.setPlayerMove).toHaveBeenCalledWith("tara");
+  });
+
   test("clicking a move button triggers computer to choose a move", () => {
     controller.initialize();
     document.getElementById("rock")!.click();
@@ -91,5 +100,6 @@ describe("Controller", () => {
     expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
+    expect(mockView.updateTaraButton).toHaveBeenCalled();
   });
 });

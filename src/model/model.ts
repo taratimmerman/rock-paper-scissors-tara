@@ -142,4 +142,8 @@ export class Model {
     this.state.taras[key] = value;
     localStorage.setItem(`${key}TaraCount`, value.toString());
   }
+
+  taraIsEnabled(): boolean {
+    return this.getTaraCount("player") > 0;
+  }
 }
