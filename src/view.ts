@@ -1,4 +1,5 @@
 import { Move } from "./utils/dataObjectUtils";
+import { MOVES } from "./utils/dataUtils";
 
 export class View {
   private messageEl = document.getElementById("message");
@@ -6,6 +7,7 @@ export class View {
   private computerScoreEl = document.getElementById("computer-score");
   private movesEl = document.getElementById("round-moves")!;
   private resultEl = document.getElementById("round-result")!;
+  private taraBtn = document.getElementById("tara")!;
 
   // ===== General Methods =====
 
@@ -40,8 +42,8 @@ export class View {
   }
 
   toggleMoveButtons(show: boolean): void {
-    ["rock", "paper", "scissors"].forEach((id) => {
-      const btn = document.getElementById(id);
+    MOVES.forEach(({ name }) => {
+      const btn = document.getElementById(name);
       if (btn) btn.style.display = show ? "inline" : "none";
     });
   }
@@ -74,5 +76,12 @@ export class View {
       playerCount.toString();
     document.getElementById("computer-tara")!.textContent =
       computerCount.toString();
+  }
+
+  updateTaraButton(isEnabled: boolean): void {
+    console.log(isEnabled);
+    if (this.taraBtn instanceof HTMLButtonElement) {
+      this.taraBtn.disabled = !isEnabled;
+    }
   }
 }

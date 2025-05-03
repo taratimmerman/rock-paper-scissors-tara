@@ -25,6 +25,11 @@ export class Controller {
     );
   }
 
+  private updateTaraButtonView(): void {
+    const isEnabled = this.model.taraIsEnabled();
+    this.view.updateTaraButton(isEnabled);
+  }
+
   private startGame(): void {
     this.view.toggleStartButton(false);
     this.view.toggleMoveButtons(true);
@@ -42,6 +47,7 @@ export class Controller {
     this.model.increaseRoundNumber();
     this.updateScoreView();
     this.updateTaraView();
+    this.updateTaraButtonView();
   }
 
   private handlePlayerMove(move: Move): void {
@@ -59,6 +65,7 @@ export class Controller {
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
     this.updateScoreView();
     this.updateTaraView();
+    this.updateTaraButtonView();
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleStartButton(true);
