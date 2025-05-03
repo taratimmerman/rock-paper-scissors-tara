@@ -8,15 +8,42 @@
   <body>
     <h1 id="message">Loading...</h1>
 
+    <!-- Scoreboard Table -->
     <table border="1">
-      <tr>
-        <th>Player</th>
-        <th>Computer</th>
-      </tr>
-      <tr>
-        <td id="player-score">0</td>
-        <td id="computer-score">0</td>
-      </tr>
+      <caption>
+        Scoreboard (Round Wins)
+      </caption>
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Computer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="player-score">0</td>
+          <td id="computer-score">0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tara Count Table -->
+    <table border="1">
+      <caption>
+        Tara Count
+      </caption>
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Computer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="player-tara">0</td>
+          <td id="computer-tara">0</td>
+        </tr>
+      </tbody>
     </table>
 
     <button id="start-game">Start Game</button>

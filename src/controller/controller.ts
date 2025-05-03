@@ -18,6 +18,12 @@ export class Controller {
       this.model.getScore("computer")
     );
   }
+  private updateTaraView(): void {
+    this.view.updateTaraCounts(
+      this.model.getTaraCount("player"),
+      this.model.getTaraCount("computer")
+    );
+  }
 
   private startGame(): void {
     this.view.toggleStartButton(false);
@@ -35,9 +41,7 @@ export class Controller {
     this.view.togglePlayAgain(true);
     this.model.increaseRoundNumber();
     this.updateScoreView();
-
-    console.log("Player Taras:", this.model.getTaraCount("player"));
-    console.log("Computer Taras:", this.model.getTaraCount("computer"));
+    this.updateTaraView();
   }
 
   private handlePlayerMove(move: Move): void {
@@ -54,6 +58,7 @@ export class Controller {
   initialize(): void {
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
     this.updateScoreView();
+    this.updateTaraView();
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleStartButton(true);
