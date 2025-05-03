@@ -27,7 +27,8 @@ export class Controller {
 
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
-    this.view.updateTaraButton(isEnabled);
+    const taraCount = this.model.getTaraCount("player");
+    this.view.updateTaraButton(isEnabled, taraCount);
   }
 
   private startGame(): void {
