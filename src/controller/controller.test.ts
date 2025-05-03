@@ -19,15 +19,18 @@ describe("Controller", () => {
       chooseComputerMove: jest.fn(),
       setComputerMove: jest.fn(),
       getComputerMove: jest.fn().mockReturnValue("scissors"),
-      evaluateRound: jest.fn().mockReturnValue("🚧"),
+      evaluateRound: jest.fn().mockReturnValue("You win!"),
+      increaseRoundNumber: jest.fn(),
     };
 
     mockView = {
       updateMessage: jest.fn(),
       updateScores: jest.fn(),
-      showMoves: jest.fn(),
+      showRoundOutcome: jest.fn(),
       toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
+      toggleStartButton: jest.fn(),
+      resetForNextRound: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -71,5 +74,19 @@ describe("Controller", () => {
     document.getElementById("rock")!.click();
 
     expect(mockModel.chooseComputerMove).toHaveBeenCalled();
+  });
+
+  test("clicking a move button displays outcome and toggles UI", () => {
+    controller.initialize();
+    document.getElementById("rock")!.click();
+
+    expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
+      "rock",
+      "scissors",
+      "You win!"
+    );
+    expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
+    expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
+    expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
   });
 });
