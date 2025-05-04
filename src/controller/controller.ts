@@ -14,20 +14,20 @@ export class Controller {
 
   private updateScoreView(): void {
     this.view.updateScores(
-      this.model.getScore("player"),
-      this.model.getScore("computer")
+      this.model.getPlayerScore(),
+      this.model.getComputerScore()
     );
   }
   private updateTaraView(): void {
     this.view.updateTaraCounts(
-      this.model.getTaraCount("player"),
-      this.model.getTaraCount("computer")
+      this.model.getPlayerTaraCount(),
+      this.model.getComputerTaraCount()
     );
   }
 
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
-    const taraCount = this.model.getTaraCount("player");
+    const taraCount = this.model.getPlayerTaraCount();
     this.view.updateTaraButton(isEnabled, taraCount);
   }
 
@@ -80,10 +80,10 @@ export class Controller {
       .getElementById("play-again")
       ?.addEventListener("click", () => this.handleNextRound());
 
-    MOVES.map((m) => m.name).forEach((id) => {
+    Object.values(MOVES).forEach((move) => {
       document
-        .getElementById(id)
-        ?.addEventListener("click", () => this.handlePlayerMove(id));
+        .getElementById(move)
+        ?.addEventListener("click", () => this.handlePlayerMove(move));
     });
   }
 }

@@ -1,5 +1,10 @@
-import { GameState, Move } from "../utils/dataObjectUtils";
-import { MOVES, MOVE_MAP, STANDARD_MOVES } from "../utils/dataUtils";
+import { GameState, Move, Participant } from "../utils/dataObjectUtils";
+import {
+  MOVES,
+  MOVE_DATA_MAP,
+  PARTICIPANTS,
+  STANDARD_MOVE_DATA_MAP,
+} from "../utils/dataUtils";
 
 export class Model {
   private state: GameState = {
@@ -19,23 +24,20 @@ export class Model {
   };
 
   constructor() {
-    this.state.scores.player = this.getScoreFromStorage("player");
-    this.state.scores.computer = this.getScoreFromStorage("computer");
-    this.state.taras.player = this.getTaraCountFromStorage("player");
-    this.state.taras.computer = this.getTaraCountFromStorage("computer");
+    this.state.scores.player = this.getPlayerScoreFromStorage();
+    this.state.scores.computer = this.getComputerScoreFromStorage();
+    this.state.taras.player = this.getPlayerTaraCountFromStorage();
+    this.state.taras.computer = this.getComputerTaraCountFromStorage();
     this.state.roundNumber = this.getRoundNumberFromStorage();
   }
 
   // ===== General Methods =====
 
   private doesMoveBeat(a: Move, b: Move): boolean {
-    return MOVE_MAP.get(a)?.beats.includes(b) ?? false;
+    return MOVE_DATA_MAP.get(a)?.beats.includes(b) ?? false;
   }
 
-  private handleRoundWin(
-    winner: "player" | "computer",
-    winningMove: Move
-  ): void {
+  private handleRoundWin(winner: Participant, winningMove: Move): void {
     this.setScore(winner, this.getScore(winner) + 1);
 
     if (this.isStandardMove(winningMove)) {
@@ -52,55 +54,86 @@ export class Model {
 
     if (playerMove === null || computerMove === null) return "Invalid round";
 
-    this.handleTaraMove("player", playerMove);
-    this.handleTaraMove("computer", computerMove);
+    this.handleTaraMove(PARTICIPANTS.PLAYER, playerMove);
+    this.handleTaraMove(PARTICIPANTS.COMPUTER, computerMove);
 
     if (playerMove === computerMove) return "It's a tie!";
 
     if (this.doesMoveBeat(playerMove, computerMove)) {
-      this.handleRoundWin("player", playerMove);
+      this.handleRoundWin(PARTICIPANTS.PLAYER, playerMove);
       return "You win!";
     } else {
-      this.handleRoundWin("computer", computerMove);
+      this.handleRoundWin(PARTICIPANTS.COMPUTER, computerMove);
       return "Computer wins!";
     }
   }
 
   // ===== Score Methods =====
-
-  private getScoreFromStorage(key: "player" | "computer"): number {
-    return parseInt(localStorage.getItem(`${key}Score`) || "0", 10);
-  }
-
-  getScore(key: "player" | "computer"): number {
-    return this.state.scores[key];
-  }
-
-  setScore(key: "player" | "computer", value: number): void {
+  private setScore(key: Participant, value: number): void {
     this.state.scores[key] = value;
     localStorage.setItem(`${key}Score`, value.toString());
   }
 
+  private getScoreFromStorage(key: Participant): number {
+    return parseInt(localStorage.getItem(`${key}Score`) || "0", 10);
+  }
+
+  private getPlayerScoreFromStorage(): number {
+    return this.getScoreFromStorage(PARTICIPANTS.PLAYER);
+  }
+
+  private getComputerScoreFromStorage(): number {
+    return this.getScoreFromStorage(PARTICIPANTS.COMPUTER);
+  }
+
+  private getScore(key: Participant): number {
+    return this.state.scores[key];
+  }
+
+  setPlayerScore(score: number) {
+    this.setScore(PARTICIPANTS.PLAYER, score);
+  }
+
+  setComputerScore(score: number) {
+    this.setScore(PARTICIPANTS.COMPUTER, score);
+  }
+
+  getPlayerScore(): number {
+    return this.getScore(PARTICIPANTS.PLAYER);
+  }
+
+  getComputerScore() {
+    return this.getScore(PARTICIPANTS.COMPUTER);
+  }
+
   // ===== Move Methods =====
 
-  private setMove(key: "player" | "computer", move: Move | null): void {
+  private isStandardMove(move: Move): boolean {
+    return move !== MOVES.TARA;
+  }
+
+  private setMove(key: Participant, move: Move | null): void {
     this.state.moves[key] = move;
   }
 
+  private getMove(key: Participant): Move | null {
+    return this.state.moves[key];
+  }
+
   setPlayerMove(move: Move | null) {
-    this.setMove("player", move);
+    this.setMove(PARTICIPANTS.PLAYER, move);
   }
 
   getPlayerMove(): Move | null {
-    return this.state.moves.player;
+    return this.getMove(PARTICIPANTS.PLAYER);
   }
 
   setComputerMove(move: Move | null) {
-    this.setMove("computer", move);
+    this.setMove(PARTICIPANTS.COMPUTER, move);
   }
 
   getComputerMove(): Move | null {
-    return this.state.moves.computer;
+    return this.getMove(PARTICIPANTS.COMPUTER);
   }
 
   resetMoves(): void {
@@ -109,15 +142,14 @@ export class Model {
   }
 
   chooseComputerMove(): void {
-    const hasTara = this.getTaraCount("computer") > 0;
-    const availableMoves = hasTara ? MOVES : STANDARD_MOVES;
+    const hasTara = this.getComputerTaraCount() > 0;
+    const moveMap = hasTara ? MOVE_DATA_MAP : STANDARD_MOVE_DATA_MAP;
 
-    const randomIndex = Math.floor(Math.random() * availableMoves.length);
-    this.setComputerMove(availableMoves[randomIndex].name);
-  }
+    const moveNames = Array.from(moveMap.keys());
+    const randomIndex = Math.floor(Math.random() * moveNames.length);
+    const randomMove = moveNames[randomIndex];
 
-  private isStandardMove(move: Move): boolean {
-    return move !== "tara";
+    this.setComputerMove(randomMove);
   }
 
   // ===== Round Methods =====
@@ -141,36 +173,60 @@ export class Model {
 
   // ===== Tara Methods =====
 
-  private getTaraCountFromStorage(key: "player" | "computer"): number {
+  private getTaraCountFromStorage(key: Participant): number {
     return parseInt(localStorage.getItem(`${key}TaraCount`) || "0", 10);
   }
 
-  private decrementTaraCount(key: "player" | "computer"): void {
+  private getPlayerTaraCountFromStorage(): number {
+    return this.getTaraCountFromStorage(PARTICIPANTS.PLAYER);
+  }
+
+  private getComputerTaraCountFromStorage(): number {
+    return this.getTaraCountFromStorage(PARTICIPANTS.COMPUTER);
+  }
+
+  private decrementTaraCount(key: Participant): void {
     const current = this.getTaraCount(key);
     if (current > 0) this.setTaraCount(key, current - 1);
   }
 
-  private handleTaraMove(key: "player" | "computer", move: Move): void {
-    if (move === "tara") {
+  private handleTaraMove(key: Participant, move: Move): void {
+    if (move === MOVES.TARA) {
       const currentTara = this.getTaraCount(key);
       if (currentTara > 0) {
         this.decrementTaraCount(key);
       } else {
-        this.setMove(key, "rock");
+        this.setMove(key, MOVES.ROCK);
       }
     }
   }
 
-  getTaraCount(key: "player" | "computer"): number {
-    return this.state.taras[key];
-  }
-
-  setTaraCount(key: "player" | "computer", value: number): void {
+  private setTaraCount(key: Participant, value: number): void {
     this.state.taras[key] = value;
     localStorage.setItem(`${key}TaraCount`, value.toString());
   }
 
+  private getTaraCount(key: Participant): number {
+    return this.state.taras[key];
+  }
+
+  setPlayerTaraCount(count: number): void {
+    this.setTaraCount(PARTICIPANTS.PLAYER, count);
+  }
+
+  setComputerTaraCount(count: number): void {
+    this.setTaraCount(PARTICIPANTS.COMPUTER, count);
+  }
+
+  getPlayerTaraCount(): number {
+    return this.getTaraCount(PARTICIPANTS.PLAYER);
+  }
+
+  getComputerTaraCount(): number {
+    return this.getTaraCount(PARTICIPANTS.COMPUTER);
+  }
+
   taraIsEnabled(): boolean {
-    return this.getTaraCount("player") > 0;
+    return this.getTaraCount(PARTICIPANTS.PLAYER) > 0;
   }
 }

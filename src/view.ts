@@ -42,8 +42,8 @@ export class View {
   }
 
   toggleMoveButtons(show: boolean): void {
-    MOVES.forEach(({ name }) => {
-      const btn = document.getElementById(name);
+    Object.values(MOVES).forEach((move) => {
+      const btn = document.getElementById(move);
       if (btn) btn.style.display = show ? "inline" : "none";
     });
   }

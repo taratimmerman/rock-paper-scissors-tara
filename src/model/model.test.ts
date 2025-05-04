@@ -1,5 +1,5 @@
 import { Model } from "./model";
-import { MOVES, STANDARD_MOVE_MAP } from "../utils/dataUtils";
+import { MOVES, STANDARD_MOVE_DATA_MAP } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
 // Utility to count frequency over many runs
@@ -34,33 +34,33 @@ describe("Model", () => {
   // ===== Score Tests =====
 
   test("getScore returns 0 when no score is set", () => {
-    expect(model.getScore("player")).toBe(0);
-    expect(model.getScore("computer")).toBe(0);
+    expect(model.getPlayerScore()).toBe(0);
+    expect(model.getComputerScore()).toBe(0);
   });
 
   test("setScore and getScore work together", () => {
-    model.setScore("player", 5);
-    model.setScore("computer", 3);
+    model.setPlayerScore(5);
+    model.setComputerScore(3);
 
-    expect(model.getScore("player")).toBe(5);
-    expect(model.getScore("computer")).toBe(3);
+    expect(model.getPlayerScore()).toBe(5);
+    expect(model.getComputerScore()).toBe(3);
   });
 
   // ===== Move Tests =====
 
   test("setPlayerMove and getPlayerMove work together", () => {
-    model.setPlayerMove("rock");
-    expect(model.getPlayerMove()).toBe("rock");
+    model.setPlayerMove(MOVES.ROCK);
+    expect(model.getPlayerMove()).toBe(MOVES.ROCK);
 
-    model.setPlayerMove("paper");
-    expect(model.getPlayerMove()).toBe("paper");
+    model.setPlayerMove(MOVES.PAPER);
+    expect(model.getPlayerMove()).toBe(MOVES.PAPER);
   });
 
   test("resetMoves clears the moves stored in state", () => {
-    model.setPlayerMove("scissors");
-    expect(model.getPlayerMove()).toBe("scissors");
-    model.setComputerMove("paper");
-    expect(model.getComputerMove()).toBe("paper");
+    model.setPlayerMove(MOVES.SCISSORS);
+    expect(model.getPlayerMove()).toBe(MOVES.SCISSORS);
+    model.setComputerMove(MOVES.PAPER);
+    expect(model.getComputerMove()).toBe(MOVES.PAPER);
 
     model.resetMoves();
     expect(model.getPlayerMove()).toBe(null);
@@ -72,14 +72,14 @@ describe("Model", () => {
   });
 
   test("setComputerMove and getComputerMove store and retrieve the move", () => {
-    model.setComputerMove("scissors");
-    expect(model.getComputerMove()).toBe("scissors");
+    model.setComputerMove(MOVES.SCISSORS);
+    expect(model.getComputerMove()).toBe(MOVES.SCISSORS);
   });
 
   test("chooseComputerMove picks a valid move from MOVES", () => {
     model.chooseComputerMove();
     const move = model.getComputerMove();
-    const validMoveNames = MOVES.map((m) => m.name);
+    const validMoveNames = Object.values(MOVES);
     expect(validMoveNames).toContain(move);
   });
 
@@ -93,40 +93,40 @@ describe("Model", () => {
 
   describe("evaluateRound", () => {
     test("returns 'Invalid round' if player move is missing", () => {
-      model.setComputerMove("rock");
+      model.setComputerMove(MOVES.ROCK);
       expect(model.evaluateRound()).toBe("Invalid round");
     });
 
     test("returns 'Invalid round' if computer move is missing", () => {
-      model.setPlayerMove("paper");
+      model.setPlayerMove(MOVES.PAPER);
       expect(model.evaluateRound()).toBe("Invalid round");
     });
 
     test("does not update scores on tie", () => {
-      model.setPlayerMove("scissors");
-      model.setComputerMove("scissors");
+      model.setPlayerMove(MOVES.SCISSORS);
+      model.setComputerMove(MOVES.SCISSORS);
 
       expect(model.evaluateRound()).toBe("It's a tie!");
-      expect(model.getScore("player")).toBe(0);
-      expect(model.getScore("computer")).toBe(0);
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
     });
 
     test("returns 'You win!' if player beats computer and updates score", () => {
-      model.setPlayerMove("rock");
-      model.setComputerMove("scissors");
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.SCISSORS);
 
       expect(model.evaluateRound()).toBe("You win!");
-      expect(model.getScore("player")).toBe(1);
-      expect(model.getScore("computer")).toBe(0);
+      expect(model.getPlayerScore()).toBe(1);
+      expect(model.getComputerScore()).toBe(0);
     });
 
     test("returns 'Computer wins!' if computer beats player and updates score", () => {
-      model.setPlayerMove("paper");
-      model.setComputerMove("scissors");
+      model.setPlayerMove(MOVES.PAPER);
+      model.setComputerMove(MOVES.SCISSORS);
 
       expect(model.evaluateRound()).toBe("Computer wins!");
-      expect(model.getScore("computer")).toBe(1);
-      expect(model.getScore("player")).toBe(0);
+      expect(model.getComputerScore()).toBe(1);
+      expect(model.getPlayerScore()).toBe(0);
     });
   });
 
@@ -154,81 +154,81 @@ describe("Model", () => {
 
   describe("Tara", () => {
     test("getTaraCount returns 0 by default", () => {
-      expect(model.getTaraCount("player")).toBe(0);
-      expect(model.getTaraCount("computer")).toBe(0);
+      expect(model.getPlayerTaraCount()).toBe(0);
+      expect(model.getComputerTaraCount()).toBe(0);
     });
 
     test("setTaraCount updates the Tara count and localStorage", () => {
-      model.setTaraCount("player", 2);
-      expect(model.getTaraCount("player")).toBe(2);
+      model.setPlayerTaraCount(2);
+      expect(model.getPlayerTaraCount()).toBe(2);
       expect(localStorage.getItem("playerTaraCount")).toBe("2");
     });
 
     test("Tara count persists between model instances", () => {
-      model.setTaraCount("computer", 1);
+      model.setComputerTaraCount(1);
       // Recreate model to simulate a page reload
       model = new Model();
-      expect(model.getTaraCount("computer")).toBe(1);
+      expect(model.getComputerTaraCount()).toBe(1);
     });
 
     test("Tara does not affect score when played against itself", () => {
-      model.setPlayerMove("tara");
-      model.setComputerMove("tara");
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.TARA);
       expect(model.evaluateRound()).toBe("It's a tie!");
-      expect(model.getScore("player")).toBe(0);
-      expect(model.getScore("computer")).toBe(0);
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
     });
 
     test("Tara beats all standard moves", () => {
-      for (const move of STANDARD_MOVE_MAP.keys()) {
-        model.setPlayerMove("tara");
+      for (const move of STANDARD_MOVE_DATA_MAP.keys()) {
+        model.setPlayerMove(MOVES.TARA);
         model.setComputerMove(move);
         expect(model.evaluateRound()).toBe("You win!");
       }
     });
 
     test("Standard moves lose to Tara", () => {
-      for (const move of STANDARD_MOVE_MAP.keys()) {
+      for (const move of STANDARD_MOVE_DATA_MAP.keys()) {
         model.setPlayerMove(move);
-        model.setComputerMove("tara");
+        model.setComputerMove(MOVES.TARA);
         expect(model.evaluateRound()).toBe("Computer wins!");
       }
     });
 
     test("Tara is not granted after winning with Tara", () => {
-      model.setPlayerMove("tara");
-      model.setComputerMove("rock");
-      const initialTaraCount = model.getTaraCount("player");
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.ROCK);
+      const initialTaraCount = model.getPlayerTaraCount();
 
       model.evaluateRound();
 
       // Should still be the same since Tara doesn't earn Tara
-      expect(model.getTaraCount("player")).toBe(initialTaraCount);
+      expect(model.getPlayerTaraCount()).toBe(initialTaraCount);
     });
 
     test("Playing Tara decreases Tara count by 1 for player", () => {
-      model.setTaraCount("player", 2);
-      model.setPlayerMove("tara");
-      model.setComputerMove("rock");
+      model.setPlayerTaraCount(2);
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.ROCK);
 
       model.evaluateRound();
 
-      expect(model.getTaraCount("player")).toBe(1);
+      expect(model.getPlayerTaraCount()).toBe(1);
     });
 
     test("Computer's Tara count decreases by 1 when it plays Tara", () => {
-      model.setTaraCount("computer", 1);
-      model.setPlayerMove("rock");
-      model.setComputerMove("tara");
+      model.setComputerTaraCount(1);
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.TARA);
 
       model.evaluateRound();
 
-      expect(model.getTaraCount("computer")).toBe(0);
+      expect(model.getComputerTaraCount()).toBe(0);
     });
 
     describe("Mitigating illegal Tara use", () => {
       test("should never choose tara when tara count is 0", () => {
-        model.setTaraCount("computer", 0);
+        model.setComputerTaraCount(0);
 
         const results = simulateComputerChoices(model, 500);
 
@@ -236,7 +236,7 @@ describe("Model", () => {
       });
 
       test("should sometimes choose tara when tara count is > 0", () => {
-        model.setTaraCount("computer", 5);
+        model.setComputerTaraCount(5);
 
         const results = simulateComputerChoices(model, 500);
 
@@ -245,18 +245,18 @@ describe("Model", () => {
       });
 
       test("should not let computer use tara twice when it only has 1 (with move reuse)", () => {
-        model.setTaraCount("computer", 1);
+        model.setComputerTaraCount(1);
 
         let taraUsed = 0;
 
         // Simulate a few rounds of gameplay
         for (let i = 0; i < 3; i++) {
-          model.setComputerMove("tara"); // Computer tries to use tara
-          model.setPlayerMove("rock"); // Player chooses rock
+          model.setComputerMove(MOVES.TARA); // Computer tries to use tara
+          model.setPlayerMove(MOVES.ROCK); // Player chooses rock
           model.evaluateRound(); // Evaluate round, this should handle resetting and tara usage
 
           // Check if tara was used
-          if (model.getComputerMove() === "tara") {
+          if (model.getComputerMove() === MOVES.TARA) {
             taraUsed++;
           }
         }
@@ -264,22 +264,22 @@ describe("Model", () => {
         // Expect that tara was only used once
         expect(taraUsed).toBe(1);
         // Expect that the tara count is decremented to 0
-        expect(model.getTaraCount("computer")).toBe(0);
+        expect(model.getComputerTaraCount()).toBe(0);
       });
 
       test("should not let player use tara when they have 0 remaining (with move reuse)", () => {
-        model.setTaraCount("player", 0); // Start with no tara for the player
+        model.setPlayerTaraCount(0); // Start with no tara for the player
 
         let taraUsed = 0;
 
         // Simulate a few rounds of gameplay
         for (let i = 0; i < 3; i++) {
-          model.setPlayerMove("tara"); // Player tries to use tara
-          model.setComputerMove("rock"); // Computer chooses rock
+          model.setPlayerMove(MOVES.TARA); // Player tries to use tara
+          model.setComputerMove(MOVES.ROCK); // Computer chooses rock
           model.evaluateRound(); // Evaluate round, this should handle illegal tara usage
 
           // Check if tara was used by the player
-          if (model.getPlayerMove() === "tara") {
+          if (model.getPlayerMove() === MOVES.TARA) {
             taraUsed++;
           }
         }
@@ -287,7 +287,7 @@ describe("Model", () => {
         // Expect that tara was not used at all by the player
         expect(taraUsed).toBe(0);
         // Expect that the tara count for the player remains 0
-        expect(model.getTaraCount("player")).toBe(0);
+        expect(model.getPlayerTaraCount()).toBe(0);
       });
     });
   });
