@@ -24,6 +24,7 @@ describe("Controller", () => {
       increaseRoundNumber: jest.fn(),
       getTaraCount: jest.fn().mockReturnValue(0),
       taraIsEnabled: jest.fn(),
+      resetMoves: jest.fn(),
     };
 
     mockView = {
@@ -101,5 +102,17 @@ describe("Controller", () => {
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraButton).toHaveBeenCalled();
+  });
+
+  test("should call resetMoves before setPlayerMove", () => {
+    const resetSpy = jest.spyOn(mockModel, "resetMoves");
+    const setPlayerMoveSpy = jest.spyOn(mockModel, "setPlayerMove");
+
+    controller.handlePlayerMove("scissors");
+
+    const resetCall = resetSpy.mock.invocationCallOrder[0];
+    const setMoveCall = setPlayerMoveSpy.mock.invocationCallOrder[0];
+
+    expect(resetCall).toBeLessThan(setMoveCall);
   });
 });

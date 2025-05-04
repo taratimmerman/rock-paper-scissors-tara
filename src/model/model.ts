@@ -83,25 +83,29 @@ export class Model {
 
   // ===== Move Methods =====
 
-  setPlayerMove(move: Move) {
-    this.state.moves.player = move;
+  private setMove(key: "player" | "computer", move: Move | null): void {
+    this.state.moves[key] = move;
+  }
+
+  setPlayerMove(move: Move | null) {
+    this.setMove("player", move);
   }
 
   getPlayerMove(): Move | null {
     return this.state.moves.player;
   }
 
-  resetMoves(): void {
-    this.state.moves.player = null;
-    this.state.moves.computer = null;
-  }
-
-  setComputerMove(move: Move) {
-    this.state.moves.computer = move;
+  setComputerMove(move: Move | null) {
+    this.setMove("computer", move);
   }
 
   getComputerMove(): Move | null {
     return this.state.moves.computer;
+  }
+
+  resetMoves(): void {
+    this.setPlayerMove(null);
+    this.setComputerMove(null);
   }
 
   chooseComputerMove(): void {
@@ -147,7 +151,14 @@ export class Model {
   }
 
   private handleTaraMove(key: "player" | "computer", move: Move): void {
-    if (move === "tara") this.decrementTaraCount(key);
+    if (move === "tara") {
+      const currentTara = this.getTaraCount(key);
+      if (currentTara > 0) {
+        this.decrementTaraCount(key);
+      } else {
+        this.setMove(key, "rock");
+      }
+    }
   }
 
   getTaraCount(key: "player" | "computer"): number {

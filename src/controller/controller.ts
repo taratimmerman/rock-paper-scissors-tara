@@ -51,15 +51,16 @@ export class Controller {
     this.updateTaraButtonView();
   }
 
-  private handlePlayerMove(move: Move): void {
-    this.model.setPlayerMove(move);
-    this.model.chooseComputerMove();
-    this.endRound();
-  }
-
   private handleNextRound(): void {
     this.view.updateRound(this.model.getRoundNumber());
     this.view.resetForNextRound();
+  }
+
+  handlePlayerMove(move: Move): void {
+    this.model.resetMoves();
+    this.model.setPlayerMove(move);
+    this.model.chooseComputerMove();
+    this.endRound();
   }
 
   initialize(): void {

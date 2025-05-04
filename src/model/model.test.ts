@@ -2,6 +2,27 @@ import { Model } from "./model";
 import { MOVES, STANDARD_MOVE_MAP } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
+// Utility to count frequency over many runs
+function simulateComputerChoices(
+  model: Model,
+  runs = 1000
+): Record<Move, number> {
+  const results: Record<Move, number> = {
+    rock: 0,
+    paper: 0,
+    scissors: 0,
+    tara: 0,
+  };
+
+  for (let i = 0; i < runs; i++) {
+    model.chooseComputerMove();
+    const move = model.getComputerMove();
+    if (move) results[move]++;
+  }
+
+  return results;
+}
+
 describe("Model", () => {
   let model: Model;
 
@@ -204,47 +225,70 @@ describe("Model", () => {
 
       expect(model.getTaraCount("computer")).toBe(0);
     });
-  });
-});
 
-// Utility to count frequency over many runs
-function simulateComputerChoices(
-  model: Model,
-  runs = 1000
-): Record<Move, number> {
-  const results: Record<Move, number> = {
-    rock: 0,
-    paper: 0,
-    scissors: 0,
-    tara: 0,
-  };
+    describe("Mitigating illegal Tara use", () => {
+      test("should never choose tara when tara count is 0", () => {
+        model.setTaraCount("computer", 0);
 
-  for (let i = 0; i < runs; i++) {
-    model.chooseComputerMove();
-    const move = model.getComputerMove();
-    if (move) results[move]++;
-  }
+        const results = simulateComputerChoices(model, 500);
 
-  return results;
-}
+        expect(results.tara).toBe(0);
+      });
 
-describe("Model - chooseComputerMove", () => {
-  it("should never choose tara when tara count is 0", () => {
-    const model = new Model();
-    model.setTaraCount("computer", 0);
+      test("should sometimes choose tara when tara count is > 0", () => {
+        model.setTaraCount("computer", 5);
 
-    const results = simulateComputerChoices(model, 500);
+        const results = simulateComputerChoices(model, 500);
 
-    expect(results.tara).toBe(0);
-  });
+        // Allow a small chance that tara isn't chosen due to randomness
+        expect(results.tara).toBeGreaterThan(0);
+      });
 
-  it("should sometimes choose tara when tara count is > 0", () => {
-    const model = new Model();
-    model.setTaraCount("computer", 5);
+      test("should not let computer use tara twice when it only has 1 (with move reuse)", () => {
+        model.setTaraCount("computer", 1);
 
-    const results = simulateComputerChoices(model, 500);
+        let taraUsed = 0;
 
-    // Allow a small chance that tara isn't chosen due to randomness
-    expect(results.tara).toBeGreaterThan(0);
+        // Simulate a few rounds of gameplay
+        for (let i = 0; i < 3; i++) {
+          model.setComputerMove("tara"); // Computer tries to use tara
+          model.setPlayerMove("rock"); // Player chooses rock
+          model.evaluateRound(); // Evaluate round, this should handle resetting and tara usage
+
+          // Check if tara was used
+          if (model.getComputerMove() === "tara") {
+            taraUsed++;
+          }
+        }
+
+        // Expect that tara was only used once
+        expect(taraUsed).toBe(1);
+        // Expect that the tara count is decremented to 0
+        expect(model.getTaraCount("computer")).toBe(0);
+      });
+
+      test("should not let player use tara when they have 0 remaining (with move reuse)", () => {
+        model.setTaraCount("player", 0); // Start with no tara for the player
+
+        let taraUsed = 0;
+
+        // Simulate a few rounds of gameplay
+        for (let i = 0; i < 3; i++) {
+          model.setPlayerMove("tara"); // Player tries to use tara
+          model.setComputerMove("rock"); // Computer chooses rock
+          model.evaluateRound(); // Evaluate round, this should handle illegal tara usage
+
+          // Check if tara was used by the player
+          if (model.getPlayerMove() === "tara") {
+            taraUsed++;
+          }
+        }
+
+        // Expect that tara was not used at all by the player
+        expect(taraUsed).toBe(0);
+        // Expect that the tara count for the player remains 0
+        expect(model.getTaraCount("player")).toBe(0);
+      });
+    });
   });
 });
