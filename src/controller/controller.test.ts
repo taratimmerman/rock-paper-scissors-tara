@@ -1,4 +1,5 @@
 import { Controller } from "./controller";
+import { MOVES } from "../utils/dataUtils";
 
 describe("Controller", () => {
   let mockModel: any;
@@ -7,23 +8,31 @@ describe("Controller", () => {
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <button id="rock"></button>
-      <button id="paper"></button>
-      <button id="scissors"></button>
-      <button id="tara">Tara</button>
+      <button id=${MOVES.ROCK}></button>
+      <button id=${MOVES.PAPER}></button>
+      <button id=${MOVES.SCISSORS}></button>
+      <button id=${MOVES.TARA}></button>
     `;
 
     mockModel = {
-      getScore: jest.fn().mockReturnValue(0),
+      getPlayerScore: jest.fn().mockReturnValue(0),
+      getComputerScore: jest.fn().mockReturnValue(0),
+      setPlayerScore: jest.fn(),
+      setComputerScore: jest.fn(),
       setPlayerMove: jest.fn(),
-      getPlayerMove: jest.fn().mockReturnValue("rock"),
-      chooseComputerMove: jest.fn(),
+      getPlayerMove: jest.fn().mockReturnValue(MOVES.ROCK),
       setComputerMove: jest.fn(),
-      getComputerMove: jest.fn().mockReturnValue("scissors"),
+      getComputerMove: jest.fn().mockReturnValue(MOVES.SCISSORS),
+      chooseComputerMove: jest.fn(),
       evaluateRound: jest.fn().mockReturnValue("You win!"),
       increaseRoundNumber: jest.fn(),
-      getTaraCount: jest.fn().mockReturnValue(0),
+      getPlayerTaraCount: jest.fn().mockReturnValue(0),
+      getComputerTaraCount: jest.fn().mockReturnValue(0),
       taraIsEnabled: jest.fn(),
+      resetMoves: jest.fn(),
+      resetScores: jest.fn(),
+      resetTaras: jest.fn(),
+      resetRoundNumber: jest.fn(),
     };
 
     mockView = {
@@ -36,6 +45,9 @@ describe("Controller", () => {
       resetForNextRound: jest.fn(),
       updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
+      toggleResetGameState: jest.fn(),
+      updateScoreView: jest.fn(),
+      updateTaraView: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -44,8 +56,8 @@ describe("Controller", () => {
   test("initialize updates the message and scores", () => {
     controller.initialize();
 
-    expect(mockModel.getScore).toHaveBeenCalledWith("player");
-    expect(mockModel.getScore).toHaveBeenCalledWith("computer");
+    expect(mockModel.getPlayerScore).toHaveBeenCalled();
+    expect(mockModel.getComputerScore).toHaveBeenCalled();
     expect(mockView.updateMessage).toHaveBeenCalledWith(
       "Rock, Paper, Scissors, Tara"
     );
@@ -56,44 +68,44 @@ describe("Controller", () => {
 
   test("clicking rock button sets player move to 'rock'", () => {
     controller.initialize();
-    const rockBtn = document.getElementById("rock")!;
+    const rockBtn = document.getElementById(MOVES.ROCK)!;
     rockBtn.click();
 
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith("rock");
+    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
   });
 
   test("clicking paper button sets player move to 'paper'", () => {
     controller.initialize();
-    document.getElementById("paper")!.click();
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith("paper");
+    document.getElementById(MOVES.PAPER)!.click();
+    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
   test("clicking scissors button sets player move to 'scissors'", () => {
     controller.initialize();
-    document.getElementById("scissors")!.click();
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith("scissors");
+    document.getElementById(MOVES.SCISSORS)!.click();
+    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
   });
 
   test("clicking tara button sets player move to 'tara'", () => {
     controller.initialize();
-    document.getElementById("tara")!.click();
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith("tara");
+    document.getElementById(MOVES.TARA)!.click();
+    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
   });
 
   test("clicking a move button triggers computer to choose a move", () => {
     controller.initialize();
-    document.getElementById("rock")!.click();
+    document.getElementById(MOVES.ROCK)!.click();
 
     expect(mockModel.chooseComputerMove).toHaveBeenCalled();
   });
 
   test("clicking a move button displays outcome and toggles UI", () => {
     controller.initialize();
-    document.getElementById("rock")!.click();
+    document.getElementById(MOVES.ROCK)!.click();
 
     expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
-      "rock",
-      "scissors",
+      MOVES.ROCK,
+      MOVES.SCISSORS,
       "You win!"
     );
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
@@ -101,5 +113,34 @@ describe("Controller", () => {
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraButton).toHaveBeenCalled();
+  });
+
+  test("should call resetMoves before setPlayerMove", () => {
+    const resetSpy = jest.spyOn(mockModel, "resetMoves");
+    const setPlayerMoveSpy = jest.spyOn(mockModel, "setPlayerMove");
+
+    controller.handlePlayerMove(MOVES.SCISSORS);
+
+    const resetCall = resetSpy.mock.invocationCallOrder[0];
+    const setMoveCall = setPlayerMoveSpy.mock.invocationCallOrder[0];
+
+    expect(resetCall).toBeLessThan(setMoveCall);
+  });
+
+  test("resetGameState should reset model and update view", () => {
+    jest.spyOn(controller as any, "updateScoreView");
+    jest.spyOn(controller as any, "updateTaraView");
+    jest.spyOn(controller as any, "updateTaraButtonView");
+
+    controller.resetGameState();
+
+    expect(mockModel.resetScores).toHaveBeenCalled();
+    expect(mockModel.resetMoves).toHaveBeenCalled();
+    expect(mockModel.resetTaras).toHaveBeenCalled();
+    expect(mockModel.resetRoundNumber).toHaveBeenCalled();
+
+    expect((controller as any).updateScoreView).toHaveBeenCalled();
+    expect((controller as any).updateTaraView).toHaveBeenCalled();
+    expect((controller as any).updateTaraButtonView).toHaveBeenCalled();
   });
 });

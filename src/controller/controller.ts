@@ -14,25 +14,26 @@ export class Controller {
 
   private updateScoreView(): void {
     this.view.updateScores(
-      this.model.getScore("player"),
-      this.model.getScore("computer")
+      this.model.getPlayerScore(),
+      this.model.getComputerScore()
     );
   }
   private updateTaraView(): void {
     this.view.updateTaraCounts(
-      this.model.getTaraCount("player"),
-      this.model.getTaraCount("computer")
+      this.model.getPlayerTaraCount(),
+      this.model.getComputerTaraCount()
     );
   }
 
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
-    const taraCount = this.model.getTaraCount("player");
+    const taraCount = this.model.getPlayerTaraCount();
     this.view.updateTaraButton(isEnabled, taraCount);
   }
 
   private startGame(): void {
     this.view.toggleStartButton(false);
+    this.view.toggleResetGameState(false);
     this.view.toggleMoveButtons(true);
     this.view.updateRound(this.model.getRoundNumber());
   }
@@ -51,15 +52,27 @@ export class Controller {
     this.updateTaraButtonView();
   }
 
-  private handlePlayerMove(move: Move): void {
-    this.model.setPlayerMove(move);
-    this.model.chooseComputerMove();
-    this.endRound();
-  }
-
   private handleNextRound(): void {
     this.view.updateRound(this.model.getRoundNumber());
     this.view.resetForNextRound();
+  }
+
+  resetGameState(): void {
+    this.model.resetScores();
+    this.model.resetMoves();
+    this.model.resetTaras();
+    this.model.resetRoundNumber();
+
+    this.updateScoreView();
+    this.updateTaraView();
+    this.updateTaraButtonView();
+  }
+
+  handlePlayerMove(move: Move): void {
+    this.model.resetMoves();
+    this.model.setPlayerMove(move);
+    this.model.chooseComputerMove();
+    this.endRound();
   }
 
   initialize(): void {
@@ -79,10 +92,14 @@ export class Controller {
       .getElementById("play-again")
       ?.addEventListener("click", () => this.handleNextRound());
 
-    MOVES.map((m) => m.name).forEach((id) => {
+    Object.values(MOVES).forEach((move) => {
       document
-        .getElementById(id)
-        ?.addEventListener("click", () => this.handlePlayerMove(id));
+        .getElementById(move)
+        ?.addEventListener("click", () => this.handlePlayerMove(move));
     });
+
+    document
+      .getElementById("reset-game-state")
+      ?.addEventListener("click", () => this.resetGameState());
   }
 }
