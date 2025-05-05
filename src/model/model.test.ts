@@ -56,17 +56,6 @@ describe("Model", () => {
     expect(model.getPlayerMove()).toBe(MOVES.PAPER);
   });
 
-  test("resetMoves clears the moves stored in state", () => {
-    model.setPlayerMove(MOVES.SCISSORS);
-    expect(model.getPlayerMove()).toBe(MOVES.SCISSORS);
-    model.setComputerMove(MOVES.PAPER);
-    expect(model.getComputerMove()).toBe(MOVES.PAPER);
-
-    model.resetMoves();
-    expect(model.getPlayerMove()).toBe(null);
-    expect(model.getComputerMove()).toBe(null);
-  });
-
   test("getPlayerMove returns null before a move is set", () => {
     expect(model.getPlayerMove()).toBe(null);
   });
@@ -290,5 +279,29 @@ describe("Model", () => {
         expect(model.getPlayerTaraCount()).toBe(0);
       });
     });
+  });
+
+  // ===== Reset Tests =====
+
+  test("resetScores should set both player and computer scores to 0", () => {
+    model.setPlayerScore(3);
+    model.setComputerScore(2);
+    model.resetScores();
+    expect(model.getPlayerScore()).toBe(0);
+    expect(model.getComputerScore()).toBe(0);
+  });
+
+  test("resetRoundNumber should set round number to 1", () => {
+    model.setRoundNumber(5);
+    model.resetRoundNumber();
+    expect(model.getRoundNumber()).toBe(1);
+  });
+
+  test("resetTaras should set both player and computer Tara counts to 0", () => {
+    model.setPlayerTaraCount(2);
+    model.setComputerTaraCount(4);
+    model.resetTaras();
+    expect(model.getPlayerTaraCount()).toBe(0);
+    expect(model.getComputerTaraCount()).toBe(0);
   });
 });

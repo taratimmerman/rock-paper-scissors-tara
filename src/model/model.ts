@@ -106,6 +106,11 @@ export class Model {
     return this.getScore(PARTICIPANTS.COMPUTER);
   }
 
+  resetScores(): void {
+    this.setPlayerScore(0);
+    this.setComputerScore(0);
+  }
+
   // ===== Move Methods =====
 
   private isStandardMove(move: Move): boolean {
@@ -171,6 +176,10 @@ export class Model {
     this.setRoundNumber(this.getRoundNumber() + 1);
   }
 
+  resetRoundNumber(): void {
+    this.setRoundNumber(1);
+  }
+
   // ===== Tara Methods =====
 
   private getTaraCountFromStorage(key: Participant): number {
@@ -216,6 +225,11 @@ export class Model {
 
   setComputerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.COMPUTER, count);
+  }
+
+  resetTaras(): void {
+    this.setPlayerTaraCount(0);
+    this.setComputerTaraCount(0);
   }
 
   getPlayerTaraCount(): number {

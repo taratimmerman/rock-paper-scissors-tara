@@ -30,6 +30,9 @@ describe("Controller", () => {
       getComputerTaraCount: jest.fn().mockReturnValue(0),
       taraIsEnabled: jest.fn(),
       resetMoves: jest.fn(),
+      resetScores: jest.fn(),
+      resetTaras: jest.fn(),
+      resetRoundNumber: jest.fn(),
     };
 
     mockView = {
@@ -42,6 +45,9 @@ describe("Controller", () => {
       resetForNextRound: jest.fn(),
       updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
+      toggleResetGameState: jest.fn(),
+      updateScoreView: jest.fn(),
+      updateTaraView: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -119,5 +125,22 @@ describe("Controller", () => {
     const setMoveCall = setPlayerMoveSpy.mock.invocationCallOrder[0];
 
     expect(resetCall).toBeLessThan(setMoveCall);
+  });
+
+  test("resetGameState should reset model and update view", () => {
+    jest.spyOn(controller as any, "updateScoreView");
+    jest.spyOn(controller as any, "updateTaraView");
+    jest.spyOn(controller as any, "updateTaraButtonView");
+
+    controller.resetGameState();
+
+    expect(mockModel.resetScores).toHaveBeenCalled();
+    expect(mockModel.resetMoves).toHaveBeenCalled();
+    expect(mockModel.resetTaras).toHaveBeenCalled();
+    expect(mockModel.resetRoundNumber).toHaveBeenCalled();
+
+    expect((controller as any).updateScoreView).toHaveBeenCalled();
+    expect((controller as any).updateTaraView).toHaveBeenCalled();
+    expect((controller as any).updateTaraButtonView).toHaveBeenCalled();
   });
 });

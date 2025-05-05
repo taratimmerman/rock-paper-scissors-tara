@@ -33,6 +33,7 @@ export class Controller {
 
   private startGame(): void {
     this.view.toggleStartButton(false);
+    this.view.toggleResetGameState(false);
     this.view.toggleMoveButtons(true);
     this.view.updateRound(this.model.getRoundNumber());
   }
@@ -54,6 +55,17 @@ export class Controller {
   private handleNextRound(): void {
     this.view.updateRound(this.model.getRoundNumber());
     this.view.resetForNextRound();
+  }
+
+  resetGameState(): void {
+    this.model.resetScores();
+    this.model.resetMoves();
+    this.model.resetTaras();
+    this.model.resetRoundNumber();
+
+    this.updateScoreView();
+    this.updateTaraView();
+    this.updateTaraButtonView();
   }
 
   handlePlayerMove(move: Move): void {
@@ -85,5 +97,9 @@ export class Controller {
         .getElementById(move)
         ?.addEventListener("click", () => this.handlePlayerMove(move));
     });
+
+    document
+      .getElementById("reset-game-state")
+      ?.addEventListener("click", () => this.resetGameState());
   }
 }
