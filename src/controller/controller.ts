@@ -62,6 +62,8 @@ export class Controller {
     this.model.resetMoves();
     this.model.resetTaras();
     this.model.resetRoundNumber();
+    this.model.resetHistories();
+    this.model.resetMostCommonMoves();
 
     this.updateScoreView();
     this.updateTaraView();
@@ -70,8 +72,9 @@ export class Controller {
 
   handlePlayerMove(move: Move): void {
     this.model.resetMoves();
-    this.model.setPlayerMove(move);
+    this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
+
     this.endRound();
   }
 
