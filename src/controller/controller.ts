@@ -62,6 +62,8 @@ export class Controller {
     this.model.resetMoves();
     this.model.resetTaras();
     this.model.resetRoundNumber();
+    this.model.resetHistories();
+    this.model.resetMostCommonMoves();
 
     this.updateScoreView();
     this.updateTaraView();

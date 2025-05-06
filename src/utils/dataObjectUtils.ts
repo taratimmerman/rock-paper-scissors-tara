@@ -15,5 +15,6 @@ export interface GameState {
   moves: Record<Participant, Move | null>;
   taras: Record<Participant, number>;
   history: Record<Participant, StandardMove[]>;
+  mostCommonMove: Record<Participant, StandardMove | null>;
   roundNumber: number;
 }
