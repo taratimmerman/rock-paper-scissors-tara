@@ -1,4 +1,9 @@
-import { GameState, Move, Participant } from "../utils/dataObjectUtils";
+import {
+  GameState,
+  Move,
+  Participant,
+  StandardMove,
+} from "../utils/dataObjectUtils";
 import {
   MOVES,
   MOVE_DATA_MAP,
@@ -20,6 +25,10 @@ export class Model {
       player: 0,
       computer: 0,
     },
+    history: {
+      player: [],
+      computer: [],
+    },
     roundNumber: 1,
   };
 
@@ -28,6 +37,8 @@ export class Model {
     this.state.scores.computer = this.getComputerScoreFromStorage();
     this.state.taras.player = this.getPlayerTaraCountFromStorage();
     this.state.taras.computer = this.getComputerTaraCountFromStorage();
+    this.state.history.player = this.getPlayerHistoryFromStorage();
+    this.state.history.computer = this.getComputerHistoryFromStorage();
     this.state.roundNumber = this.getRoundNumberFromStorage();
   }
 
@@ -113,8 +124,8 @@ export class Model {
 
   // ===== Move Methods =====
 
-  private isStandardMove(move: Move): boolean {
-    return move !== MOVES.TARA;
+  private isStandardMove(value: unknown): value is StandardMove {
+    return typeof value === "string" && value !== MOVES.TARA;
   }
 
   private setMove(key: Participant, move: Move | null): void {
@@ -154,7 +165,17 @@ export class Model {
     const randomIndex = Math.floor(Math.random() * moveNames.length);
     const randomMove = moveNames[randomIndex];
 
-    this.setComputerMove(randomMove);
+    this.registerComputerMove(randomMove);
+  }
+
+  registerPlayerMove(move: Move) {
+    this.setPlayerMove(move);
+    if (this.isStandardMove(move)) this.setPlayerHistory(move);
+  }
+
+  registerComputerMove(move: Move) {
+    this.setComputerMove(move);
+    if (this.isStandardMove(move)) this.setComputerHistory(move);
   }
 
   // ===== Round Methods =====
@@ -242,5 +263,57 @@ export class Model {
 
   taraIsEnabled(): boolean {
     return this.getTaraCount(PARTICIPANTS.PLAYER) > 0;
+  }
+
+  // ===== History Methods =====
+
+  private setHistory(key: Participant, move: StandardMove): void {
+    this.state.history[key].push(move);
+
+    try {
+      localStorage.setItem(
+        `${key}History`,
+        JSON.stringify(this.state.history[key])
+      );
+    } catch (e) {
+      console.warn(`Failed to save ${key} history to localStorage`, e);
+    }
+  }
+
+  private getHistoryFromStorage(key: Participant): StandardMove[] {
+    try {
+      const raw = localStorage.getItem(`${key}History`);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private getPlayerHistoryFromStorage(): StandardMove[] {
+    return this.getHistoryFromStorage(PARTICIPANTS.PLAYER);
+  }
+
+  private getComputerHistoryFromStorage(): StandardMove[] {
+    return this.getHistoryFromStorage(PARTICIPANTS.COMPUTER);
+  }
+
+  private getHistory(key: Participant): StandardMove[] {
+    return this.state.history[key];
+  }
+
+  setPlayerHistory(move: StandardMove): void {
+    this.setHistory(PARTICIPANTS.PLAYER, move);
+  }
+
+  setComputerHistory(move: StandardMove): void {
+    this.setHistory(PARTICIPANTS.COMPUTER, move);
+  }
+
+  getPlayerHistory(): StandardMove[] {
+    return this.getHistory(PARTICIPANTS.PLAYER);
+  }
+
+  getComputerHistory(): StandardMove[] {
+    return this.getHistory(PARTICIPANTS.COMPUTER);
   }
 }

@@ -19,7 +19,6 @@ describe("Controller", () => {
       getComputerScore: jest.fn().mockReturnValue(0),
       setPlayerScore: jest.fn(),
       setComputerScore: jest.fn(),
-      setPlayerMove: jest.fn(),
       getPlayerMove: jest.fn().mockReturnValue(MOVES.ROCK),
       setComputerMove: jest.fn(),
       getComputerMove: jest.fn().mockReturnValue(MOVES.SCISSORS),
@@ -33,6 +32,7 @@ describe("Controller", () => {
       resetScores: jest.fn(),
       resetTaras: jest.fn(),
       resetRoundNumber: jest.fn(),
+      registerPlayerMove: jest.fn(),
     };
 
     mockView = {
@@ -71,25 +71,25 @@ describe("Controller", () => {
     const rockBtn = document.getElementById(MOVES.ROCK)!;
     rockBtn.click();
 
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
+    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
   });
 
   test("clicking paper button sets player move to 'paper'", () => {
     controller.initialize();
     document.getElementById(MOVES.PAPER)!.click();
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
+    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
   test("clicking scissors button sets player move to 'scissors'", () => {
     controller.initialize();
     document.getElementById(MOVES.SCISSORS)!.click();
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
+    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
   });
 
   test("clicking tara button sets player move to 'tara'", () => {
     controller.initialize();
     document.getElementById(MOVES.TARA)!.click();
-    expect(mockModel.setPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
+    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
   });
 
   test("clicking a move button triggers computer to choose a move", () => {
@@ -115,14 +115,14 @@ describe("Controller", () => {
     expect(mockView.updateTaraButton).toHaveBeenCalled();
   });
 
-  test("should call resetMoves before setPlayerMove", () => {
+  test("should call resetMoves before registerPlayerMove", () => {
     const resetSpy = jest.spyOn(mockModel, "resetMoves");
-    const setPlayerMoveSpy = jest.spyOn(mockModel, "setPlayerMove");
+    const registerPlayerMoveSpy = jest.spyOn(mockModel, "registerPlayerMove");
 
     controller.handlePlayerMove(MOVES.SCISSORS);
 
     const resetCall = resetSpy.mock.invocationCallOrder[0];
-    const setMoveCall = setPlayerMoveSpy.mock.invocationCallOrder[0];
+    const setMoveCall = registerPlayerMoveSpy.mock.invocationCallOrder[0];
 
     expect(resetCall).toBeLessThan(setMoveCall);
   });

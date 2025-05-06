@@ -304,4 +304,40 @@ describe("Model", () => {
     expect(model.getPlayerTaraCount()).toBe(0);
     expect(model.getComputerTaraCount()).toBe(0);
   });
+
+  // ===== History Tests =====
+
+  test("registerPlayerMove adds standard move to history", () => {
+    model.registerPlayerMove(MOVES.ROCK);
+    expect(model.getPlayerHistory()).toContain(MOVES.ROCK);
+    expect(localStorage.getItem("playerHistory")).toContain(MOVES.ROCK);
+  });
+
+  test("registerPlayerMove does not add 'tara' to history", () => {
+    model.registerPlayerMove(MOVES.TARA);
+    expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
+  });
+
+  test("setHistory stores move and updates localStorage", () => {
+    model.setPlayerHistory("paper");
+    expect(model.getPlayerHistory()).toContain("paper");
+    expect(JSON.parse(localStorage.getItem("playerHistory")!)).toContain(
+      "paper"
+    );
+  });
+
+  test("getComputerHistory returns empty array if no localStorage data", () => {
+    localStorage.removeItem("computerHistory");
+
+    const newModel = new Model(); // simulate app reload
+    expect(newModel.getComputerHistory()).toEqual([]);
+  });
+
+  test("getPlayerHistory handles corrupted localStorage gracefully", () => {
+    localStorage.setItem("playerHistory", "{not: valid}");
+
+    const newModel = new Model(); // simulate app reload
+    expect(() => newModel.getPlayerHistory()).not.toThrow();
+    expect(newModel.getPlayerHistory()).toEqual([]);
+  });
 });

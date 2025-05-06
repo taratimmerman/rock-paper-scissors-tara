@@ -70,8 +70,9 @@ export class Controller {
 
   handlePlayerMove(move: Move): void {
     this.model.resetMoves();
-    this.model.setPlayerMove(move);
+    this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
+
     this.endRound();
   }
 
