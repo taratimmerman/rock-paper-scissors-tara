@@ -411,4 +411,12 @@ export class Model {
   getComputerHistory(): StandardMove[] {
     return this.getHistory(PARTICIPANTS.COMPUTER);
   }
+
+  showMostCommonMove(): boolean {
+    return (
+      this.getRoundNumber() > 1 &&
+      !!this.getPlayerMostCommonMove() &&
+      !!this.getComputerMostCommonMove()
+    );
+  }
 }

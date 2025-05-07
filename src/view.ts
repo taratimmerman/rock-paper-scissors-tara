@@ -1,10 +1,16 @@
-import { Move } from "./utils/dataObjectUtils";
+import { Move, StandardMove } from "./utils/dataObjectUtils";
 import { MOVES } from "./utils/dataUtils";
 
 export class View {
   private messageEl = document.getElementById("message");
   private playerScoreEl = document.getElementById("player-score");
   private computerScoreEl = document.getElementById("computer-score");
+  private playerMostCommonMoveEl = document.getElementById(
+    "player-most-common-move"
+  );
+  private computerMostCommonMoveEl = document.getElementById(
+    "computer-most-common-move"
+  );
   private movesEl = document.getElementById("round-moves")!;
   private resultEl = document.getElementById("round-result")!;
   private taraBtn = document.getElementById("tara")!;
@@ -58,7 +64,13 @@ export class View {
     if (btn) btn.style.display = show ? "inline-block" : "none";
   }
 
+  toggleMostCommonMoveTable(show: boolean): void {
+    const table = document.getElementById("most-common-move-table");
+    if (table) table.style.display = show ? "table" : "none";
+  }
+
   resetForNextRound(): void {
+    this.toggleMostCommonMoveTable(true);
     this.toggleMoveButtons(true);
     this.togglePlayAgain(false);
 
@@ -89,5 +101,14 @@ export class View {
     }
 
     this.taraBtn.textContent = `Tara (x${taraCount})`;
+  }
+
+  // ===== History Methods =====
+
+  updateMostCommonMoves(player: StandardMove, computer: StandardMove): void {
+    if (this.playerMostCommonMoveEl)
+      this.playerMostCommonMoveEl.textContent = player;
+    if (this.computerMostCommonMoveEl)
+      this.computerMostCommonMoveEl.textContent = computer;
   }
 }

@@ -35,6 +35,8 @@ describe("Controller", () => {
       registerPlayerMove: jest.fn(),
       resetHistories: jest.fn(),
       resetMostCommonMoves: jest.fn(),
+      getPlayerMostCommonMove: jest.fn(),
+      getComputerMostCommonMove: jest.fn(),
     };
 
     mockView = {
@@ -50,6 +52,7 @@ describe("Controller", () => {
       toggleResetGameState: jest.fn(),
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
+      toggleMostCommonMoveTable: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -64,6 +67,43 @@ describe("Controller", () => {
       "Rock, Paper, Scissors, Tara"
     );
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
+  });
+
+  test("initialize calls view.updateMostCommonMoves when both most common moves exist", () => {
+    mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
+    mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
+    mockView.updateMostCommonMoves = jest.fn();
+
+    controller.initialize();
+
+    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+      MOVES.ROCK,
+      MOVES.PAPER
+    );
+  });
+
+  test("initialize does not call view.updateMostCommonMoves when one or both moves are missing", () => {
+    mockModel.getPlayerMostCommonMove.mockReturnValue(null);
+    mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
+    mockView.updateMostCommonMoves = jest.fn();
+
+    controller.initialize();
+
+    expect(mockView.updateMostCommonMoves).not.toHaveBeenCalled();
+  });
+
+  test("endRound calls view.updateMostCommonMoves when both most common moves exist", () => {
+    mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
+    mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.SCISSORS);
+    mockView.updateMostCommonMoves = jest.fn();
+
+    controller.initialize();
+    document.getElementById(MOVES.PAPER)!.click();
+
+    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+      MOVES.ROCK,
+      MOVES.SCISSORS
+    );
   });
 
   // ===== Move Tests =====
