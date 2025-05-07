@@ -18,11 +18,24 @@ export class Controller {
       this.model.getComputerScore()
     );
   }
+
   private updateTaraView(): void {
     this.view.updateTaraCounts(
       this.model.getPlayerTaraCount(),
       this.model.getComputerTaraCount()
     );
+  }
+
+  private updateMostCommonMoveView(): void {
+    const playerMostCommonMove = this.model.getPlayerMostCommonMove();
+    const comptuterMostCommonMove = this.model.getComputerMostCommonMove();
+
+    if (playerMostCommonMove && comptuterMostCommonMove) {
+      this.view.updateMostCommonMoves(
+        playerMostCommonMove,
+        comptuterMostCommonMove
+      );
+    }
   }
 
   private updateTaraButtonView(): void {
@@ -34,6 +47,7 @@ export class Controller {
   private startGame(): void {
     this.view.toggleStartButton(false);
     this.view.toggleResetGameState(false);
+    this.view.toggleMostCommonMoveTable(this.model.showMostCommonMove());
     this.view.toggleMoveButtons(true);
     this.view.updateRound(this.model.getRoundNumber());
   }
@@ -44,11 +58,13 @@ export class Controller {
     const result = this.model.evaluateRound();
 
     this.view.showRoundOutcome(playerMove, computerMove, result);
+    this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
     this.model.increaseRoundNumber();
     this.updateScoreView();
     this.updateTaraView();
+    this.updateMostCommonMoveView();
     this.updateTaraButtonView();
   }
 
@@ -67,6 +83,7 @@ export class Controller {
 
     this.updateScoreView();
     this.updateTaraView();
+    this.updateMostCommonMoveView();
     this.updateTaraButtonView();
   }
 
@@ -82,7 +99,9 @@ export class Controller {
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
     this.updateScoreView();
     this.updateTaraView();
+    this.updateMostCommonMoveView();
     this.updateTaraButtonView();
+    this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleStartButton(true);

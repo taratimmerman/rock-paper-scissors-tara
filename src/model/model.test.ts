@@ -487,4 +487,44 @@ describe("Model", () => {
     expect(model.getPlayerMostCommonMove()).toBeNull();
     expect(model.getComputerMostCommonMove()).toBeNull();
   });
+
+  describe("showMostCommonMove", () => {
+    test("returns true when round > 1 and both most common moves exist", () => {
+      jest.spyOn(model, "getRoundNumber").mockReturnValue(2);
+      jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(MOVES.ROCK);
+      jest
+        .spyOn(model, "getComputerMostCommonMove")
+        .mockReturnValue(MOVES.SCISSORS);
+
+      expect(model.showMostCommonMove()).toBe(true);
+    });
+  });
+
+  test("returns false when round is 1", () => {
+    jest.spyOn(model, "getRoundNumber").mockReturnValue(1);
+    jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(MOVES.ROCK);
+    jest
+      .spyOn(model, "getComputerMostCommonMove")
+      .mockReturnValue(MOVES.SCISSORS);
+
+    expect(model.showMostCommonMove()).toBe(false);
+  });
+
+  test("returns false when player most common move is missing", () => {
+    jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+    jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
+    jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(MOVES.PAPER);
+
+    expect(model.showMostCommonMove()).toBe(false);
+  });
+
+  test("returns false when computer most common move is missing", () => {
+    jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+    jest
+      .spyOn(model, "getPlayerMostCommonMove")
+      .mockReturnValue(MOVES.SCISSORS);
+    jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(null);
+
+    expect(model.showMostCommonMove()).toBe(false);
+  });
 });
