@@ -4,12 +4,7 @@ import {
   Participant,
   StandardMove,
 } from "../utils/dataObjectUtils";
-import {
-  MOVES,
-  MOVE_DATA_MAP,
-  PARTICIPANTS,
-  STANDARD_MOVE_DATA_MAP,
-} from "../utils/dataUtils";
+import { MOVES, MOVE_DATA_MAP, PARTICIPANTS } from "../utils/dataUtils";
 
 export class Model {
   private state: GameState = {
