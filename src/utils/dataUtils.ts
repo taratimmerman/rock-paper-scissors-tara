@@ -1,4 +1,4 @@
-import { Move, MoveData } from "./dataObjectUtils";
+import { Move, MoveData, StandardMove } from "./dataObjectUtils";
 
 export const PARTICIPANTS = {
   PLAYER: "player",
@@ -28,6 +28,5 @@ export const MOVE_DATA_MAP: ReadonlyMap<Move, MoveData> = new Map(
 
 const STANDARD_MOVE_DATA = MOVE_DATA.filter((move) => move.name !== MOVES.TARA);
 
-export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<Move, MoveData> = new Map(
-  STANDARD_MOVE_DATA.map((move) => [move.name, move])
-);
+export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<StandardMove, MoveData> =
+  new Map(STANDARD_MOVE_DATA.map((move) => [move.name, move]));

@@ -527,4 +527,76 @@ describe("Model", () => {
 
     expect(model.showMostCommonMove()).toBe(false);
   });
+
+  describe("ComputerModel AI", () => {
+    test("chooses randomly when no player history exists", () => {
+      const results = simulateComputerChoices(model, 300);
+      expect(results.rock).toBeGreaterThan(0);
+      expect(results.paper).toBeGreaterThan(0);
+      expect(results.scissors).toBeGreaterThan(0);
+    });
+
+    test("favors counter to most common player move", () => {
+      for (let i = 0; i < 20; i++) {
+        model.registerPlayerMove(MOVES.ROCK);
+      }
+
+      const results = simulateComputerChoices(model, 300);
+      expect(results.paper).toBeGreaterThan(results.scissors);
+      expect(results.paper).toBeGreaterThan(results.rock);
+    });
+
+    test("adjusts to updated player move history", () => {
+      for (let i = 0; i < 20; i++) {
+        model.registerPlayerMove(MOVES.SCISSORS);
+      }
+
+      const results = simulateComputerChoices(model, 300);
+      expect(results.rock).toBeGreaterThan(results.paper);
+      expect(results.rock).toBeGreaterThan(results.scissors);
+    });
+
+    test("respects tara count: does not choose tara when tara count is 0", () => {
+      model.setComputerTaraCount(0);
+      for (let i = 0; i < 20; i++) {
+        model.registerPlayerMove(MOVES.PAPER);
+      }
+
+      const results = simulateComputerChoices(model, 300);
+      expect(results.tara).toBe(0);
+    });
+
+    test("uses tara when tara count is available", () => {
+      model.setComputerTaraCount(5);
+      for (let i = 0; i < 20; i++) {
+        model.registerPlayerMove(MOVES.ROCK);
+      }
+
+      const results = simulateComputerChoices(model, 300);
+      expect(results.tara).toBeGreaterThan(0);
+    });
+
+    test("uses tara less than counter moves even when available", () => {
+      model.setComputerTaraCount(100); // High count to test frequency
+      for (let i = 0; i < 20; i++) {
+        model.registerPlayerMove(MOVES.SCISSORS);
+      }
+
+      const results = simulateComputerChoices(model, 300);
+      expect(results.rock).toBeGreaterThan(results.tara); // Rock is the counter to scissors
+    });
+
+    test("defaults to random when all move frequencies are equal", () => {
+      for (let i = 0; i < 10; i++) {
+        model.registerPlayerMove(MOVES.ROCK);
+        model.registerPlayerMove(MOVES.PAPER);
+        model.registerPlayerMove(MOVES.SCISSORS);
+      }
+
+      const results = simulateComputerChoices(model, 300);
+      expect(results.rock).toBeGreaterThan(0);
+      expect(results.paper).toBeGreaterThan(0);
+      expect(results.scissors).toBeGreaterThan(0);
+    });
+  });
 });
