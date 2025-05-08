@@ -187,6 +187,87 @@ export class Model {
     return this.state.mostCommonMove[key];
   }
 
+  private getAvailableMoves(hasTara: boolean): Move[] {
+    return hasTara
+      ? [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS, MOVES.TARA]
+      : [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS];
+  }
+
+  private getBaseWeights(): Record<Move, number> {
+    return {
+      [MOVES.ROCK]: 1,
+      [MOVES.PAPER]: 1,
+      [MOVES.SCISSORS]: 1,
+      [MOVES.TARA]: 0,
+    };
+  }
+
+  private getTaraWeight(moves: Move[]): number | null {
+    if (!moves.includes(MOVES.TARA)) return null;
+
+    const { player, computer } = this.state.scores;
+    const scoreDiff = player - computer;
+
+    if (scoreDiff > 0) return Math.min(3 + scoreDiff, 10);
+    if (scoreDiff < 0) return 1;
+    return 2;
+  }
+
+  private getStandardMoveWeights(): Record<StandardMove, number> {
+    const weights: Record<StandardMove, number> = {
+      [MOVES.ROCK]: 1,
+      [MOVES.PAPER]: 1,
+      [MOVES.SCISSORS]: 1,
+    };
+
+    const mostCommon = this.state.mostCommonMove.player;
+    if (!mostCommon) return weights;
+
+    const counterMap: Record<StandardMove, StandardMove> = {
+      [MOVES.ROCK]: MOVES.PAPER,
+      [MOVES.PAPER]: MOVES.SCISSORS,
+      [MOVES.SCISSORS]: MOVES.ROCK,
+    };
+
+    const counter = counterMap[mostCommon];
+    return {
+      [MOVES.ROCK]: counter === MOVES.ROCK ? 5 : 2,
+      [MOVES.PAPER]: counter === MOVES.PAPER ? 5 : 2,
+      [MOVES.SCISSORS]: counter === MOVES.SCISSORS ? 5 : 2,
+    };
+  }
+
+  private chooseWeightedRandomMove(
+    moves: Move[],
+    weights: Record<Move, number>
+  ): Move {
+    const weightedPool = moves.flatMap((move) =>
+      Array(weights[move]).fill(move)
+    );
+    const randomIndex = Math.floor(Math.random() * weightedPool.length);
+    return weightedPool[randomIndex];
+  }
+
+  private getComputerMoveWeights(moves: Move[]): Record<Move, number> {
+    const baseWeights = this.getBaseWeights();
+    const taraWeight = this.getTaraWeight(moves);
+    const standardWeights = this.getStandardMoveWeights();
+
+    return {
+      ...baseWeights,
+      ...standardWeights,
+      ...(taraWeight !== null ? { [MOVES.TARA]: taraWeight } : {}),
+    };
+  }
+
+  private getWeightedComputerMove(): Move {
+    const hasTara = this.getComputerTaraCount() > 0;
+    const availableMoves = this.getAvailableMoves(hasTara);
+    const weights = this.getComputerMoveWeights(availableMoves);
+
+    return this.chooseWeightedRandomMove(availableMoves, weights);
+  }
+
   setPlayerMove(move: Move | null) {
     this.setMove(PARTICIPANTS.PLAYER, move);
   }
@@ -209,14 +290,8 @@ export class Model {
   }
 
   chooseComputerMove(): void {
-    const hasTara = this.getComputerTaraCount() > 0;
-    const moveMap = hasTara ? MOVE_DATA_MAP : STANDARD_MOVE_DATA_MAP;
-
-    const moveNames = Array.from(moveMap.keys());
-    const randomIndex = Math.floor(Math.random() * moveNames.length);
-    const randomMove = moveNames[randomIndex];
-
-    this.registerComputerMove(randomMove);
+    const move = this.getWeightedComputerMove();
+    this.registerComputerMove(move);
   }
 
   registerPlayerMove(move: Move) {
