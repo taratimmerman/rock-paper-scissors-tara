@@ -536,7 +536,7 @@ describe("Model", () => {
       expect(results.scissors).toBeGreaterThan(0);
     });
 
-    test("avoids most common player move if counter exists", () => {
+    test("favors counter to most common player move", () => {
       for (let i = 0; i < 20; i++) {
         model.registerPlayerMove(MOVES.ROCK);
       }
