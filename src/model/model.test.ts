@@ -31,54 +31,52 @@ describe("Model", () => {
     model = new Model();
   });
 
-  // ===== Score Tests =====
+  describe("Scores", () => {
+    test("getScore returns 0 when no score is set", () => {
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
+    });
 
-  test("getScore returns 0 when no score is set", () => {
-    expect(model.getPlayerScore()).toBe(0);
-    expect(model.getComputerScore()).toBe(0);
+    test("setScore and getScore work together", () => {
+      model.setPlayerScore(5);
+      model.setComputerScore(3);
+
+      expect(model.getPlayerScore()).toBe(5);
+      expect(model.getComputerScore()).toBe(3);
+    });
   });
 
-  test("setScore and getScore work together", () => {
-    model.setPlayerScore(5);
-    model.setComputerScore(3);
+  describe("Moves", () => {
+    test("setPlayerMove and getPlayerMove work together", () => {
+      model.setPlayerMove(MOVES.ROCK);
+      expect(model.getPlayerMove()).toBe(MOVES.ROCK);
 
-    expect(model.getPlayerScore()).toBe(5);
-    expect(model.getComputerScore()).toBe(3);
+      model.setPlayerMove(MOVES.PAPER);
+      expect(model.getPlayerMove()).toBe(MOVES.PAPER);
+    });
+
+    test("getPlayerMove returns null before a move is set", () => {
+      expect(model.getPlayerMove()).toBe(null);
+    });
+
+    test("setComputerMove and getComputerMove store and retrieve the move", () => {
+      model.setComputerMove(MOVES.SCISSORS);
+      expect(model.getComputerMove()).toBe(MOVES.SCISSORS);
+    });
+
+    test("chooseComputerMove picks a valid move from MOVES", () => {
+      model.chooseComputerMove();
+      const move = model.getComputerMove();
+      const validMoveNames = Object.values(MOVES);
+      expect(validMoveNames).toContain(move);
+    });
+
+    test("chooseComputerMove sets a non-empty move", () => {
+      model.chooseComputerMove();
+      const move = model.getComputerMove();
+      expect(move).not.toBe("");
+    });
   });
-
-  // ===== Move Tests =====
-
-  test("setPlayerMove and getPlayerMove work together", () => {
-    model.setPlayerMove(MOVES.ROCK);
-    expect(model.getPlayerMove()).toBe(MOVES.ROCK);
-
-    model.setPlayerMove(MOVES.PAPER);
-    expect(model.getPlayerMove()).toBe(MOVES.PAPER);
-  });
-
-  test("getPlayerMove returns null before a move is set", () => {
-    expect(model.getPlayerMove()).toBe(null);
-  });
-
-  test("setComputerMove and getComputerMove store and retrieve the move", () => {
-    model.setComputerMove(MOVES.SCISSORS);
-    expect(model.getComputerMove()).toBe(MOVES.SCISSORS);
-  });
-
-  test("chooseComputerMove picks a valid move from MOVES", () => {
-    model.chooseComputerMove();
-    const move = model.getComputerMove();
-    const validMoveNames = Object.values(MOVES);
-    expect(validMoveNames).toContain(move);
-  });
-
-  test("chooseComputerMove sets a non-empty move", () => {
-    model.chooseComputerMove();
-    const move = model.getComputerMove();
-    expect(move).not.toBe("");
-  });
-
-  // ===== Evaluate Round Tests =====
 
   describe("evaluateRound", () => {
     test("returns 'Invalid round' if player move is missing", () => {
@@ -119,8 +117,6 @@ describe("Model", () => {
     });
   });
 
-  // ===== Round Number Tests =====
-
   describe("Round Number", () => {
     test("getRoundNumber returns 1 by default if not previously set", () => {
       expect(model.getRoundNumber()).toBe(1);
@@ -138,8 +134,6 @@ describe("Model", () => {
       expect(model.getRoundNumber()).toBe(3);
     });
   });
-
-  // ===== Tara Tests =====
 
   describe("Tara", () => {
     test("getTaraCount returns 0 by default", () => {
@@ -281,211 +275,245 @@ describe("Model", () => {
     });
   });
 
-  // ===== Reset Tests =====
+  describe("Reset", () => {
+    test("resetScores should set both player and computer scores to 0", () => {
+      model.setPlayerScore(3);
+      model.setComputerScore(2);
+      model.resetScores();
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
+    });
 
-  test("resetScores should set both player and computer scores to 0", () => {
-    model.setPlayerScore(3);
-    model.setComputerScore(2);
-    model.resetScores();
-    expect(model.getPlayerScore()).toBe(0);
-    expect(model.getComputerScore()).toBe(0);
+    test("resetRoundNumber should set round number to 1", () => {
+      model.setRoundNumber(5);
+      model.resetRoundNumber();
+      expect(model.getRoundNumber()).toBe(1);
+    });
+
+    test("resetTaras should set both player and computer Tara counts to 0", () => {
+      model.setPlayerTaraCount(2);
+      model.setComputerTaraCount(4);
+      model.resetTaras();
+      expect(model.getPlayerTaraCount()).toBe(0);
+      expect(model.getComputerTaraCount()).toBe(0);
+    });
+
+    test("resetMostCommonMoves removes most common moves from localStorage", () => {
+      localStorage.setItem("playerMostCommonMove", MOVES.ROCK);
+      localStorage.setItem("computerMostCommonMove", MOVES.SCISSORS);
+
+      model.resetMostCommonMoves();
+
+      expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      expect(localStorage.getItem("computerMostCommonMove")).toBeNull();
+    });
+
+    test("resetMostCommonMoves clears most common move from state", () => {
+      model.setPlayerMostCommonMove();
+      model.setComputerMostCommonMove();
+
+      model.resetMostCommonMoves();
+
+      expect(model.getPlayerMostCommonMove()).toBeNull();
+      expect(model.getComputerMostCommonMove()).toBeNull();
+    });
+
+    test("resetHistories clears histories from localStorage", () => {
+      localStorage.setItem(
+        "playerHistory",
+        JSON.stringify([MOVES.ROCK, MOVES.PAPER])
+      );
+      localStorage.setItem(
+        "computerHistory",
+        JSON.stringify([MOVES.SCISSORS, MOVES.ROCK])
+      );
+
+      model.resetHistories();
+
+      expect(localStorage.getItem("playerHistory")).toBe("[]");
+      expect(localStorage.getItem("computerHistory")).toBe("[]");
+    });
+
+    test("resetHistories clears histories from state", () => {
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.PAPER);
+      model.registerComputerMove(MOVES.SCISSORS);
+      model.registerComputerMove(MOVES.ROCK);
+
+      expect(model.getPlayerHistory()).toEqual([MOVES.ROCK, MOVES.PAPER]);
+      expect(model.getComputerHistory()).toEqual([MOVES.SCISSORS, MOVES.ROCK]);
+
+      model.resetHistories();
+
+      expect(model.getPlayerHistory()).toEqual([]);
+      expect(model.getComputerHistory()).toEqual([]);
+    });
   });
 
-  test("resetRoundNumber should set round number to 1", () => {
-    model.setRoundNumber(5);
-    model.resetRoundNumber();
-    expect(model.getRoundNumber()).toBe(1);
+  describe("History", () => {
+    test("registerPlayerMove adds standard move to history", () => {
+      model.registerPlayerMove(MOVES.ROCK);
+      expect(model.getPlayerHistory()).toContain(MOVES.ROCK);
+      expect(localStorage.getItem("playerHistory")).toContain(MOVES.ROCK);
+    });
+
+    test("registerPlayerMove does not add 'tara' to history", () => {
+      model.registerPlayerMove(MOVES.TARA);
+      expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
+    });
+
+    test("setHistory stores move and updates localStorage", () => {
+      model.setPlayerHistory(MOVES.PAPER);
+      expect(model.getPlayerHistory()).toContain(MOVES.PAPER);
+      expect(JSON.parse(localStorage.getItem("playerHistory")!)).toContain(
+        MOVES.PAPER
+      );
+    });
+
+    test("getComputerHistory returns empty array if no localStorage data", () => {
+      localStorage.removeItem("computerHistory");
+
+      const newModel = new Model(); // simulate app reload
+      expect(newModel.getComputerHistory()).toEqual([]);
+    });
+
+    test("getPlayerHistory handles corrupted localStorage gracefully", () => {
+      localStorage.setItem("playerHistory", "{not: valid}");
+
+      const newModel = new Model(); // simulate app reload
+      expect(() => newModel.getPlayerHistory()).not.toThrow();
+      expect(newModel.getPlayerHistory()).toEqual([]);
+    });
   });
 
-  test("resetTaras should set both player and computer Tara counts to 0", () => {
-    model.setPlayerTaraCount(2);
-    model.setComputerTaraCount(4);
-    model.resetTaras();
-    expect(model.getPlayerTaraCount()).toBe(0);
-    expect(model.getComputerTaraCount()).toBe(0);
-  });
+  describe("Most Common Move", () => {
+    test("sets and gets most common move for player", () => {
+      model["state"].history.player = [MOVES.ROCK, MOVES.ROCK, MOVES.PAPER];
 
-  test("resetMostCommonMoves removes most common moves from localStorage", () => {
-    localStorage.setItem("playerMostCommonMove", MOVES.ROCK);
-    localStorage.setItem("computerMostCommonMove", MOVES.SCISSORS);
+      model.setPlayerMostCommonMove();
+      const result = model.getPlayerMostCommonMove();
 
-    model.resetMostCommonMoves();
+      expect(result).toBe(MOVES.ROCK);
+    });
 
-    expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
-    expect(localStorage.getItem("computerMostCommonMove")).toBeNull();
-  });
+    test("sets and gets most common move for computer", () => {
+      model["state"].history.computer = [
+        MOVES.SCISSORS,
+        MOVES.SCISSORS,
+        MOVES.ROCK,
+      ];
 
-  test("resetMostCommonMoves clears most common move from state", () => {
-    model.setPlayerMostCommonMove();
-    model.setComputerMostCommonMove();
+      model.setComputerMostCommonMove();
+      const result = model.getComputerMostCommonMove();
 
-    model.resetMostCommonMoves();
+      expect(result).toBe(MOVES.SCISSORS);
+    });
 
-    expect(model.getPlayerMostCommonMove()).toBeNull();
-    expect(model.getComputerMostCommonMove()).toBeNull();
-  });
+    test("persists most common move to localStorage", () => {
+      model["state"].history.player = [
+        MOVES.PAPER,
+        MOVES.PAPER,
+        MOVES.SCISSORS,
+      ];
 
-  test("resetHistories clears histories from localStorage", () => {
-    localStorage.setItem(
-      "playerHistory",
-      JSON.stringify([MOVES.ROCK, MOVES.PAPER])
-    );
-    localStorage.setItem(
-      "computerHistory",
-      JSON.stringify([MOVES.SCISSORS, MOVES.ROCK])
-    );
+      model.setPlayerMostCommonMove();
+      const stored = localStorage.getItem("playerMostCommonMove");
 
-    model.resetHistories();
+      expect(stored).toBe(MOVES.PAPER);
+    });
 
-    expect(localStorage.getItem("playerHistory")).toBe("[]");
-    expect(localStorage.getItem("computerHistory")).toBe("[]");
-  });
+    test("returns null when no move history", () => {
+      model.setComputerMostCommonMove();
+      const result = model.getComputerMostCommonMove();
 
-  test("resetHistories clears histories from state", () => {
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.PAPER);
-    model.registerComputerMove(MOVES.SCISSORS);
-    model.registerComputerMove(MOVES.ROCK);
+      expect(result).toBeNull();
+    });
 
-    expect(model.getPlayerHistory()).toEqual([MOVES.ROCK, MOVES.PAPER]);
-    expect(model.getComputerHistory()).toEqual([MOVES.SCISSORS, MOVES.ROCK]);
+    test("registerPlayerMove updates most common move", () => {
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.PAPER);
 
-    model.resetHistories();
+      expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
+      expect(localStorage.getItem("playerMostCommonMove")).toBe(MOVES.ROCK);
+    });
 
-    expect(model.getPlayerHistory()).toEqual([]);
-    expect(model.getComputerHistory()).toEqual([]);
-  });
+    test("registerPlayerMove with 'tara' does not affect history or most common move", () => {
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.PAPER);
 
-  // ===== History Tests =====
+      // 'rock' should be the most common so far
+      expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
 
-  test("registerPlayerMove adds standard move to history", () => {
-    model.registerPlayerMove(MOVES.ROCK);
-    expect(model.getPlayerHistory()).toContain(MOVES.ROCK);
-    expect(localStorage.getItem("playerHistory")).toContain(MOVES.ROCK);
-  });
+      // Add 'tara' multiple times
+      model.registerPlayerMove(MOVES.TARA);
+      model.registerPlayerMove(MOVES.TARA);
+      model.registerPlayerMove(MOVES.TARA);
 
-  test("registerPlayerMove does not add 'tara' to history", () => {
-    model.registerPlayerMove(MOVES.TARA);
-    expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
-  });
+      // Verify it wasn't added to history
+      expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
 
-  test("setHistory stores move and updates localStorage", () => {
-    model.setPlayerHistory(MOVES.PAPER);
-    expect(model.getPlayerHistory()).toContain(MOVES.PAPER);
-    expect(JSON.parse(localStorage.getItem("playerHistory")!)).toContain(
-      MOVES.PAPER
-    );
-  });
+      // And the most common move didn't change to 'tara'
+      expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
+    });
 
-  test("getComputerHistory returns empty array if no localStorage data", () => {
-    localStorage.removeItem("computerHistory");
+    test("most common move changes when enough additional moves are added to history", () => {
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.PAPER);
 
-    const newModel = new Model(); // simulate app reload
-    expect(newModel.getComputerHistory()).toEqual([]);
-  });
+      // 'rock' should be the most common so far
+      expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
 
-  test("getPlayerHistory handles corrupted localStorage gracefully", () => {
-    localStorage.setItem("playerHistory", "{not: valid}");
+      // Add 'scissor' multiple times
+      model.registerPlayerMove(MOVES.SCISSORS);
+      model.registerPlayerMove(MOVES.SCISSORS);
+      model.registerPlayerMove(MOVES.SCISSORS);
 
-    const newModel = new Model(); // simulate app reload
-    expect(() => newModel.getPlayerHistory()).not.toThrow();
-    expect(newModel.getPlayerHistory()).toEqual([]);
-  });
+      // Verify the most common move changed to 'scissors'
+      expect(model.getPlayerMostCommonMove()).toBe(MOVES.SCISSORS);
+    });
 
-  // ===== Most Common Move Tests =====
+    test("registerComputerMove sets most common move after first standard move", () => {
+      model.registerComputerMove(MOVES.SCISSORS);
+      expect(model.getComputerMostCommonMove()).toBe(MOVES.SCISSORS);
+    });
 
-  test("sets and gets most common move for player", () => {
-    model["state"].history.player = [MOVES.ROCK, MOVES.ROCK, MOVES.PAPER];
+    test("most common move is null before any standard moves are registered", () => {
+      expect(model.getPlayerMostCommonMove()).toBeNull();
+      expect(model.getComputerMostCommonMove()).toBeNull();
+    });
 
-    model.setPlayerMostCommonMove();
-    const result = model.getPlayerMostCommonMove();
+    test("returns false when round is 1", () => {
+      jest.spyOn(model, "getRoundNumber").mockReturnValue(1);
+      jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(MOVES.ROCK);
+      jest
+        .spyOn(model, "getComputerMostCommonMove")
+        .mockReturnValue(MOVES.SCISSORS);
 
-    expect(result).toBe(MOVES.ROCK);
-  });
+      expect(model.showMostCommonMove()).toBe(false);
+    });
 
-  test("sets and gets most common move for computer", () => {
-    model["state"].history.computer = [
-      MOVES.SCISSORS,
-      MOVES.SCISSORS,
-      MOVES.ROCK,
-    ];
+    test("returns false when player most common move is missing", () => {
+      jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+      jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
+      jest
+        .spyOn(model, "getComputerMostCommonMove")
+        .mockReturnValue(MOVES.PAPER);
 
-    model.setComputerMostCommonMove();
-    const result = model.getComputerMostCommonMove();
+      expect(model.showMostCommonMove()).toBe(false);
+    });
 
-    expect(result).toBe(MOVES.SCISSORS);
-  });
+    test("returns false when computer most common move is missing", () => {
+      jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+      jest
+        .spyOn(model, "getPlayerMostCommonMove")
+        .mockReturnValue(MOVES.SCISSORS);
+      jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(null);
 
-  test("persists most common move to localStorage", () => {
-    model["state"].history.player = [MOVES.PAPER, MOVES.PAPER, MOVES.SCISSORS];
-
-    model.setPlayerMostCommonMove();
-    const stored = localStorage.getItem("playerMostCommonMove");
-
-    expect(stored).toBe(MOVES.PAPER);
-  });
-
-  test("returns null when no move history", () => {
-    model.setComputerMostCommonMove();
-    const result = model.getComputerMostCommonMove();
-
-    expect(result).toBeNull();
-  });
-
-  test("registerPlayerMove updates most common move", () => {
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.PAPER);
-
-    expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
-    expect(localStorage.getItem("playerMostCommonMove")).toBe(MOVES.ROCK);
-  });
-
-  test("registerPlayerMove with 'tara' does not affect history or most common move", () => {
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.PAPER);
-
-    // 'rock' should be the most common so far
-    expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
-
-    // Add 'tara' multiple times
-    model.registerPlayerMove(MOVES.TARA);
-    model.registerPlayerMove(MOVES.TARA);
-    model.registerPlayerMove(MOVES.TARA);
-
-    // Verify it wasn't added to history
-    expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
-
-    // And the most common move didn't change to 'tara'
-    expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
-  });
-
-  test("most common move changes when enough additional moves are added to history", () => {
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.ROCK);
-    model.registerPlayerMove(MOVES.PAPER);
-
-    // 'rock' should be the most common so far
-    expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
-
-    // Add 'scissor' multiple times
-    model.registerPlayerMove(MOVES.SCISSORS);
-    model.registerPlayerMove(MOVES.SCISSORS);
-    model.registerPlayerMove(MOVES.SCISSORS);
-
-    // Verify the most common move changed to 'scissors'
-    expect(model.getPlayerMostCommonMove()).toBe(MOVES.SCISSORS);
-  });
-
-  test("registerComputerMove sets most common move after first standard move", () => {
-    model.registerComputerMove(MOVES.SCISSORS);
-    expect(model.getComputerMostCommonMove()).toBe(MOVES.SCISSORS);
-  });
-
-  test("most common move is null before any standard moves are registered", () => {
-    expect(model.getPlayerMostCommonMove()).toBeNull();
-    expect(model.getComputerMostCommonMove()).toBeNull();
+      expect(model.showMostCommonMove()).toBe(false);
+    });
   });
 
   describe("showMostCommonMove", () => {
@@ -498,34 +526,6 @@ describe("Model", () => {
 
       expect(model.showMostCommonMove()).toBe(true);
     });
-  });
-
-  test("returns false when round is 1", () => {
-    jest.spyOn(model, "getRoundNumber").mockReturnValue(1);
-    jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(MOVES.ROCK);
-    jest
-      .spyOn(model, "getComputerMostCommonMove")
-      .mockReturnValue(MOVES.SCISSORS);
-
-    expect(model.showMostCommonMove()).toBe(false);
-  });
-
-  test("returns false when player most common move is missing", () => {
-    jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
-    jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
-    jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(MOVES.PAPER);
-
-    expect(model.showMostCommonMove()).toBe(false);
-  });
-
-  test("returns false when computer most common move is missing", () => {
-    jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
-    jest
-      .spyOn(model, "getPlayerMostCommonMove")
-      .mockReturnValue(MOVES.SCISSORS);
-    jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(null);
-
-    expect(model.showMostCommonMove()).toBe(false);
   });
 
   describe("ComputerModel AI", () => {
