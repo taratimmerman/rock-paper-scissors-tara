@@ -4,7 +4,13 @@ import {
   Participant,
   StandardMove,
 } from "../utils/dataObjectUtils";
-import { MOVES, MOVE_DATA_MAP, PARTICIPANTS } from "../utils/dataUtils";
+import {
+  MOVES,
+  MOVE_DATA,
+  MOVE_DATA_MAP,
+  PARTICIPANTS,
+  STANDARD_MOVE_DATA,
+} from "../utils/dataUtils";
 
 export class Model {
   private state: GameState = {
@@ -183,9 +189,11 @@ export class Model {
   }
 
   private getAvailableMoves(hasTara: boolean): Move[] {
-    return hasTara
-      ? [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS, MOVES.TARA]
-      : [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS];
+    if (hasTara) {
+      return MOVE_DATA.map((move) => move.name);
+    } else {
+      return STANDARD_MOVE_DATA.map((move) => move.name);
+    }
   }
 
   private getBaseWeights(): Record<Move, number> {
