@@ -480,9 +480,9 @@ export class Model {
     this.state.history[key] = [];
 
     try {
-      localStorage.setItem(`${key}History`, JSON.stringify([]));
+      localStorage.removeItem(`${key}History`);
     } catch (e) {
-      console.warn(`Failed to save ${key} history to localStorage`, e);
+      console.warn(`Failed to remove ${key} history from localStorage`, e);
     }
   }
 

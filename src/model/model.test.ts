@@ -330,8 +330,8 @@ describe("Model", () => {
 
       model.resetHistories();
 
-      expect(localStorage.getItem("playerHistory")).toBe("[]");
-      expect(localStorage.getItem("computerHistory")).toBe("[]");
+      expect(localStorage.getItem("playerHistory")).toBe(null);
+      expect(localStorage.getItem("computerHistory")).toBe(null);
     });
 
     test("resetHistories clears histories from state", () => {
@@ -350,16 +350,27 @@ describe("Model", () => {
     });
 
     test("resetBothMoveCounts resets both participants' localStorage counts", () => {
-      model["state"].moveCounts.player = {
+      const playerMoveCounts = {
         rock: 1,
-        paper: 0,
+        paper: 1,
         scissors: 0,
       };
-      model["state"].moveCounts.computer = {
-        rock: 0,
+      const computerMoveCounts = {
+        rock: 1,
         paper: 0,
         scissors: 1,
       };
+
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.PAPER);
+      model.registerComputerMove(MOVES.SCISSORS);
+      model.registerComputerMove(MOVES.ROCK);
+
+      const initialPlayerStorage = localStorage.getItem("playerMoveCounts");
+      const initialComputerStorage = localStorage.getItem("computerMoveCounts");
+
+      expect(JSON.parse(initialPlayerStorage!)).toEqual(playerMoveCounts);
+      expect(JSON.parse(initialComputerStorage!)).toEqual(computerMoveCounts);
 
       model.resetBothMoveCounts();
 
