@@ -330,8 +330,8 @@ describe("Model", () => {
 
       model.resetHistories();
 
-      expect(localStorage.getItem("playerHistory")).toBe("[]");
-      expect(localStorage.getItem("computerHistory")).toBe("[]");
+      expect(localStorage.getItem("playerHistory")).toBe(null);
+      expect(localStorage.getItem("computerHistory")).toBe(null);
     });
 
     test("resetHistories clears histories from state", () => {
@@ -347,6 +347,38 @@ describe("Model", () => {
 
       expect(model.getPlayerHistory()).toEqual([]);
       expect(model.getComputerHistory()).toEqual([]);
+    });
+
+    test("resetBothMoveCounts resets both participants' localStorage counts", () => {
+      const playerMoveCounts = {
+        rock: 1,
+        paper: 1,
+        scissors: 0,
+      };
+      const computerMoveCounts = {
+        rock: 1,
+        paper: 0,
+        scissors: 1,
+      };
+
+      model.registerPlayerMove(MOVES.ROCK);
+      model.registerPlayerMove(MOVES.PAPER);
+      model.registerComputerMove(MOVES.SCISSORS);
+      model.registerComputerMove(MOVES.ROCK);
+
+      const initialPlayerStorage = localStorage.getItem("playerMoveCounts");
+      const initialComputerStorage = localStorage.getItem("computerMoveCounts");
+
+      expect(JSON.parse(initialPlayerStorage!)).toEqual(playerMoveCounts);
+      expect(JSON.parse(initialComputerStorage!)).toEqual(computerMoveCounts);
+
+      model.resetBothMoveCounts();
+
+      const playerStorage = localStorage.getItem("playerMoveCounts");
+      const computerStorage = localStorage.getItem("computerMoveCounts");
+
+      expect(JSON.parse(playerStorage!)).toEqual(null);
+      expect(JSON.parse(computerStorage!)).toEqual(null);
     });
   });
 
@@ -388,20 +420,24 @@ describe("Model", () => {
 
   describe("Most Common Move", () => {
     test("sets and gets most common move for player", () => {
-      model["state"].history.player = [MOVES.ROCK, MOVES.ROCK, MOVES.PAPER];
+      model["state"].moveCounts.player = {
+        rock: 1,
+        paper: 3,
+        scissors: 2,
+      };
 
       model.setPlayerMostCommonMove();
       const result = model.getPlayerMostCommonMove();
 
-      expect(result).toBe(MOVES.ROCK);
+      expect(result).toBe(MOVES.PAPER);
     });
 
     test("sets and gets most common move for computer", () => {
-      model["state"].history.computer = [
-        MOVES.SCISSORS,
-        MOVES.SCISSORS,
-        MOVES.ROCK,
-      ];
+      model["state"].moveCounts.computer = {
+        rock: 1,
+        paper: 0,
+        scissors: 2,
+      };
 
       model.setComputerMostCommonMove();
       const result = model.getComputerMostCommonMove();
@@ -410,11 +446,11 @@ describe("Model", () => {
     });
 
     test("persists most common move to localStorage", () => {
-      model["state"].history.player = [
-        MOVES.PAPER,
-        MOVES.PAPER,
-        MOVES.SCISSORS,
-      ];
+      model["state"].moveCounts.player = {
+        rock: 0,
+        paper: 2,
+        scissors: 1,
+      };
 
       model.setPlayerMostCommonMove();
       const stored = localStorage.getItem("playerMostCommonMove");
