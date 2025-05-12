@@ -334,21 +334,6 @@ describe("Model", () => {
       expect(localStorage.getItem("computerHistory")).toBe(null);
     });
 
-    test("resetHistories clears histories from state", () => {
-      model.registerPlayerMove(MOVES.ROCK);
-      model.registerPlayerMove(MOVES.PAPER);
-      model.registerComputerMove(MOVES.SCISSORS);
-      model.registerComputerMove(MOVES.ROCK);
-
-      expect(model.getPlayerHistory()).toEqual([MOVES.ROCK, MOVES.PAPER]);
-      expect(model.getComputerHistory()).toEqual([MOVES.SCISSORS, MOVES.ROCK]);
-
-      model.resetHistories();
-
-      expect(model.getPlayerHistory()).toEqual([]);
-      expect(model.getComputerHistory()).toEqual([]);
-    });
-
     test("resetBothMoveCounts resets both participants' localStorage counts", () => {
       const playerMoveCounts = {
         rock: 1,
@@ -379,42 +364,6 @@ describe("Model", () => {
 
       expect(JSON.parse(playerStorage!)).toEqual(null);
       expect(JSON.parse(computerStorage!)).toEqual(null);
-    });
-  });
-
-  describe("History", () => {
-    test("registerPlayerMove adds standard move to history", () => {
-      model.registerPlayerMove(MOVES.ROCK);
-      expect(model.getPlayerHistory()).toContain(MOVES.ROCK);
-      expect(localStorage.getItem("playerHistory")).toContain(MOVES.ROCK);
-    });
-
-    test("registerPlayerMove does not add 'tara' to history", () => {
-      model.registerPlayerMove(MOVES.TARA);
-      expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
-    });
-
-    test("setHistory stores move and updates localStorage", () => {
-      model.setPlayerHistory(MOVES.PAPER);
-      expect(model.getPlayerHistory()).toContain(MOVES.PAPER);
-      expect(JSON.parse(localStorage.getItem("playerHistory")!)).toContain(
-        MOVES.PAPER
-      );
-    });
-
-    test("getComputerHistory returns empty array if no localStorage data", () => {
-      localStorage.removeItem("computerHistory");
-
-      const newModel = new Model(); // simulate app reload
-      expect(newModel.getComputerHistory()).toEqual([]);
-    });
-
-    test("getPlayerHistory handles corrupted localStorage gracefully", () => {
-      localStorage.setItem("playerHistory", "{not: valid}");
-
-      const newModel = new Model(); // simulate app reload
-      expect(() => newModel.getPlayerHistory()).not.toThrow();
-      expect(newModel.getPlayerHistory()).toEqual([]);
     });
   });
 
@@ -474,7 +423,7 @@ describe("Model", () => {
       expect(localStorage.getItem("playerMostCommonMove")).toBe(MOVES.ROCK);
     });
 
-    test("registerPlayerMove with 'tara' does not affect history or most common move", () => {
+    test("registerPlayerMove with 'tara' does not affect most common move", () => {
       model.registerPlayerMove(MOVES.ROCK);
       model.registerPlayerMove(MOVES.ROCK);
       model.registerPlayerMove(MOVES.PAPER);
@@ -486,9 +435,6 @@ describe("Model", () => {
       model.registerPlayerMove(MOVES.TARA);
       model.registerPlayerMove(MOVES.TARA);
       model.registerPlayerMove(MOVES.TARA);
-
-      // Verify it wasn't added to history
-      expect(model.getPlayerHistory()).not.toContain(MOVES.TARA);
 
       // And the most common move didn't change to 'tara'
       expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
