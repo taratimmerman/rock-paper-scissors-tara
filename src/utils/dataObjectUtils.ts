@@ -10,11 +10,14 @@ export type MoveData = {
   beats: readonly Move[];
 };
 
+export type MoveCount = Record<StandardMove, number>;
+
 export interface GameState {
   scores: Record<Participant, number>;
   moves: Record<Participant, Move | null>;
   taras: Record<Participant, number>;
   history: Record<Participant, StandardMove[]>;
   mostCommonMove: Record<Participant, StandardMove | null>;
+  moveCounts: Record<Participant, MoveCount>;
   roundNumber: number;
 }

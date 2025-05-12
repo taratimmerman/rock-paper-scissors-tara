@@ -348,6 +348,27 @@ describe("Model", () => {
       expect(model.getPlayerHistory()).toEqual([]);
       expect(model.getComputerHistory()).toEqual([]);
     });
+
+    test("resetBothMoveCounts resets both participants' localStorage counts", () => {
+      model["state"].moveCounts.player = {
+        rock: 1,
+        paper: 0,
+        scissors: 0,
+      };
+      model["state"].moveCounts.computer = {
+        rock: 0,
+        paper: 0,
+        scissors: 1,
+      };
+
+      model.resetBothMoveCounts();
+
+      const playerStorage = localStorage.getItem("playerMoveCounts");
+      const computerStorage = localStorage.getItem("computerMoveCounts");
+
+      expect(JSON.parse(playerStorage!)).toEqual(null);
+      expect(JSON.parse(computerStorage!)).toEqual(null);
+    });
   });
 
   describe("History", () => {
@@ -388,20 +409,24 @@ describe("Model", () => {
 
   describe("Most Common Move", () => {
     test("sets and gets most common move for player", () => {
-      model["state"].history.player = [MOVES.ROCK, MOVES.ROCK, MOVES.PAPER];
+      model["state"].moveCounts.player = {
+        rock: 1,
+        paper: 3,
+        scissors: 2,
+      };
 
       model.setPlayerMostCommonMove();
       const result = model.getPlayerMostCommonMove();
 
-      expect(result).toBe(MOVES.ROCK);
+      expect(result).toBe(MOVES.PAPER);
     });
 
     test("sets and gets most common move for computer", () => {
-      model["state"].history.computer = [
-        MOVES.SCISSORS,
-        MOVES.SCISSORS,
-        MOVES.ROCK,
-      ];
+      model["state"].moveCounts.computer = {
+        rock: 1,
+        paper: 0,
+        scissors: 2,
+      };
 
       model.setComputerMostCommonMove();
       const result = model.getComputerMostCommonMove();
@@ -410,11 +435,11 @@ describe("Model", () => {
     });
 
     test("persists most common move to localStorage", () => {
-      model["state"].history.player = [
-        MOVES.PAPER,
-        MOVES.PAPER,
-        MOVES.SCISSORS,
-      ];
+      model["state"].moveCounts.player = {
+        rock: 0,
+        paper: 2,
+        scissors: 1,
+      };
 
       model.setPlayerMostCommonMove();
       const stored = localStorage.getItem("playerMostCommonMove");

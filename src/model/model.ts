@@ -1,6 +1,7 @@
 import {
   GameState,
   Move,
+  MoveCount,
   Participant,
   StandardMove,
 } from "../utils/dataObjectUtils";
@@ -34,6 +35,10 @@ export class Model {
       player: null,
       computer: null,
     },
+    moveCounts: {
+      player: { rock: 0, paper: 0, scissors: 0 },
+      computer: { rock: 0, paper: 0, scissors: 0 },
+    },
     roundNumber: 1,
   };
 
@@ -48,6 +53,12 @@ export class Model {
       this.getPlayerMostCommonMoveFromStorage();
     this.state.mostCommonMove.computer =
       this.getComputerMostCommonMoveFromStorage();
+    this.state.moveCounts.player = this.getMoveCountsFromStorage(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.moveCounts.computer = this.getMoveCountsFromStorage(
+      PARTICIPANTS.COMPUTER
+    );
     this.state.roundNumber = this.getRoundNumberFromStorage();
   }
 
@@ -145,20 +156,24 @@ export class Model {
     return this.state.moves[key];
   }
 
-  private determineMostCommonMove(moves: StandardMove[]): StandardMove | null {
-    if (moves.length === 0) return null;
+  private determineMostCommonMove(moveCounts: MoveCount): StandardMove | null {
+    let mostCommonMove: StandardMove | null = null;
+    let highestCount = 0;
 
-    const counts = new Map<StandardMove, number>();
+    if (Object.values(moveCounts).every((count) => count === 0)) return null;
 
-    for (const move of moves) {
-      counts.set(move, (counts.get(move) || 0) + 1);
+    for (const [move, count] of Object.entries(moveCounts)) {
+      if (count > highestCount) {
+        highestCount = count;
+        mostCommonMove = move as StandardMove;
+      }
     }
 
-    return [...counts.entries()].reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    return mostCommonMove;
   }
 
-  private setMostCommonMove(key: Participant, moves: StandardMove[]): void {
-    const mostCommonMove = this.determineMostCommonMove(moves);
+  private setMostCommonMove(key: Participant, moveCounts: MoveCount): void {
+    const mostCommonMove = this.determineMostCommonMove(moveCounts);
 
     if (mostCommonMove) {
       this.state.mostCommonMove[key] = mostCommonMove;
@@ -301,6 +316,7 @@ export class Model {
     this.setPlayerMove(move);
     if (this.isStandardMove(move)) {
       this.setPlayerHistory(move);
+      this.setMoveCounts(PARTICIPANTS.PLAYER, move);
       this.setPlayerMostCommonMove();
     }
   }
@@ -309,18 +325,19 @@ export class Model {
     this.setComputerMove(move);
     if (this.isStandardMove(move)) {
       this.setComputerHistory(move);
+      this.setMoveCounts(PARTICIPANTS.COMPUTER, move);
       this.setComputerMostCommonMove();
     }
   }
 
   setPlayerMostCommonMove(): void {
-    const moves = this.getPlayerHistory();
-    this.setMostCommonMove(PARTICIPANTS.PLAYER, moves);
+    const moveCounts = this.getMoveCounts(PARTICIPANTS.PLAYER);
+    this.setMostCommonMove(PARTICIPANTS.PLAYER, moveCounts);
   }
 
   setComputerMostCommonMove(): void {
-    const moves = this.getComputerHistory();
-    this.setMostCommonMove(PARTICIPANTS.COMPUTER, moves);
+    const moveCounts = this.getMoveCounts(PARTICIPANTS.COMPUTER);
+    this.setMostCommonMove(PARTICIPANTS.COMPUTER, moveCounts);
   }
 
   resetMostCommonMoves(): void {
@@ -496,5 +513,44 @@ export class Model {
       !!this.getPlayerMostCommonMove() &&
       !!this.getComputerMostCommonMove()
     );
+  }
+
+  // ===== Move Count Methods =====
+
+  private setMoveCounts(key: Participant, move: StandardMove): void {
+    this.state.moveCounts[key][move] =
+      (this.state.moveCounts[key][move] || 0) + 1;
+
+    try {
+      localStorage.setItem(
+        `${key}MoveCounts`,
+        JSON.stringify(this.state.moveCounts[key])
+      );
+    } catch (e) {
+      console.warn(`Failed to save ${key} data to localStorage`, e);
+    }
+  }
+
+  private getMoveCountsFromStorage(key: Participant): MoveCount {
+    try {
+      const raw = localStorage.getItem(`${key}MoveCounts`);
+      return raw ? JSON.parse(raw) : { rock: 0, paper: 0, scissors: 0 };
+    } catch {
+      return { rock: 0, paper: 0, scissors: 0 };
+    }
+  }
+
+  private resetMoveCounts(key: Participant): void {
+    this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
+    localStorage.removeItem(`${key}MoveCounts`);
+  }
+
+  resetBothMoveCounts(): void {
+    this.resetMoveCounts(PARTICIPANTS.PLAYER);
+    this.resetMoveCounts(PARTICIPANTS.COMPUTER);
+  }
+
+  private getMoveCounts(key: Participant): MoveCount {
+    return this.state.moveCounts[key];
   }
 }
