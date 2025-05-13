@@ -54,6 +54,7 @@ describe("Controller", () => {
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
       toggleMostCommonMoveTable: jest.fn(),
+      updateMostCommonMoves: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
