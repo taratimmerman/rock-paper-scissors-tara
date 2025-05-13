@@ -27,10 +27,6 @@ export class Model {
       player: 0,
       computer: 0,
     },
-    history: {
-      player: [],
-      computer: [],
-    },
     mostCommonMove: {
       player: null,
       computer: null,
@@ -47,8 +43,6 @@ export class Model {
     this.state.scores.computer = this.getComputerScoreFromStorage();
     this.state.taras.player = this.getPlayerTaraCountFromStorage();
     this.state.taras.computer = this.getComputerTaraCountFromStorage();
-    this.state.history.player = this.getPlayerHistoryFromStorage();
-    this.state.history.computer = this.getComputerHistoryFromStorage();
     this.state.mostCommonMove.player =
       this.getPlayerMostCommonMoveFromStorage();
     this.state.mostCommonMove.computer =
@@ -315,7 +309,6 @@ export class Model {
   registerPlayerMove(move: Move) {
     this.setPlayerMove(move);
     if (this.isStandardMove(move)) {
-      this.setPlayerHistory(move);
       this.setMoveCounts(PARTICIPANTS.PLAYER, move);
       this.setPlayerMostCommonMove();
     }
@@ -324,7 +317,6 @@ export class Model {
   registerComputerMove(move: Move) {
     this.setComputerMove(move);
     if (this.isStandardMove(move)) {
-      this.setComputerHistory(move);
       this.setMoveCounts(PARTICIPANTS.COMPUTER, move);
       this.setComputerMostCommonMove();
     }
@@ -351,6 +343,64 @@ export class Model {
 
   getComputerMostCommonMove(): StandardMove | null {
     return this.getMostCommonMove(PARTICIPANTS.COMPUTER);
+  }
+
+  private setMoveCounts(key: Participant, move: StandardMove): void {
+    this.state.moveCounts[key][move] =
+      (this.state.moveCounts[key][move] || 0) + 1;
+
+    try {
+      localStorage.setItem(
+        `${key}MoveCounts`,
+        JSON.stringify(this.state.moveCounts[key])
+      );
+    } catch (e) {
+      console.warn(`Failed to save ${key} data to localStorage`, e);
+    }
+  }
+
+  private getMoveCountsFromStorage(key: Participant): MoveCount {
+    try {
+      const raw = localStorage.getItem(`${key}MoveCounts`);
+      return raw ? JSON.parse(raw) : { rock: 0, paper: 0, scissors: 0 };
+    } catch {
+      return { rock: 0, paper: 0, scissors: 0 };
+    }
+  }
+
+  private resetMoveCounts(key: Participant): void {
+    this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
+    localStorage.removeItem(`${key}MoveCounts`);
+  }
+
+  private getMoveCounts(key: Participant): MoveCount {
+    return this.state.moveCounts[key];
+  }
+
+  resetBothMoveCounts(): void {
+    this.resetMoveCounts(PARTICIPANTS.PLAYER);
+    this.resetMoveCounts(PARTICIPANTS.COMPUTER);
+  }
+
+  showMostCommonMove(): boolean {
+    return (
+      this.getRoundNumber() > 1 &&
+      !!this.getPlayerMostCommonMove() &&
+      !!this.getComputerMostCommonMove()
+    );
+  }
+
+  private resetHistory(key: Participant): void {
+    try {
+      localStorage.removeItem(`${key}History`);
+    } catch (e) {
+      console.warn(`Failed to remove ${key} history from localStorage`, e);
+    }
+  }
+
+  resetHistories(): void {
+    this.resetHistory(PARTICIPANTS.PLAYER);
+    this.resetHistory(PARTICIPANTS.COMPUTER);
   }
 
   // ===== Round Methods =====
@@ -438,119 +488,5 @@ export class Model {
 
   taraIsEnabled(): boolean {
     return this.getTaraCount(PARTICIPANTS.PLAYER) > 0;
-  }
-
-  // ===== History Methods =====
-
-  private setHistory(key: Participant, move: StandardMove): void {
-    this.state.history[key].push(move);
-
-    try {
-      localStorage.setItem(
-        `${key}History`,
-        JSON.stringify(this.state.history[key])
-      );
-    } catch (e) {
-      console.warn(`Failed to save ${key} history to localStorage`, e);
-    }
-  }
-
-  private getHistoryFromStorage(key: Participant): StandardMove[] {
-    try {
-      const raw = localStorage.getItem(`${key}History`);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private getPlayerHistoryFromStorage(): StandardMove[] {
-    return this.getHistoryFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerHistoryFromStorage(): StandardMove[] {
-    return this.getHistoryFromStorage(PARTICIPANTS.COMPUTER);
-  }
-
-  private getHistory(key: Participant): StandardMove[] {
-    return this.state.history[key];
-  }
-
-  private resetHistory(key: Participant): void {
-    this.state.history[key] = [];
-
-    try {
-      localStorage.removeItem(`${key}History`);
-    } catch (e) {
-      console.warn(`Failed to remove ${key} history from localStorage`, e);
-    }
-  }
-
-  setPlayerHistory(move: StandardMove): void {
-    this.setHistory(PARTICIPANTS.PLAYER, move);
-  }
-
-  setComputerHistory(move: StandardMove): void {
-    this.setHistory(PARTICIPANTS.COMPUTER, move);
-  }
-
-  resetHistories(): void {
-    this.resetHistory(PARTICIPANTS.PLAYER);
-    this.resetHistory(PARTICIPANTS.COMPUTER);
-  }
-
-  getPlayerHistory(): StandardMove[] {
-    return this.getHistory(PARTICIPANTS.PLAYER);
-  }
-
-  getComputerHistory(): StandardMove[] {
-    return this.getHistory(PARTICIPANTS.COMPUTER);
-  }
-
-  showMostCommonMove(): boolean {
-    return (
-      this.getRoundNumber() > 1 &&
-      !!this.getPlayerMostCommonMove() &&
-      !!this.getComputerMostCommonMove()
-    );
-  }
-
-  // ===== Move Count Methods =====
-
-  private setMoveCounts(key: Participant, move: StandardMove): void {
-    this.state.moveCounts[key][move] =
-      (this.state.moveCounts[key][move] || 0) + 1;
-
-    try {
-      localStorage.setItem(
-        `${key}MoveCounts`,
-        JSON.stringify(this.state.moveCounts[key])
-      );
-    } catch (e) {
-      console.warn(`Failed to save ${key} data to localStorage`, e);
-    }
-  }
-
-  private getMoveCountsFromStorage(key: Participant): MoveCount {
-    try {
-      const raw = localStorage.getItem(`${key}MoveCounts`);
-      return raw ? JSON.parse(raw) : { rock: 0, paper: 0, scissors: 0 };
-    } catch {
-      return { rock: 0, paper: 0, scissors: 0 };
-    }
-  }
-
-  private resetMoveCounts(key: Participant): void {
-    this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
-    localStorage.removeItem(`${key}MoveCounts`);
-  }
-
-  resetBothMoveCounts(): void {
-    this.resetMoveCounts(PARTICIPANTS.PLAYER);
-    this.resetMoveCounts(PARTICIPANTS.COMPUTER);
-  }
-
-  private getMoveCounts(key: Participant): MoveCount {
-    return this.state.moveCounts[key];
   }
 }
