@@ -105,10 +105,13 @@ export class View {
 
   // ===== History Methods =====
 
-  updateMostCommonMoves(player: StandardMove, computer: StandardMove): void {
+  updateMostCommonMoves(
+    player: StandardMove | null,
+    computer: StandardMove | null
+  ): void {
     if (this.playerMostCommonMoveEl)
-      this.playerMostCommonMoveEl.textContent = player;
+      this.playerMostCommonMoveEl.textContent = player ?? "X";
     if (this.computerMostCommonMoveEl)
-      this.computerMostCommonMoveEl.textContent = computer;
+      this.computerMostCommonMoveEl.textContent = computer ?? "X";
   }
 }

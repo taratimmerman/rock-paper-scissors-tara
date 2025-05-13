@@ -153,17 +153,24 @@ export class Model {
   private determineMostCommonMove(moveCounts: MoveCount): StandardMove | null {
     let mostCommonMove: StandardMove | null = null;
     let highestCount = 0;
-
-    if (Object.values(moveCounts).every((count) => count === 0)) return null;
+    let tie = false;
 
     for (const [move, count] of Object.entries(moveCounts)) {
       if (count > highestCount) {
         highestCount = count;
         mostCommonMove = move as StandardMove;
+        tie = false;
+      } else if (count === highestCount && count !== 0) {
+        tie = true;
       }
     }
 
-    return mostCommonMove;
+    return tie ? null : mostCommonMove;
+  }
+
+  private resetMostCommonMove(key: Participant): void {
+    this.state.mostCommonMove[key] = null;
+    localStorage.removeItem(`${key}MostCommonMove`);
   }
 
   private setMostCommonMove(key: Participant, moveCounts: MoveCount): void {
@@ -172,12 +179,9 @@ export class Model {
     if (mostCommonMove) {
       this.state.mostCommonMove[key] = mostCommonMove;
       localStorage.setItem(`${key}MostCommonMove`, mostCommonMove.toString());
+    } else {
+      this.resetMostCommonMove(key);
     }
-  }
-
-  private resetMostCommonMove(key: Participant): void {
-    this.state.mostCommonMove[key] = null;
-    localStorage.removeItem(`${key}MostCommonMove`);
   }
 
   private getMostCommonMoveFromStorage(key: Participant): StandardMove | null {
@@ -385,8 +389,8 @@ export class Model {
   showMostCommonMove(): boolean {
     return (
       this.getRoundNumber() > 1 &&
-      !!this.getPlayerMostCommonMove() &&
-      !!this.getComputerMostCommonMove()
+      (this.getPlayerMostCommonMove() !== null ||
+        this.getComputerMostCommonMove() !== null)
     );
   }
 

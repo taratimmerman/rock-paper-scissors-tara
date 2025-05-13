@@ -30,12 +30,10 @@ export class Controller {
     const playerMostCommonMove = this.model.getPlayerMostCommonMove();
     const comptuterMostCommonMove = this.model.getComputerMostCommonMove();
 
-    if (playerMostCommonMove && comptuterMostCommonMove) {
-      this.view.updateMostCommonMoves(
-        playerMostCommonMove,
-        comptuterMostCommonMove
-      );
-    }
+    this.view.updateMostCommonMoves(
+      playerMostCommonMove,
+      comptuterMostCommonMove
+    );
   }
 
   private updateTaraButtonView(): void {
