@@ -115,6 +115,11 @@ export class Model {
     return this.state.scores[key];
   }
 
+  private resetScore(key: Participant): void {
+    this.state.scores[key] = 0;
+    localStorage.removeItem(`${key}Score`);
+  }
+
   setPlayerScore(score: number) {
     this.setScore(PARTICIPANTS.PLAYER, score);
   }
@@ -132,8 +137,8 @@ export class Model {
   }
 
   resetScores(): void {
-    this.setPlayerScore(0);
-    this.setComputerScore(0);
+    this.resetScore(PARTICIPANTS.PLAYER);
+    this.resetScore(PARTICIPANTS.COMPUTER);
   }
 
   // ===== Move Methods =====
@@ -427,7 +432,8 @@ export class Model {
   }
 
   resetRoundNumber(): void {
-    this.setRoundNumber(1);
+    this.state.roundNumber = 1;
+    localStorage.removeItem(`roundNumber`);
   }
 
   // ===== Tara Methods =====
@@ -469,6 +475,11 @@ export class Model {
     return this.state.taras[key];
   }
 
+  private resetTaraCount(key: Participant): void {
+    this.state.taras[key] = 0;
+    localStorage.removeItem(`${key}TaraCount`);
+  }
+
   setPlayerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.PLAYER, count);
   }
@@ -478,8 +489,8 @@ export class Model {
   }
 
   resetTaras(): void {
-    this.setPlayerTaraCount(0);
-    this.setComputerTaraCount(0);
+    this.resetTaraCount(PARTICIPANTS.PLAYER);
+    this.resetTaraCount(PARTICIPANTS.COMPUTER);
   }
 
   getPlayerTaraCount(): number {
