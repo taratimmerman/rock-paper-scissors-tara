@@ -30,7 +30,7 @@ export class Controller {
     const playerMostCommonMove = this.model.getPlayerMostCommonMove();
     const comptuterMostCommonMove = this.model.getComputerMostCommonMove();
 
-    if (playerMostCommonMove && comptuterMostCommonMove) {
+    if (playerMostCommonMove || comptuterMostCommonMove) {
       this.view.updateMostCommonMoves(
         playerMostCommonMove,
         comptuterMostCommonMove

@@ -83,14 +83,17 @@ describe("Controller", () => {
     );
   });
 
-  test("initialize does not call view.updateMostCommonMoves when one or both moves are missing", () => {
+  test("initialize calls updateMostCommonMoves when one move is present", () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(null);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
     mockView.updateMostCommonMoves = jest.fn();
 
     controller.initialize();
 
-    expect(mockView.updateMostCommonMoves).not.toHaveBeenCalled();
+    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+      null,
+      MOVES.PAPER
+    );
   });
 
   test("endRound calls view.updateMostCommonMoves when both most common moves exist", () => {

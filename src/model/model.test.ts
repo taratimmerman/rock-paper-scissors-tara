@@ -1,6 +1,6 @@
 import { Model } from "./model";
 import { MOVES, STANDARD_MOVE_DATA_MAP } from "../utils/dataUtils";
-import { Move, StandardMove } from "../utils/dataObjectUtils";
+import { Move } from "../utils/dataObjectUtils";
 
 // Utility to count frequency over many runs
 function simulateComputerChoices(
@@ -477,24 +477,154 @@ describe("Model", () => {
       expect(model.showMostCommonMove()).toBe(false);
     });
 
-    test("returns false when player most common move is missing", () => {
-      jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
-      jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
-      jest
-        .spyOn(model, "getComputerMostCommonMove")
-        .mockReturnValue(MOVES.PAPER);
+    describe("showMostCommonMove", () => {
+      test("returns false when round is 1", () => {
+        jest.spyOn(model, "getRoundNumber").mockReturnValue(1);
+        jest
+          .spyOn(model, "getPlayerMostCommonMove")
+          .mockReturnValue(MOVES.ROCK);
+        jest
+          .spyOn(model, "getComputerMostCommonMove")
+          .mockReturnValue(MOVES.SCISSORS);
 
-      expect(model.showMostCommonMove()).toBe(false);
+        expect(model.showMostCommonMove()).toBe(false);
+      });
+
+      test("returns false when both player and computer most common moves are missing", () => {
+        jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+        jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
+        jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(null);
+
+        expect(model.showMostCommonMove()).toBe(false);
+      });
+
+      test("returns true when only player most common move is present", () => {
+        jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+        jest
+          .spyOn(model, "getPlayerMostCommonMove")
+          .mockReturnValue(MOVES.ROCK);
+        jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(null);
+
+        expect(model.showMostCommonMove()).toBe(true);
+      });
+
+      test("returns true when only computer most common move is present", () => {
+        jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+        jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
+        jest
+          .spyOn(model, "getComputerMostCommonMove")
+          .mockReturnValue(MOVES.PAPER);
+
+        expect(model.showMostCommonMove()).toBe(true);
+      });
+
+      test("returns true when both player and computer most common moves are present", () => {
+        jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
+        jest
+          .spyOn(model, "getPlayerMostCommonMove")
+          .mockReturnValue(MOVES.SCISSORS);
+        jest
+          .spyOn(model, "getComputerMostCommonMove")
+          .mockReturnValue(MOVES.PAPER);
+
+        expect(model.showMostCommonMove()).toBe(true);
+      });
     });
 
-    test("returns false when computer most common move is missing", () => {
-      jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
-      jest
-        .spyOn(model, "getPlayerMostCommonMove")
-        .mockReturnValue(MOVES.SCISSORS);
-      jest.spyOn(model, "getComputerMostCommonMove").mockReturnValue(null);
+    describe("Tie Handling", () => {
+      test("determineMostCommonMove returns null when there is a tie between two moves (player)", () => {
+        model["state"].moveCounts.player = {
+          rock: 2,
+          paper: 2,
+          scissors: 1,
+        };
 
-      expect(model.showMostCommonMove()).toBe(false);
+        model.setPlayerMostCommonMove();
+
+        expect(model.getPlayerMostCommonMove()).toBeNull();
+        expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      });
+
+      test("determineMostCommonMove returns null when there is a tie between two moves (computer)", () => {
+        model["state"].moveCounts.computer = {
+          rock: 1,
+          paper: 3,
+          scissors: 3,
+        };
+
+        model.setComputerMostCommonMove();
+
+        expect(model.getComputerMostCommonMove()).toBeNull();
+        expect(localStorage.getItem("computerMostCommonMove")).toBeNull();
+      });
+
+      test("determineMostCommonMove returns null when there is a three-way tie", () => {
+        model["state"].moveCounts.player = {
+          rock: 1,
+          paper: 1,
+          scissors: 1,
+        };
+
+        model.setPlayerMostCommonMove();
+
+        expect(model.getPlayerMostCommonMove()).toBeNull();
+        expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      });
+
+      test("determineMostCommonMove returns null when all counts are zero (explicit test)", () => {
+        model["state"].moveCounts.player = {
+          rock: 0,
+          paper: 0,
+          scissors: 0,
+        };
+
+        model.setPlayerMostCommonMove();
+
+        expect(model.getPlayerMostCommonMove()).toBeNull();
+        expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      });
+
+      test("most common move becomes null if subsequent moves result in a tie after a non-tied state", () => {
+        model["state"].moveCounts.player = {
+          rock: 3,
+          paper: 1,
+          scissors: 1,
+        };
+        model.setPlayerMostCommonMove();
+        expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
+        expect(localStorage.getItem("playerMostCommonMove")).toBe(MOVES.ROCK);
+
+        model["state"].moveCounts.player = {
+          rock: 3,
+          paper: 3,
+          scissors: 1,
+        };
+        model.setPlayerMostCommonMove();
+
+        expect(model.getPlayerMostCommonMove()).toBeNull();
+        expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      });
+
+      test("most common move becomes null if all counts become zero after a non-zero state", () => {
+        model["state"].moveCounts.player = {
+          rock: 3,
+          paper: 1,
+          scissors: 1,
+        };
+        model.setPlayerMostCommonMove();
+        expect(model.getPlayerMostCommonMove()).toBe(MOVES.ROCK);
+        expect(localStorage.getItem("playerMostCommonMove")).toBe(MOVES.ROCK);
+
+        model["state"].moveCounts.player = {
+          rock: 0,
+          paper: 0,
+          scissors: 0,
+        };
+        model.setPlayerMostCommonMove();
+
+        expect(model.getPlayerMostCommonMove()).toBeNull();
+        expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      });
     });
   });
 
