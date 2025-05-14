@@ -1,0 +1,144 @@
+import { IGameStorage } from "./gameStorage";
+import { Participant, MoveCount, StandardMove } from "../utils/dataObjectUtils";
+import { MOVES, STANDARD_MOVE_NAMES } from "../utils/dataUtils";
+
+const KEY_SUFFIX_SCORE = "Score";
+const KEY_SUFFIX_TARA_COUNT = "TaraCount";
+const KEY_SUFFIX_MOST_COMMON_MOVE = "MostCommonMove";
+const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
+const KEY_SUFFIX_HISTORY = "History";
+
+const KEY_ROUND_NUMBER = "roundNumber";
+
+const DEFAULT_NUMERIC_VALUE = 0;
+const DEFAULT_ROUND_NUMBER_GET = 1;
+
+const DEFAULT_MOVE_COUNTS: MoveCount = {
+  [MOVES.ROCK]: 0,
+  [MOVES.PAPER]: 0,
+  [MOVES.SCISSORS]: 0,
+};
+
+/**
+ * Implementation of IGameStorage using browser's localStorage.
+ */
+export class LocalStorageGameStorage implements IGameStorage {
+  private formatKey(participant: Participant, suffix: string): string {
+    return `${participant}${suffix}`;
+  }
+
+  private safelySetItem(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.warn(`LocalStorage Error: Failed to save "${key}".`, e);
+    }
+  }
+
+  // ===== Getters =====
+
+  getScore(participant: Participant): number {
+    const key = this.formatKey(participant, KEY_SUFFIX_SCORE);
+    return parseInt(
+      localStorage.getItem(key) || DEFAULT_NUMERIC_VALUE.toString(),
+      10
+    );
+  }
+
+  getTaraCount(participant: Participant): number {
+    const key = this.formatKey(participant, KEY_SUFFIX_TARA_COUNT);
+    return parseInt(
+      localStorage.getItem(key) || DEFAULT_NUMERIC_VALUE.toString(),
+      10
+    );
+  }
+
+  getMostCommonMove(participant: Participant): StandardMove | null {
+    const key = this.formatKey(participant, KEY_SUFFIX_MOST_COMMON_MOVE);
+    const move = localStorage.getItem(key);
+    return move && STANDARD_MOVE_NAMES.includes(move as StandardMove)
+      ? (move as StandardMove)
+      : null;
+  }
+
+  getMoveCounts(participant: Participant): MoveCount {
+    const key = this.formatKey(participant, KEY_SUFFIX_MOVE_COUNTS);
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : DEFAULT_MOVE_COUNTS;
+    } catch (e) {
+      console.warn(`LocalStorage Error: Failed to parse "${key}".`, e);
+      return DEFAULT_MOVE_COUNTS;
+    }
+  }
+
+  getRoundNumber(): number {
+    return parseInt(
+      localStorage.getItem(KEY_ROUND_NUMBER) ||
+        DEFAULT_ROUND_NUMBER_GET.toString(),
+      10
+    );
+  }
+
+  // ===== Setters =====
+
+  setScore(participant: Participant, score: number): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_SCORE);
+    this.safelySetItem(key, score.toString());
+  }
+
+  setTaraCount(participant: Participant, count: number): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_TARA_COUNT);
+    this.safelySetItem(key, count.toString());
+  }
+
+  setMostCommonMove(participant: Participant, move: StandardMove | null): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_MOST_COMMON_MOVE);
+    if (move) {
+      this.safelySetItem(key, move);
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
+  setMoveCounts(participant: Participant, moveCounts: MoveCount): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_MOVE_COUNTS);
+    this.safelySetItem(key, JSON.stringify(moveCounts));
+  }
+
+  setRoundNumber(round: number): void {
+    const key = KEY_ROUND_NUMBER;
+    this.safelySetItem(key, round.toString());
+  }
+
+  // ===== Removers =====
+
+  removeScore(participant: Participant): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_SCORE);
+    localStorage.removeItem(key);
+  }
+
+  removeTaraCount(participant: Participant): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_TARA_COUNT);
+    localStorage.removeItem(key);
+  }
+
+  removeMostCommonMove(participant: Participant): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_MOST_COMMON_MOVE);
+    localStorage.removeItem(key);
+  }
+
+  removeMoveCounts(participant: Participant): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_MOVE_COUNTS);
+    localStorage.removeItem(key);
+  }
+
+  removeRoundNumber(): void {
+    localStorage.removeItem(KEY_ROUND_NUMBER);
+  }
+
+  removeHistory(participant: Participant): void {
+    const key = this.formatKey(participant, KEY_SUFFIX_HISTORY);
+    localStorage.removeItem(key);
+  }
+}
