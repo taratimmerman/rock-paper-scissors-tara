@@ -6,11 +6,11 @@ import {
   StandardMove,
 } from "../utils/dataObjectUtils";
 import {
+  ALL_MOVE_NAMES,
   MOVES,
-  MOVE_DATA,
   MOVE_DATA_MAP,
   PARTICIPANTS,
-  STANDARD_MOVE_DATA,
+  STANDARD_MOVE_NAMES,
 } from "../utils/dataUtils";
 
 export class Model {
@@ -208,9 +208,9 @@ export class Model {
 
   private getAvailableMoves(hasTara: boolean): Move[] {
     if (hasTara) {
-      return MOVE_DATA.map((move) => move.name);
+      return ALL_MOVE_NAMES;
     } else {
-      return STANDARD_MOVE_DATA.map((move) => move.name);
+      return STANDARD_MOVE_NAMES;
     }
   }
 
