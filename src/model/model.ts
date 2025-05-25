@@ -122,7 +122,7 @@ export class Model {
 
   private resetScore(key: Participant): void {
     this.state.scores[key] = 0;
-    localStorage.removeItem(`${key}Score`);
+    this.gameStorage.removeScore(key);
   }
 
   setPlayerScore(score: number) {
@@ -180,7 +180,7 @@ export class Model {
 
   private resetMostCommonMove(key: Participant): void {
     this.state.mostCommonMove[key] = null;
-    localStorage.removeItem(`${key}MostCommonMove`);
+    this.gameStorage.removeMostCommonMove(key);
   }
 
   private setMostCommonMove(key: Participant, moveCounts: MoveCount): void {
@@ -392,11 +392,7 @@ export class Model {
   }
 
   private resetHistory(key: Participant): void {
-    try {
-      localStorage.removeItem(`${key}History`);
-    } catch (e) {
-      console.warn(`Failed to remove ${key} history from localStorage`, e);
-    }
+    this.gameStorage.removeHistory(key);
   }
 
   resetHistories(): void {
@@ -425,7 +421,7 @@ export class Model {
 
   resetRoundNumber(): void {
     this.state.roundNumber = 1;
-    localStorage.removeItem(`roundNumber`);
+    this.gameStorage.removeRoundNumber();
   }
 
   // ===== Tara Methods =====
@@ -469,7 +465,7 @@ export class Model {
 
   private resetTaraCount(key: Participant): void {
     this.state.taras[key] = 0;
-    localStorage.removeItem(`${key}TaraCount`);
+    this.gameStorage.removeTaraCount(key);
   }
 
   setPlayerTaraCount(count: number): void {

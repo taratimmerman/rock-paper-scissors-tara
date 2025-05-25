@@ -57,7 +57,9 @@ describe("Model", () => {
           }
         }
       ),
-      removeMostCommonMove: jest.fn(),
+      removeMostCommonMove: jest.fn((participant: Participant) => {
+        localStorage.removeItem(`${participant}MostCommonMove`);
+      }),
       getMoveCounts: jest.fn(),
       setMoveCounts: jest.fn(
         (participant: Participant, moveCounts: MoveCount) => {
@@ -76,7 +78,9 @@ describe("Model", () => {
         localStorage.setItem("roundNumber", roundNumber.toString());
       }),
       removeRoundNumber: jest.fn(),
-      removeHistory: jest.fn(),
+      removeHistory: jest.fn((participant: Participant) => {
+        localStorage.removeItem(`${participant}History`);
+      }),
     } as jest.Mocked<IGameStorage>;
     model = new Model(mockGameStorage);
   });
