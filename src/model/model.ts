@@ -6,12 +6,14 @@ import {
   StandardMove,
 } from "../utils/dataObjectUtils";
 import {
+  ALL_MOVE_NAMES,
   MOVES,
-  MOVE_DATA,
   MOVE_DATA_MAP,
   PARTICIPANTS,
-  STANDARD_MOVE_DATA,
+  STANDARD_MOVE_NAMES,
 } from "../utils/dataUtils";
+import { IGameStorage } from "../storage/gameStorage";
+import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
 
 export class Model {
   private state: GameState = {
@@ -37,23 +39,33 @@ export class Model {
     },
     roundNumber: 1,
   };
+  private gameStorage: IGameStorage;
 
-  constructor() {
-    this.state.scores.player = this.getPlayerScoreFromStorage();
-    this.state.scores.computer = this.getComputerScoreFromStorage();
-    this.state.taras.player = this.getPlayerTaraCountFromStorage();
-    this.state.taras.computer = this.getComputerTaraCountFromStorage();
-    this.state.mostCommonMove.player =
-      this.getPlayerMostCommonMoveFromStorage();
-    this.state.mostCommonMove.computer =
-      this.getComputerMostCommonMoveFromStorage();
-    this.state.moveCounts.player = this.getMoveCountsFromStorage(
-      PARTICIPANTS.PLAYER
-    );
-    this.state.moveCounts.computer = this.getMoveCountsFromStorage(
+  constructor(gameStorage: IGameStorage = new LocalStorageGameStorage()) {
+    this.gameStorage = gameStorage;
+    this.state.scores.player = this.gameStorage.getScore(PARTICIPANTS.PLAYER);
+    this.state.scores.computer = this.gameStorage.getScore(
       PARTICIPANTS.COMPUTER
     );
-    this.state.roundNumber = this.getRoundNumberFromStorage();
+    this.state.taras.player = this.gameStorage.getTaraCount(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.taras.computer = this.gameStorage.getTaraCount(
+      PARTICIPANTS.COMPUTER
+    );
+    this.state.mostCommonMove.player = this.gameStorage.getMostCommonMove(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.mostCommonMove.computer = this.gameStorage.getMostCommonMove(
+      PARTICIPANTS.COMPUTER
+    );
+    this.state.moveCounts.player = this.gameStorage.getMoveCounts(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.moveCounts.computer = this.gameStorage.getMoveCounts(
+      PARTICIPANTS.COMPUTER
+    );
+    this.state.roundNumber = this.gameStorage.getRoundNumber();
   }
 
   // ===== General Methods =====
@@ -94,21 +106,10 @@ export class Model {
   }
 
   // ===== Score Methods =====
+
   private setScore(key: Participant, value: number): void {
     this.state.scores[key] = value;
-    localStorage.setItem(`${key}Score`, value.toString());
-  }
-
-  private getScoreFromStorage(key: Participant): number {
-    return parseInt(localStorage.getItem(`${key}Score`) || "0", 10);
-  }
-
-  private getPlayerScoreFromStorage(): number {
-    return this.getScoreFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerScoreFromStorage(): number {
-    return this.getScoreFromStorage(PARTICIPANTS.COMPUTER);
+    this.gameStorage.setScore(key, value);
   }
 
   private getScore(key: Participant): number {
@@ -117,7 +118,7 @@ export class Model {
 
   private resetScore(key: Participant): void {
     this.state.scores[key] = 0;
-    localStorage.removeItem(`${key}Score`);
+    this.gameStorage.removeScore(key);
   }
 
   setPlayerScore(score: number) {
@@ -175,31 +176,13 @@ export class Model {
 
   private resetMostCommonMove(key: Participant): void {
     this.state.mostCommonMove[key] = null;
-    localStorage.removeItem(`${key}MostCommonMove`);
+    this.gameStorage.removeMostCommonMove(key);
   }
 
   private setMostCommonMove(key: Participant, moveCounts: MoveCount): void {
     const mostCommonMove = this.determineMostCommonMove(moveCounts);
-
-    if (mostCommonMove) {
-      this.state.mostCommonMove[key] = mostCommonMove;
-      localStorage.setItem(`${key}MostCommonMove`, mostCommonMove.toString());
-    } else {
-      this.resetMostCommonMove(key);
-    }
-  }
-
-  private getMostCommonMoveFromStorage(key: Participant): StandardMove | null {
-    const move = localStorage.getItem(`${key}MostCommonMove`);
-    return move && this.isStandardMove(move) ? move : null;
-  }
-
-  private getPlayerMostCommonMoveFromStorage(): StandardMove | null {
-    return this.getMostCommonMoveFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerMostCommonMoveFromStorage(): StandardMove | null {
-    return this.getMostCommonMoveFromStorage(PARTICIPANTS.COMPUTER);
+    this.state.mostCommonMove[key] = mostCommonMove;
+    this.gameStorage.setMostCommonMove(key, mostCommonMove);
   }
 
   private getMostCommonMove(key: Participant): StandardMove | null {
@@ -208,9 +191,9 @@ export class Model {
 
   private getAvailableMoves(hasTara: boolean): Move[] {
     if (hasTara) {
-      return MOVE_DATA.map((move) => move.name);
+      return ALL_MOVE_NAMES;
     } else {
-      return STANDARD_MOVE_DATA.map((move) => move.name);
+      return STANDARD_MOVE_NAMES;
     }
   }
 
@@ -357,29 +340,12 @@ export class Model {
   private setMoveCounts(key: Participant, move: StandardMove): void {
     this.state.moveCounts[key][move] =
       (this.state.moveCounts[key][move] || 0) + 1;
-
-    try {
-      localStorage.setItem(
-        `${key}MoveCounts`,
-        JSON.stringify(this.state.moveCounts[key])
-      );
-    } catch (e) {
-      console.warn(`Failed to save ${key} data to localStorage`, e);
-    }
-  }
-
-  private getMoveCountsFromStorage(key: Participant): MoveCount {
-    try {
-      const raw = localStorage.getItem(`${key}MoveCounts`);
-      return raw ? JSON.parse(raw) : { rock: 0, paper: 0, scissors: 0 };
-    } catch {
-      return { rock: 0, paper: 0, scissors: 0 };
-    }
+    this.gameStorage.setMoveCounts(key, this.state.moveCounts[key]);
   }
 
   private resetMoveCounts(key: Participant): void {
     this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
-    localStorage.removeItem(`${key}MoveCounts`);
+    this.gameStorage.removeMoveCounts(key);
   }
 
   private getMoveCounts(key: Participant): MoveCount {
@@ -400,11 +366,7 @@ export class Model {
   }
 
   private resetHistory(key: Participant): void {
-    try {
-      localStorage.removeItem(`${key}History`);
-    } catch (e) {
-      console.warn(`Failed to remove ${key} history from localStorage`, e);
-    }
+    this.gameStorage.removeHistory(key);
   }
 
   resetHistories(): void {
@@ -414,17 +376,13 @@ export class Model {
 
   // ===== Round Methods =====
 
-  private getRoundNumberFromStorage(): number {
-    return parseInt(localStorage.getItem(`roundNumber`) || "1", 10);
-  }
-
   getRoundNumber(): number {
     return this.state.roundNumber;
   }
 
   setRoundNumber(value: number): void {
     this.state.roundNumber = value;
-    localStorage.setItem(`roundNumber`, value.toString());
+    this.gameStorage.setRoundNumber(value);
   }
 
   increaseRoundNumber(): void {
@@ -433,22 +391,10 @@ export class Model {
 
   resetRoundNumber(): void {
     this.state.roundNumber = 1;
-    localStorage.removeItem(`roundNumber`);
+    this.gameStorage.removeRoundNumber();
   }
 
   // ===== Tara Methods =====
-
-  private getTaraCountFromStorage(key: Participant): number {
-    return parseInt(localStorage.getItem(`${key}TaraCount`) || "0", 10);
-  }
-
-  private getPlayerTaraCountFromStorage(): number {
-    return this.getTaraCountFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerTaraCountFromStorage(): number {
-    return this.getTaraCountFromStorage(PARTICIPANTS.COMPUTER);
-  }
 
   private decrementTaraCount(key: Participant): void {
     const current = this.getTaraCount(key);
@@ -468,7 +414,7 @@ export class Model {
 
   private setTaraCount(key: Participant, value: number): void {
     this.state.taras[key] = value;
-    localStorage.setItem(`${key}TaraCount`, value.toString());
+    this.gameStorage.setTaraCount(key, value);
   }
 
   private getTaraCount(key: Participant): number {
@@ -477,7 +423,7 @@ export class Model {
 
   private resetTaraCount(key: Participant): void {
     this.state.taras[key] = 0;
-    localStorage.removeItem(`${key}TaraCount`);
+    this.gameStorage.removeTaraCount(key);
   }
 
   setPlayerTaraCount(count: number): void {

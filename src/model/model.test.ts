@@ -1,6 +1,16 @@
 import { Model } from "./model";
-import { MOVES, STANDARD_MOVE_DATA_MAP } from "../utils/dataUtils";
-import { Move } from "../utils/dataObjectUtils";
+import {
+  MOVES,
+  PARTICIPANTS,
+  STANDARD_MOVE_DATA_MAP,
+} from "../utils/dataUtils";
+import {
+  Move,
+  MoveCount,
+  Participant,
+  StandardMove,
+} from "../utils/dataObjectUtils";
+import { IGameStorage } from "../storage/gameStorage";
 
 // Utility to count frequency over many runs
 function simulateComputerChoices(
@@ -24,11 +34,77 @@ function simulateComputerChoices(
 }
 
 describe("Model", () => {
+  let mockGameStorage: jest.Mocked<IGameStorage>;
   let model: Model;
 
   beforeEach(() => {
     localStorage.clear();
-    model = new Model();
+
+    mockGameStorage = {
+      getScore: jest.fn((participant: Participant) => {
+        return parseInt(localStorage.getItem(`${participant}Score`) || "0", 10);
+      }),
+      setScore: jest.fn(),
+      removeScore: jest.fn(),
+      getTaraCount: jest.fn((participant: Participant) => {
+        return parseInt(
+          localStorage.getItem(`${participant}TaraCount`) || "0",
+          10
+        );
+      }),
+      setTaraCount: jest.fn(),
+      removeTaraCount: jest.fn(),
+      getMostCommonMove: jest.fn((participant: Participant) => {
+        const move = localStorage.getItem(`${participant}MostCommonMove`);
+        return move &&
+          (["rock", "paper", "scissors"] as StandardMove[]).includes(
+            move as StandardMove
+          )
+          ? (move as StandardMove)
+          : null;
+      }),
+      setMostCommonMove: jest.fn(
+        (participant: Participant, move: StandardMove | null) => {
+          if (move) {
+            localStorage.setItem(`${participant}MostCommonMove`, move);
+          } else {
+            localStorage.removeItem(`${participant}MostCommonMove`);
+          }
+        }
+      ),
+      removeMostCommonMove: jest.fn((participant: Participant) => {
+        localStorage.removeItem(`${participant}MostCommonMove`);
+      }),
+      getMoveCounts: jest.fn((participant: Participant) => {
+        const raw = localStorage.getItem(`${participant}MoveCounts`);
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed || { rock: 0, paper: 0, scissors: 0 };
+      }),
+      setMoveCounts: jest.fn(
+        (participant: Participant, moveCounts: MoveCount) => {
+          // JSON.stringify the moveCounts object and store it
+          localStorage.setItem(
+            `${participant}MoveCounts`,
+            JSON.stringify(moveCounts)
+          );
+        }
+      ),
+      removeMoveCounts: jest.fn((participant: Participant) => {
+        localStorage.removeItem(`${participant}MoveCounts`);
+      }),
+      getRoundNumber: jest.fn(() => {
+        const stored = localStorage.getItem(`roundNumber`);
+        return parseInt(stored || "1", 10);
+      }),
+      setRoundNumber: jest.fn((roundNumber: number) => {
+        localStorage.setItem("roundNumber", roundNumber.toString());
+      }),
+      removeRoundNumber: jest.fn(),
+      removeHistory: jest.fn((participant: Participant) => {
+        localStorage.removeItem(`${participant}History`);
+      }),
+    } as jest.Mocked<IGameStorage>;
+    model = new Model(mockGameStorage);
   });
 
   describe("Scores", () => {
@@ -141,16 +217,33 @@ describe("Model", () => {
       expect(model.getComputerTaraCount()).toBe(0);
     });
 
-    test("setTaraCount updates the Tara count and localStorage", () => {
+    test("setTaraCount updates the Tara count and calls gameStorage", () => {
+      jest.clearAllMocks(); // Clear calls from constructor
+
       model.setPlayerTaraCount(2);
       expect(model.getPlayerTaraCount()).toBe(2);
-      expect(localStorage.getItem("playerTaraCount")).toBe("2");
+      expect(mockGameStorage.setTaraCount).toHaveBeenCalledWith(
+        PARTICIPANTS.PLAYER,
+        2
+      );
     });
 
     test("Tara count persists between model instances", () => {
+      // Temporarily override the mock's behavior for this specific test
+      // Make setTaraCount actually write to the mock localStorage
+      mockGameStorage.setTaraCount.mockImplementation((participant, count) => {
+        localStorage.setItem(`${participant}TaraCount`, count.toString());
+      });
+
+      // Make getTaraCount actually read from the mock localStorage
+      mockGameStorage.getTaraCount.mockImplementation((participant) => {
+        const stored = localStorage.getItem(`${participant}TaraCount`);
+        return stored ? parseInt(stored, 10) : 0;
+      });
+
       model.setComputerTaraCount(1);
       // Recreate model to simulate a page reload
-      model = new Model();
+      model = new Model(mockGameStorage);
       expect(model.getComputerTaraCount()).toBe(1);
     });
 

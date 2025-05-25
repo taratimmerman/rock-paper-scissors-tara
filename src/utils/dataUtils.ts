@@ -22,12 +22,17 @@ export const MOVE_DATA = [
   },
 ] as const;
 
+export const ALL_MOVE_NAMES: Move[] = MOVE_DATA.map((data) => data.name);
+
 export const MOVE_DATA_MAP: ReadonlyMap<Move, MoveData> = new Map(
   MOVE_DATA.map((move) => [move.name, move])
 );
 
 export const STANDARD_MOVE_DATA = MOVE_DATA.filter(
   (move) => move.name !== MOVES.TARA
+);
+export const STANDARD_MOVE_NAMES: StandardMove[] = STANDARD_MOVE_DATA.map(
+  (data) => data.name
 );
 
 export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<StandardMove, MoveData> =
