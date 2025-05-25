@@ -12,6 +12,8 @@ import {
   PARTICIPANTS,
   STANDARD_MOVE_NAMES,
 } from "../utils/dataUtils";
+import { IGameStorage } from "../storage/gameStorage";
+import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
 
 export class Model {
   private state: GameState = {
@@ -37,8 +39,10 @@ export class Model {
     },
     roundNumber: 1,
   };
+  private gameStorage: IGameStorage;
 
-  constructor() {
+  constructor(gameStorage: IGameStorage = new LocalStorageGameStorage()) {
+    this.gameStorage = gameStorage;
     this.state.scores.player = this.getPlayerScoreFromStorage();
     this.state.scores.computer = this.getComputerScoreFromStorage();
     this.state.taras.player = this.getPlayerTaraCountFromStorage();

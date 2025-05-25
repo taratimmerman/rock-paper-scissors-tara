@@ -1,6 +1,7 @@
 import { Model } from "./model";
 import { MOVES, STANDARD_MOVE_DATA_MAP } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
+import { IGameStorage } from "../storage/gameStorage";
 
 // Utility to count frequency over many runs
 function simulateComputerChoices(
@@ -24,11 +25,31 @@ function simulateComputerChoices(
 }
 
 describe("Model", () => {
+  let mockGameStorage: jest.Mocked<IGameStorage>;
   let model: Model;
 
   beforeEach(() => {
     localStorage.clear();
-    model = new Model();
+
+    mockGameStorage = {
+      getScore: jest.fn(),
+      setScore: jest.fn(),
+      removeScore: jest.fn(),
+      getTaraCount: jest.fn(),
+      setTaraCount: jest.fn(),
+      removeTaraCount: jest.fn(),
+      getMostCommonMove: jest.fn(),
+      setMostCommonMove: jest.fn(),
+      removeMostCommonMove: jest.fn(),
+      getMoveCounts: jest.fn(),
+      setMoveCounts: jest.fn(),
+      removeMoveCounts: jest.fn(),
+      getRoundNumber: jest.fn(),
+      setRoundNumber: jest.fn(),
+      removeRoundNumber: jest.fn(),
+      removeHistory: jest.fn(),
+    } as jest.Mocked<IGameStorage>;
+    model = new Model(mockGameStorage);
   });
 
   describe("Scores", () => {
