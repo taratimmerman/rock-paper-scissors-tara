@@ -41,13 +41,28 @@ describe("Model", () => {
     localStorage.clear();
 
     mockGameStorage = {
-      getScore: jest.fn(),
+      getScore: jest.fn((participant: Participant) => {
+        return parseInt(localStorage.getItem(`${participant}Score`) || "0", 10);
+      }),
       setScore: jest.fn(),
       removeScore: jest.fn(),
-      getTaraCount: jest.fn(),
+      getTaraCount: jest.fn((participant: Participant) => {
+        return parseInt(
+          localStorage.getItem(`${participant}TaraCount`) || "0",
+          10
+        );
+      }),
       setTaraCount: jest.fn(),
       removeTaraCount: jest.fn(),
-      getMostCommonMove: jest.fn(),
+      getMostCommonMove: jest.fn((participant: Participant) => {
+        const move = localStorage.getItem(`${participant}MostCommonMove`);
+        return move &&
+          (["rock", "paper", "scissors"] as StandardMove[]).includes(
+            move as StandardMove
+          )
+          ? (move as StandardMove)
+          : null;
+      }),
       setMostCommonMove: jest.fn(
         (participant: Participant, move: StandardMove | null) => {
           if (move) {
@@ -60,7 +75,11 @@ describe("Model", () => {
       removeMostCommonMove: jest.fn((participant: Participant) => {
         localStorage.removeItem(`${participant}MostCommonMove`);
       }),
-      getMoveCounts: jest.fn(),
+      getMoveCounts: jest.fn((participant: Participant) => {
+        const raw = localStorage.getItem(`${participant}MoveCounts`);
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed || { rock: 0, paper: 0, scissors: 0 };
+      }),
       setMoveCounts: jest.fn(
         (participant: Participant, moveCounts: MoveCount) => {
           // JSON.stringify the moveCounts object and store it
@@ -73,7 +92,10 @@ describe("Model", () => {
       removeMoveCounts: jest.fn((participant: Participant) => {
         localStorage.removeItem(`${participant}MoveCounts`);
       }),
-      getRoundNumber: jest.fn(),
+      getRoundNumber: jest.fn(() => {
+        const stored = localStorage.getItem(`roundNumber`);
+        return parseInt(stored || "1", 10);
+      }),
       setRoundNumber: jest.fn((roundNumber: number) => {
         localStorage.setItem("roundNumber", roundNumber.toString());
       }),

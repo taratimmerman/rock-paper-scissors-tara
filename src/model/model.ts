@@ -43,21 +43,29 @@ export class Model {
 
   constructor(gameStorage: IGameStorage = new LocalStorageGameStorage()) {
     this.gameStorage = gameStorage;
-    this.state.scores.player = this.getPlayerScoreFromStorage();
-    this.state.scores.computer = this.getComputerScoreFromStorage();
-    this.state.taras.player = this.getPlayerTaraCountFromStorage();
-    this.state.taras.computer = this.getComputerTaraCountFromStorage();
-    this.state.mostCommonMove.player =
-      this.getPlayerMostCommonMoveFromStorage();
-    this.state.mostCommonMove.computer =
-      this.getComputerMostCommonMoveFromStorage();
-    this.state.moveCounts.player = this.getMoveCountsFromStorage(
-      PARTICIPANTS.PLAYER
-    );
-    this.state.moveCounts.computer = this.getMoveCountsFromStorage(
+    this.state.scores.player = this.gameStorage.getScore(PARTICIPANTS.PLAYER);
+    this.state.scores.computer = this.gameStorage.getScore(
       PARTICIPANTS.COMPUTER
     );
-    this.state.roundNumber = this.getRoundNumberFromStorage();
+    this.state.taras.player = this.gameStorage.getTaraCount(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.taras.computer = this.gameStorage.getTaraCount(
+      PARTICIPANTS.COMPUTER
+    );
+    this.state.mostCommonMove.player = this.gameStorage.getMostCommonMove(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.mostCommonMove.computer = this.gameStorage.getMostCommonMove(
+      PARTICIPANTS.COMPUTER
+    );
+    this.state.moveCounts.player = this.gameStorage.getMoveCounts(
+      PARTICIPANTS.PLAYER
+    );
+    this.state.moveCounts.computer = this.gameStorage.getMoveCounts(
+      PARTICIPANTS.COMPUTER
+    );
+    this.state.roundNumber = this.gameStorage.getRoundNumber();
   }
 
   // ===== General Methods =====
@@ -102,18 +110,6 @@ export class Model {
   private setScore(key: Participant, value: number): void {
     this.state.scores[key] = value;
     this.gameStorage.setScore(key, value);
-  }
-
-  private getScoreFromStorage(key: Participant): number {
-    return parseInt(localStorage.getItem(`${key}Score`) || "0", 10);
-  }
-
-  private getPlayerScoreFromStorage(): number {
-    return this.getScoreFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerScoreFromStorage(): number {
-    return this.getScoreFromStorage(PARTICIPANTS.COMPUTER);
   }
 
   private getScore(key: Participant): number {
@@ -187,19 +183,6 @@ export class Model {
     const mostCommonMove = this.determineMostCommonMove(moveCounts);
     this.state.mostCommonMove[key] = mostCommonMove;
     this.gameStorage.setMostCommonMove(key, mostCommonMove);
-  }
-
-  private getMostCommonMoveFromStorage(key: Participant): StandardMove | null {
-    const move = localStorage.getItem(`${key}MostCommonMove`);
-    return move && this.isStandardMove(move) ? move : null;
-  }
-
-  private getPlayerMostCommonMoveFromStorage(): StandardMove | null {
-    return this.getMostCommonMoveFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerMostCommonMoveFromStorage(): StandardMove | null {
-    return this.getMostCommonMoveFromStorage(PARTICIPANTS.COMPUTER);
   }
 
   private getMostCommonMove(key: Participant): StandardMove | null {
@@ -360,15 +343,6 @@ export class Model {
     this.gameStorage.setMoveCounts(key, this.state.moveCounts[key]);
   }
 
-  private getMoveCountsFromStorage(key: Participant): MoveCount {
-    try {
-      const raw = localStorage.getItem(`${key}MoveCounts`);
-      return raw ? JSON.parse(raw) : { rock: 0, paper: 0, scissors: 0 };
-    } catch {
-      return { rock: 0, paper: 0, scissors: 0 };
-    }
-  }
-
   private resetMoveCounts(key: Participant): void {
     this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
     this.gameStorage.removeMoveCounts(key);
@@ -402,10 +376,6 @@ export class Model {
 
   // ===== Round Methods =====
 
-  private getRoundNumberFromStorage(): number {
-    return parseInt(localStorage.getItem(`roundNumber`) || "1", 10);
-  }
-
   getRoundNumber(): number {
     return this.state.roundNumber;
   }
@@ -425,18 +395,6 @@ export class Model {
   }
 
   // ===== Tara Methods =====
-
-  private getTaraCountFromStorage(key: Participant): number {
-    return parseInt(localStorage.getItem(`${key}TaraCount`) || "0", 10);
-  }
-
-  private getPlayerTaraCountFromStorage(): number {
-    return this.getTaraCountFromStorage(PARTICIPANTS.PLAYER);
-  }
-
-  private getComputerTaraCountFromStorage(): number {
-    return this.getTaraCountFromStorage(PARTICIPANTS.COMPUTER);
-  }
 
   private decrementTaraCount(key: Participant): void {
     const current = this.getTaraCount(key);
