@@ -98,9 +98,10 @@ export class Model {
   }
 
   // ===== Score Methods =====
+
   private setScore(key: Participant, value: number): void {
     this.state.scores[key] = value;
-    localStorage.setItem(`${key}Score`, value.toString());
+    this.gameStorage.setScore(key, value);
   }
 
   private getScoreFromStorage(key: Participant): number {
@@ -184,13 +185,8 @@ export class Model {
 
   private setMostCommonMove(key: Participant, moveCounts: MoveCount): void {
     const mostCommonMove = this.determineMostCommonMove(moveCounts);
-
-    if (mostCommonMove) {
-      this.state.mostCommonMove[key] = mostCommonMove;
-      localStorage.setItem(`${key}MostCommonMove`, mostCommonMove.toString());
-    } else {
-      this.resetMostCommonMove(key);
-    }
+    this.state.mostCommonMove[key] = mostCommonMove;
+    this.gameStorage.setMostCommonMove(key, mostCommonMove);
   }
 
   private getMostCommonMoveFromStorage(key: Participant): StandardMove | null {
@@ -361,15 +357,7 @@ export class Model {
   private setMoveCounts(key: Participant, move: StandardMove): void {
     this.state.moveCounts[key][move] =
       (this.state.moveCounts[key][move] || 0) + 1;
-
-    try {
-      localStorage.setItem(
-        `${key}MoveCounts`,
-        JSON.stringify(this.state.moveCounts[key])
-      );
-    } catch (e) {
-      console.warn(`Failed to save ${key} data to localStorage`, e);
-    }
+    this.gameStorage.setMoveCounts(key, this.state.moveCounts[key]);
   }
 
   private getMoveCountsFromStorage(key: Participant): MoveCount {
@@ -383,7 +371,7 @@ export class Model {
 
   private resetMoveCounts(key: Participant): void {
     this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
-    localStorage.removeItem(`${key}MoveCounts`);
+    this.gameStorage.removeMoveCounts(key);
   }
 
   private getMoveCounts(key: Participant): MoveCount {
@@ -428,7 +416,7 @@ export class Model {
 
   setRoundNumber(value: number): void {
     this.state.roundNumber = value;
-    localStorage.setItem(`roundNumber`, value.toString());
+    this.gameStorage.setRoundNumber(value);
   }
 
   increaseRoundNumber(): void {
@@ -472,7 +460,7 @@ export class Model {
 
   private setTaraCount(key: Participant, value: number): void {
     this.state.taras[key] = value;
-    localStorage.setItem(`${key}TaraCount`, value.toString());
+    this.gameStorage.setTaraCount(key, value);
   }
 
   private getTaraCount(key: Participant): number {
