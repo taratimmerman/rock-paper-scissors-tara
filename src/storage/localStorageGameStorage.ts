@@ -120,7 +120,25 @@ export class LocalStorageGameStorage implements IGameStorage {
   }
 
   getOldGlobalRoundNumber(): number | null {
-    return null; // stub: return null to simulate absence of legacy data
+    const roundString = localStorage.getItem(KEY_ROUND_NUMBER);
+
+    // If the item doesn't exist in localStorage, getItem returns null.
+    if (roundString === null) {
+      return null;
+    }
+
+    // Attempt to parse the string to an integer.
+    const parsedRound = parseInt(roundString, 10);
+
+    // Check if parsing resulted in NaN (Not a Number), meaning the stored value was invalid.
+    if (isNaN(parsedRound)) {
+      console.warn(
+        `Legacy 'roundNumber' in localStorage (${roundString}) is not a valid number. Skipping migration.`
+      );
+      return null; // Treat invalid data as if it doesn't exist for migration purposes
+    }
+
+    return parsedRound;
   }
 
   // ===== Setters =====
@@ -202,6 +220,6 @@ export class LocalStorageGameStorage implements IGameStorage {
   }
 
   removeOldGlobalRoundNumber(): void {
-    // stub: do nothing for now
+    localStorage.removeItem(KEY_ROUND_NUMBER);
   }
 }
