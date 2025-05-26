@@ -5,6 +5,7 @@ import {
   STANDARD_MOVE_DATA_MAP,
 } from "../utils/dataUtils";
 import {
+  Match,
   Move,
   MoveCount,
   Participant,
@@ -809,6 +810,111 @@ describe("Model", () => {
       expect(results.rock).toBeGreaterThan(0);
       expect(results.paper).toBeGreaterThan(0);
       expect(results.scissors).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Initial load Match state", () => {
+    // Test Scenario 1: Brand New Game - No stored match data, no global match number
+    test("should initialize with default state if no match or global match number is stored", () => {
+      // Directly check the state properties, since isMatchActive() doesn't exist yet
+      expect(model["state"].currentMatch).toBeNull();
+      expect(model["state"].globalMatchNumber).toBe(1);
+
+      // Verify that the storage methods were called correctly on initialization
+      expect(mockGameStorage.getMatch).toHaveBeenCalledTimes(1);
+      expect(mockGameStorage.getGlobalMatchNumber).toHaveBeenCalledTimes(1);
+      // Ensure save methods were NOT called at this stage for initial load
+      expect(mockGameStorage.setMatch).not.toHaveBeenCalled();
+      expect(mockGameStorage.setGlobalMatchNumber).not.toHaveBeenCalled();
+    });
+
+    // Test Scenario 2: Existing Match and Global Match Number
+    test("should load existing match and global match number from storage", () => {
+      const existingMatch: Match = {
+        matchRoundNumber: 3,
+        playerHealth: 50,
+        computerHealth: 100,
+        initialHealth: 100,
+        damagePerLoss: 50,
+      };
+      const existingGlobalMatchNumber = 5;
+
+      mockGameStorage.getMatch.mockReturnValue(existingMatch);
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(
+        existingGlobalMatchNumber
+      );
+
+      // Re-initialize the model to apply the specific mock returns for this test
+      model = new Model(mockGameStorage);
+
+      // Directly check the state properties
+      expect(model["state"].currentMatch).toEqual(existingMatch);
+      expect(model["state"].globalMatchNumber).toBe(existingGlobalMatchNumber);
+
+      expect(mockGameStorage.getMatch).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.getGlobalMatchNumber).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.setMatch).not.toHaveBeenCalled();
+      expect(mockGameStorage.setGlobalMatchNumber).not.toHaveBeenCalled();
+    });
+
+    // Test Scenario 3: Invalid Match Data (getMatch returns null due to parse error)
+    test("should initialize without an active match if stored match data is invalid", () => {
+      // Simulate getMatch failing to parse and returning null
+      mockGameStorage.getMatch.mockReturnValue(null);
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(10); // Some non-default global match number
+
+      // Re-initialize the model
+      model = new Model(mockGameStorage);
+
+      expect(model["state"].currentMatch).toBeNull();
+      expect(model["state"].globalMatchNumber).toBe(10); // Should still load the valid global match number
+
+      expect(mockGameStorage.getMatch).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.getGlobalMatchNumber).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.setMatch).not.toHaveBeenCalled();
+      expect(mockGameStorage.setGlobalMatchNumber).not.toHaveBeenCalled();
+    });
+
+    // Test Scenario 4: Invalid Global Match Number Data (getGlobalMatchNumber returns default 1)
+    test("should load default global match number if stored global match number is invalid/missing", () => {
+      const existingMatch: Match = {
+        matchRoundNumber: 1,
+        playerHealth: 100,
+        computerHealth: 100,
+        initialHealth: 100,
+        damagePerLoss: 50,
+      };
+
+      mockGameStorage.getMatch.mockReturnValue(existingMatch);
+      // Simulate getGlobalMatchNumber returning its default (1) due to invalid/missing data
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(1); // This mimics the actual storage behavior for invalid data
+
+      // Re-initialize the model
+      model = new Model(mockGameStorage);
+
+      expect(model["state"].currentMatch).toEqual(existingMatch);
+      expect(model["state"].globalMatchNumber).toBe(1); // Should be the default 1
+
+      expect(mockGameStorage.getMatch).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.getGlobalMatchNumber).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.setMatch).not.toHaveBeenCalled();
+      expect(mockGameStorage.setGlobalMatchNumber).not.toHaveBeenCalled();
+    });
+
+    // Test Scenario 5: Both Invalid/Missing
+    test("should initialize with defaults if both match and global match number data are invalid/missing", () => {
+      mockGameStorage.getMatch.mockReturnValue(null);
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(1); // Simulating default behavior
+
+      model = new Model(mockGameStorage);
+
+      expect(model["state"].currentMatch).toBeNull();
+      expect(model["state"].globalMatchNumber).toBe(1);
+
+      expect(mockGameStorage.getMatch).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.getGlobalMatchNumber).toHaveBeenCalledTimes(2);
+      expect(mockGameStorage.setMatch).not.toHaveBeenCalled();
+      expect(mockGameStorage.setGlobalMatchNumber).not.toHaveBeenCalled();
     });
   });
 });
