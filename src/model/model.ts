@@ -68,6 +68,8 @@ export class Model {
       PARTICIPANTS.COMPUTER
     );
     this.state.roundNumber = this.gameStorage.getRoundNumber();
+    this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
+    this.state.currentMatch = this.gameStorage.getMatch();
   }
 
   // ===== General Methods =====

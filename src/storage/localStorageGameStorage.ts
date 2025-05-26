@@ -103,7 +103,7 @@ export class LocalStorageGameStorage implements IGameStorage {
 
   getGlobalMatchNumber(): number {
     return parseInt(
-      localStorage.getItem(KEY_ROUND_NUMBER) ||
+      localStorage.getItem(KEY_GLOBAL_MATCH_NUMBER) ||
         DEFAULT_MATCH_NUMBER_GET.toString(),
       10
     );
@@ -112,10 +112,10 @@ export class LocalStorageGameStorage implements IGameStorage {
   getMatch(): Match | null {
     try {
       const raw = localStorage.getItem(KEY_CURRENT_MATCH);
-      return raw ? JSON.parse(raw) : DEFAULT_MATCH;
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
       console.warn(`LocalStorage Error: Failed to parse currentMatch.`, e);
-      return DEFAULT_MATCH;
+      return null;
     }
   }
 
