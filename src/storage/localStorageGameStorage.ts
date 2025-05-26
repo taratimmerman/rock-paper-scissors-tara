@@ -5,7 +5,12 @@ import {
   Participant,
   StandardMove,
 } from "../utils/dataObjectUtils";
-import { MOVES, STANDARD_MOVE_NAMES } from "../utils/dataUtils";
+import {
+  DAMAGE_PER_LOSS,
+  INITIAL_HEALTH,
+  MOVES,
+  STANDARD_MOVE_NAMES,
+} from "../utils/dataUtils";
 
 const KEY_SUFFIX_SCORE = "Score";
 const KEY_SUFFIX_TARA_COUNT = "TaraCount";
@@ -14,14 +19,25 @@ const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
 const KEY_SUFFIX_HISTORY = "History";
 
 const KEY_ROUND_NUMBER = "roundNumber";
+const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
+const KEY_CURRENT_MATCH = "currentMatch";
 
 const DEFAULT_NUMERIC_VALUE = 0;
 const DEFAULT_ROUND_NUMBER_GET = 1;
+const DEFAULT_MATCH_NUMBER_GET = 1;
 
 const DEFAULT_MOVE_COUNTS: MoveCount = {
   [MOVES.ROCK]: 0,
   [MOVES.PAPER]: 0,
   [MOVES.SCISSORS]: 0,
+};
+
+const DEFAULT_MATCH: Match = {
+  matchRoundNumber: DEFAULT_ROUND_NUMBER_GET,
+  playerHealth: INITIAL_HEALTH,
+  computerHealth: INITIAL_HEALTH,
+  initialHealth: INITIAL_HEALTH,
+  damagePerLoss: DAMAGE_PER_LOSS,
 };
 
 /**
@@ -86,11 +102,21 @@ export class LocalStorageGameStorage implements IGameStorage {
   }
 
   getGlobalMatchNumber(): number {
-    return 1; // temporary default
+    return parseInt(
+      localStorage.getItem(KEY_ROUND_NUMBER) ||
+        DEFAULT_MATCH_NUMBER_GET.toString(),
+      10
+    );
   }
 
   getMatch(): Match | null {
-    return null; // temporary stub
+    try {
+      const raw = localStorage.getItem(KEY_CURRENT_MATCH);
+      return raw ? JSON.parse(raw) : DEFAULT_MATCH;
+    } catch (e) {
+      console.warn(`LocalStorage Error: Failed to parse currentMatch.`, e);
+      return DEFAULT_MATCH;
+    }
   }
 
   getOldGlobalRoundNumber(): number | null {
@@ -128,12 +154,16 @@ export class LocalStorageGameStorage implements IGameStorage {
     this.safelySetItem(key, round.toString());
   }
 
-  setGlobalMatchNumber(match: number): void {
-    // stub: do nothing for now
+  setGlobalMatchNumber(matchNumber: number): void {
+    this.safelySetItem(KEY_GLOBAL_MATCH_NUMBER, matchNumber.toString());
   }
 
   setMatch(match: Match | null): void {
-    // stub: do nothing for now
+    if (match) {
+      this.safelySetItem(KEY_CURRENT_MATCH, JSON.stringify(match));
+    } else {
+      localStorage.removeItem(KEY_CURRENT_MATCH);
+    }
   }
 
   // ===== Removers =====
@@ -168,7 +198,7 @@ export class LocalStorageGameStorage implements IGameStorage {
   }
 
   removeGlobalMatchNumber(): void {
-    // stub: do nothing for now
+    localStorage.removeItem(KEY_GLOBAL_MATCH_NUMBER);
   }
 
   removeOldGlobalRoundNumber(): void {
