@@ -5,6 +5,9 @@ export const PARTICIPANTS = {
   COMPUTER: "computer",
 } as const;
 
+export const INITIAL_HEALTH = 100;
+export const DAMAGE_PER_LOSS = 50;
+
 export const MOVES = {
   ROCK: "rock",
   PAPER: "paper",

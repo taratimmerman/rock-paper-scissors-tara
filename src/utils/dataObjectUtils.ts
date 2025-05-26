@@ -20,3 +20,11 @@ export interface GameState {
   moveCounts: Record<Participant, MoveCount>;
   roundNumber: number;
 }
+
+export interface Match {
+  matchRoundNumber: number;
+  playerHealth: number;
+  computerHealth: number;
+  initialHealth: number;
+  damagePerLoss: number;
+}
