@@ -1,5 +1,10 @@
 import { IGameStorage } from "./gameStorage";
-import { Participant, MoveCount, StandardMove } from "../utils/dataObjectUtils";
+import {
+  Match,
+  MoveCount,
+  Participant,
+  StandardMove,
+} from "../utils/dataObjectUtils";
 import { MOVES, STANDARD_MOVE_NAMES } from "../utils/dataUtils";
 
 const KEY_SUFFIX_SCORE = "Score";
@@ -80,6 +85,18 @@ export class LocalStorageGameStorage implements IGameStorage {
     );
   }
 
+  getGlobalMatchNumber(): number {
+    return 1; // temporary default
+  }
+
+  getMatch(): Match | null {
+    return null; // temporary stub
+  }
+
+  getOldGlobalRoundNumber(): number | null {
+    return null; // stub: return null to simulate absence of legacy data
+  }
+
   // ===== Setters =====
 
   setScore(participant: Participant, score: number): void {
@@ -111,6 +128,14 @@ export class LocalStorageGameStorage implements IGameStorage {
     this.safelySetItem(key, round.toString());
   }
 
+  setGlobalMatchNumber(match: number): void {
+    // stub: do nothing for now
+  }
+
+  setMatch(match: Match | null): void {
+    // stub: do nothing for now
+  }
+
   // ===== Removers =====
 
   removeScore(participant: Participant): void {
@@ -140,5 +165,13 @@ export class LocalStorageGameStorage implements IGameStorage {
   removeHistory(participant: Participant): void {
     const key = this.formatKey(participant, KEY_SUFFIX_HISTORY);
     localStorage.removeItem(key);
+  }
+
+  removeGlobalMatchNumber(): void {
+    // stub: do nothing for now
+  }
+
+  removeOldGlobalRoundNumber(): void {
+    // stub: do nothing for now
   }
 }

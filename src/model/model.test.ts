@@ -103,6 +103,13 @@ describe("Model", () => {
       removeHistory: jest.fn((participant: Participant) => {
         localStorage.removeItem(`${participant}History`);
       }),
+      getMatch: jest.fn(() => null),
+      setMatch: jest.fn(),
+      getGlobalMatchNumber: jest.fn(() => 1),
+      setGlobalMatchNumber: jest.fn(),
+      removeGlobalMatchNumber: jest.fn(),
+      getOldGlobalRoundNumber: jest.fn(() => null),
+      removeOldGlobalRoundNumber: jest.fn(),
     } as jest.Mocked<IGameStorage>;
     model = new Model(mockGameStorage);
   });
