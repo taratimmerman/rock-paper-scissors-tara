@@ -38,6 +38,8 @@ export class Model {
       computer: { rock: 0, paper: 0, scissors: 0 },
     },
     roundNumber: 1,
+    globalMatchNumber: 1,
+    currentMatch: null,
   };
   private gameStorage: IGameStorage;
 
