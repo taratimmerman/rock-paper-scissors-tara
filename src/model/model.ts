@@ -109,6 +109,10 @@ export class Model {
     }
   }
 
+  isMatchActive(): boolean {
+    return this.state.currentMatch !== null;
+  }
+
   // ===== Score Methods =====
 
   private setScore(key: Participant, value: number): void {

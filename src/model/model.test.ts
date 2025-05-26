@@ -917,4 +917,27 @@ describe("Model", () => {
       expect(mockGameStorage.setGlobalMatchNumber).not.toHaveBeenCalled();
     });
   });
+
+  describe("isMatchActive", () => {
+    test("returns false if currentMatch is null", () => {
+      const model = new Model(mockGameStorage);
+      expect(model.isMatchActive()).toBe(false);
+    });
+
+    test("returns true if currentMatch is a valid Match object", () => {
+      const validMatch: Match = {
+        matchRoundNumber: 1,
+        playerHealth: 100,
+        computerHealth: 50,
+        initialHealth: 100,
+        damagePerLoss: 50,
+      };
+
+      // Override getMatch to return a real match
+      mockGameStorage.getMatch.mockReturnValue(validMatch);
+
+      const model = new Model(mockGameStorage);
+      expect(model.isMatchActive()).toBe(true);
+    });
+  });
 });
