@@ -5,12 +5,7 @@ import {
   Participant,
   StandardMove,
 } from "../utils/dataObjectUtils";
-import {
-  DAMAGE_PER_LOSS,
-  INITIAL_HEALTH,
-  MOVES,
-  STANDARD_MOVE_NAMES,
-} from "../utils/dataUtils";
+import { MOVES, STANDARD_MOVE_NAMES } from "../utils/dataUtils";
 
 const KEY_SUFFIX_SCORE = "Score";
 const KEY_SUFFIX_TARA_COUNT = "TaraCount";
@@ -30,14 +25,6 @@ const DEFAULT_MOVE_COUNTS: MoveCount = {
   [MOVES.ROCK]: 0,
   [MOVES.PAPER]: 0,
   [MOVES.SCISSORS]: 0,
-};
-
-const DEFAULT_MATCH: Match = {
-  matchRoundNumber: DEFAULT_ROUND_NUMBER_GET,
-  playerHealth: INITIAL_HEALTH,
-  computerHealth: INITIAL_HEALTH,
-  initialHealth: INITIAL_HEALTH,
-  damagePerLoss: DAMAGE_PER_LOSS,
 };
 
 /**

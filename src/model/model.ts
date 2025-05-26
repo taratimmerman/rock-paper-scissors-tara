@@ -7,6 +7,8 @@ import {
 } from "../utils/dataObjectUtils";
 import {
   ALL_MOVE_NAMES,
+  DAMAGE_PER_LOSS,
+  INITIAL_HEALTH,
   MOVES,
   MOVE_DATA_MAP,
   PARTICIPANTS,
@@ -45,6 +47,7 @@ export class Model {
 
   constructor(gameStorage: IGameStorage = new LocalStorageGameStorage()) {
     this.gameStorage = gameStorage;
+
     this.state.scores.player = this.gameStorage.getScore(PARTICIPANTS.PLAYER);
     this.state.scores.computer = this.gameStorage.getScore(
       PARTICIPANTS.COMPUTER
@@ -67,9 +70,8 @@ export class Model {
     this.state.moveCounts.computer = this.gameStorage.getMoveCounts(
       PARTICIPANTS.COMPUTER
     );
-    this.state.roundNumber = this.gameStorage.getRoundNumber();
-    this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
-    this.state.currentMatch = this.gameStorage.getMatch();
+
+    this._loadOrMigrateMatchState();
   }
 
   // ===== General Methods =====
@@ -458,4 +460,71 @@ export class Model {
   taraIsEnabled(): boolean {
     return this.getTaraCount(PARTICIPANTS.PLAYER) > 0;
   }
+
+  // ===== Match Methods =====
+
+  /**
+   * Initializes the game state based on available storage.
+   *
+   * This method is called during Model construction. It checks for:
+   * - A valid saved match (loads it and skips migration),
+   * - An old-format global round number (migrates it into a new match),
+   * - Or no valid data (starts a new match with default values).
+   *
+   * It also ensures the global match number is set appropriately.
+   */
+  private _loadOrMigrateMatchState(): void {
+    this.state.currentMatch = this.gameStorage.getMatch();
+
+    if (this.isMatchActive()) {
+      this._loadExistingMatchState();
+    } else {
+      const oldGlobalRoundNumber = this.gameStorage.getOldGlobalRoundNumber();
+
+      if (oldGlobalRoundNumber !== null && oldGlobalRoundNumber > 0) {
+        this._migrateOldData(oldGlobalRoundNumber);
+      } else {
+        this._startNewGameDefaults();
+      }
+    }
+  }
+
+  /**
+   * Loads state for an existing match stored in the new format.
+   */
+  private _loadExistingMatchState(): void {
+    this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
+  }
+
+  /**
+   * Migrates match state from an older game version to the current format.
+   *
+   * @param oldRoundNumber - The round number from the old game format.
+   */
+  private _migrateOldData(oldRoundNumber: number): void {
+    this.state.currentMatch = {
+      matchRoundNumber: oldRoundNumber,
+      playerHealth: INITIAL_HEALTH,
+      computerHealth: INITIAL_HEALTH,
+      initialHealth: INITIAL_HEALTH,
+      damagePerLoss: DAMAGE_PER_LOSS,
+    };
+
+    this.gameStorage.setMatch(this.state.currentMatch);
+    this.gameStorage.removeOldGlobalRoundNumber();
+
+    this.state.globalMatchNumber = 1;
+    this.gameStorage.setGlobalMatchNumber(this.state.globalMatchNumber);
+  }
+
+  /**
+   * Initializes state for a completely new game with no saved data.
+   */
+  private _startNewGameDefaults(): void {
+    this.state.currentMatch = null;
+    this.state.globalMatchNumber = 1;
+    this.gameStorage.setGlobalMatchNumber(this.state.globalMatchNumber);
+  }
+
+  // ===== END OF CLASS =====
 }
