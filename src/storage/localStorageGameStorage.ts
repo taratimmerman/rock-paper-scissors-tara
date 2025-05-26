@@ -1,6 +1,16 @@
 import { IGameStorage } from "./gameStorage";
-import { Participant, MoveCount, StandardMove } from "../utils/dataObjectUtils";
-import { MOVES, STANDARD_MOVE_NAMES } from "../utils/dataUtils";
+import {
+  Match,
+  MoveCount,
+  Participant,
+  StandardMove,
+} from "../utils/dataObjectUtils";
+import {
+  DAMAGE_PER_LOSS,
+  INITIAL_HEALTH,
+  MOVES,
+  STANDARD_MOVE_NAMES,
+} from "../utils/dataUtils";
 
 const KEY_SUFFIX_SCORE = "Score";
 const KEY_SUFFIX_TARA_COUNT = "TaraCount";
@@ -9,14 +19,25 @@ const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
 const KEY_SUFFIX_HISTORY = "History";
 
 const KEY_ROUND_NUMBER = "roundNumber";
+const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
+const KEY_CURRENT_MATCH = "currentMatch";
 
 const DEFAULT_NUMERIC_VALUE = 0;
 const DEFAULT_ROUND_NUMBER_GET = 1;
+const DEFAULT_MATCH_NUMBER_GET = 1;
 
 const DEFAULT_MOVE_COUNTS: MoveCount = {
   [MOVES.ROCK]: 0,
   [MOVES.PAPER]: 0,
   [MOVES.SCISSORS]: 0,
+};
+
+const DEFAULT_MATCH: Match = {
+  matchRoundNumber: DEFAULT_ROUND_NUMBER_GET,
+  playerHealth: INITIAL_HEALTH,
+  computerHealth: INITIAL_HEALTH,
+  initialHealth: INITIAL_HEALTH,
+  damagePerLoss: DAMAGE_PER_LOSS,
 };
 
 /**
@@ -80,6 +101,46 @@ export class LocalStorageGameStorage implements IGameStorage {
     );
   }
 
+  getGlobalMatchNumber(): number {
+    return parseInt(
+      localStorage.getItem(KEY_GLOBAL_MATCH_NUMBER) ||
+        DEFAULT_MATCH_NUMBER_GET.toString(),
+      10
+    );
+  }
+
+  getMatch(): Match | null {
+    try {
+      const raw = localStorage.getItem(KEY_CURRENT_MATCH);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.warn(`LocalStorage Error: Failed to parse currentMatch.`, e);
+      return null;
+    }
+  }
+
+  getOldGlobalRoundNumber(): number | null {
+    const roundString = localStorage.getItem(KEY_ROUND_NUMBER);
+
+    // If the item doesn't exist in localStorage, getItem returns null.
+    if (roundString === null) {
+      return null;
+    }
+
+    // Attempt to parse the string to an integer.
+    const parsedRound = parseInt(roundString, 10);
+
+    // Check if parsing resulted in NaN (Not a Number), meaning the stored value was invalid.
+    if (isNaN(parsedRound)) {
+      console.warn(
+        `Legacy 'roundNumber' in localStorage (${roundString}) is not a valid number. Skipping migration.`
+      );
+      return null; // Treat invalid data as if it doesn't exist for migration purposes
+    }
+
+    return parsedRound;
+  }
+
   // ===== Setters =====
 
   setScore(participant: Participant, score: number): void {
@@ -111,6 +172,18 @@ export class LocalStorageGameStorage implements IGameStorage {
     this.safelySetItem(key, round.toString());
   }
 
+  setGlobalMatchNumber(matchNumber: number): void {
+    this.safelySetItem(KEY_GLOBAL_MATCH_NUMBER, matchNumber.toString());
+  }
+
+  setMatch(match: Match | null): void {
+    if (match) {
+      this.safelySetItem(KEY_CURRENT_MATCH, JSON.stringify(match));
+    } else {
+      localStorage.removeItem(KEY_CURRENT_MATCH);
+    }
+  }
+
   // ===== Removers =====
 
   removeScore(participant: Participant): void {
@@ -140,5 +213,13 @@ export class LocalStorageGameStorage implements IGameStorage {
   removeHistory(participant: Participant): void {
     const key = this.formatKey(participant, KEY_SUFFIX_HISTORY);
     localStorage.removeItem(key);
+  }
+
+  removeGlobalMatchNumber(): void {
+    localStorage.removeItem(KEY_GLOBAL_MATCH_NUMBER);
+  }
+
+  removeOldGlobalRoundNumber(): void {
+    localStorage.removeItem(KEY_ROUND_NUMBER);
   }
 }

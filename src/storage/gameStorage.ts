@@ -1,4 +1,9 @@
-import { Participant, MoveCount, StandardMove } from "../utils/dataObjectUtils";
+import {
+  Match,
+  MoveCount,
+  Participant,
+  StandardMove,
+} from "../utils/dataObjectUtils";
 
 /**
  * Interface for game state storage.
@@ -12,6 +17,9 @@ export interface IGameStorage {
   getMostCommonMove(participant: Participant): StandardMove | null;
   getMoveCounts(participant: Participant): MoveCount;
   getRoundNumber(): number;
+  getGlobalMatchNumber(): number;
+  getMatch(): Match | null;
+  getOldGlobalRoundNumber(): number | null;
 
   // ===== Setters =====
 
@@ -20,6 +28,8 @@ export interface IGameStorage {
   setMostCommonMove(participant: Participant, move: StandardMove | null): void;
   setMoveCounts(participant: Participant, moveCounts: MoveCount): void;
   setRoundNumber(round: number): void;
+  setGlobalMatchNumber(match: number): void;
+  setMatch(match: Match | null): void;
 
   // ===== Removers =====
 
@@ -29,4 +39,6 @@ export interface IGameStorage {
   removeMoveCounts(participant: Participant): void;
   removeRoundNumber(): void;
   removeHistory(participant: Participant): void;
+  removeGlobalMatchNumber(): void;
+  removeOldGlobalRoundNumber(): void;
 }

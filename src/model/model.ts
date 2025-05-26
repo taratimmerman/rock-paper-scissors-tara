@@ -38,6 +38,8 @@ export class Model {
       computer: { rock: 0, paper: 0, scissors: 0 },
     },
     roundNumber: 1,
+    globalMatchNumber: 1,
+    currentMatch: null,
   };
   private gameStorage: IGameStorage;
 
@@ -66,6 +68,8 @@ export class Model {
       PARTICIPANTS.COMPUTER
     );
     this.state.roundNumber = this.gameStorage.getRoundNumber();
+    this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
+    this.state.currentMatch = this.gameStorage.getMatch();
   }
 
   // ===== General Methods =====
