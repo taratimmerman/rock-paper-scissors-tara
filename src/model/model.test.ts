@@ -1,6 +1,8 @@
 import { Model } from "./model";
 import {
   DAMAGE_PER_LOSS,
+  DEFAULT_MATCH,
+  DEFAULT_MATCH_NUMBER,
   INITIAL_HEALTH,
   MOVES,
   PARTICIPANTS,
@@ -845,6 +847,20 @@ describe("Model", () => {
 
       const model = new Model(mockGameStorage);
       expect(model.isMatchActive()).toBe(true);
+    });
+  });
+
+  describe("Match number and match persistence", () => {
+    test("initializes globalMatchNumber to DEFAULT_MATCH_NUMBER when storage returns null", () => {
+      expect(model.getMatchNumber()).toBe(DEFAULT_MATCH_NUMBER);
+    });
+
+    test("falls back to DEFAULT_MATCH when no currentMatch is found", () => {
+      expect(model["state"].currentMatch).toBeNull();
+
+      model.setDefaultMatchData();
+
+      expect(model["state"].currentMatch).toEqual(DEFAULT_MATCH);
     });
   });
 });
