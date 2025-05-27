@@ -95,14 +95,6 @@ describe("Model", () => {
       removeMoveCounts: jest.fn((participant: Participant) => {
         localStorage.removeItem(`${participant}MoveCounts`);
       }),
-      getRoundNumber: jest.fn(() => {
-        const stored = localStorage.getItem(`roundNumber`);
-        return parseInt(stored || "1", 10);
-      }),
-      setRoundNumber: jest.fn((roundNumber: number) => {
-        localStorage.setItem("roundNumber", roundNumber.toString());
-      }),
-      removeRoundNumber: jest.fn(),
       removeHistory: jest.fn((participant: Participant) => {
         localStorage.removeItem(`${participant}History`);
       }),
@@ -208,16 +200,40 @@ describe("Model", () => {
       expect(model.getRoundNumber()).toBe(1);
     });
 
-    test("setRoundNumber updates the state and localStorage", () => {
+    test("setRoundNumber updates the matchRoundNumber in state and storage", () => {
+      mockGameStorage.getMatch.mockReturnValue({
+        matchRoundNumber: 1,
+        playerHealth: INITIAL_HEALTH,
+        computerHealth: INITIAL_HEALTH,
+        initialHealth: INITIAL_HEALTH,
+        damagePerLoss: DAMAGE_PER_LOSS,
+      });
+
+      const model = new Model(mockGameStorage);
       model.setRoundNumber(3);
+
       expect(model.getRoundNumber()).toBe(3);
-      expect(localStorage.getItem("roundNumber")).toBe("3");
+      expect(mockGameStorage.setMatch).toHaveBeenCalledWith(
+        expect.objectContaining({ matchRoundNumber: 3 })
+      );
     });
 
-    test("increaseRoundNumber increments the round number by 1", () => {
-      model.setRoundNumber(2);
+    test("increaseRoundNumber increments the matchRoundNumber by 1", () => {
+      mockGameStorage.getMatch.mockReturnValue({
+        matchRoundNumber: 2,
+        playerHealth: INITIAL_HEALTH,
+        computerHealth: INITIAL_HEALTH,
+        initialHealth: INITIAL_HEALTH,
+        damagePerLoss: DAMAGE_PER_LOSS,
+      });
+
+      const model = new Model(mockGameStorage);
       model.increaseRoundNumber();
+
       expect(model.getRoundNumber()).toBe(3);
+      expect(mockGameStorage.setMatch).toHaveBeenCalledWith(
+        expect.objectContaining({ matchRoundNumber: 3 })
+      );
     });
   });
 
@@ -385,12 +401,6 @@ describe("Model", () => {
       model.resetScores();
       expect(model.getPlayerScore()).toBe(0);
       expect(model.getComputerScore()).toBe(0);
-    });
-
-    test("resetRoundNumber should set round number to 1", () => {
-      model.setRoundNumber(5);
-      model.resetRoundNumber();
-      expect(model.getRoundNumber()).toBe(1);
     });
 
     test("resetTaras should set both player and computer Tara counts to 0", () => {
@@ -870,8 +880,6 @@ describe("Model Constructor - Initialization and Migration", () => {
       removeMoveCounts: jest.fn((participant: Participant) => {}),
 
       getRoundNumber: jest.fn(() => 1),
-      setRoundNumber: jest.fn(),
-      removeRoundNumber: jest.fn(),
       removeHistory: jest.fn((participant: Participant) => {}),
 
       getMatch: jest.fn(() => null),

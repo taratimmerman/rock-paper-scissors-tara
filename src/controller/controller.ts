@@ -75,7 +75,6 @@ export class Controller {
     this.model.resetScores();
     this.model.resetMoves();
     this.model.resetTaras();
-    this.model.resetRoundNumber();
     this.model.resetHistories();
     this.model.resetBothMoveCounts();
     this.model.resetMostCommonMoves();

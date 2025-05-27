@@ -39,7 +39,6 @@ export class Model {
       player: { rock: 0, paper: 0, scissors: 0 },
       computer: { rock: 0, paper: 0, scissors: 0 },
     },
-    roundNumber: 1,
     globalMatchNumber: 1,
     currentMatch: null,
   };
@@ -387,21 +386,19 @@ export class Model {
   // ===== Round Methods =====
 
   getRoundNumber(): number {
-    return this.state.roundNumber;
+    return this.state.currentMatch?.matchRoundNumber ?? 1;
   }
 
   setRoundNumber(value: number): void {
-    this.state.roundNumber = value;
-    this.gameStorage.setRoundNumber(value);
+    if (!this.state.currentMatch) return;
+
+    this.state.currentMatch.matchRoundNumber = value;
+    this.gameStorage.setMatch(this.state.currentMatch);
   }
 
   increaseRoundNumber(): void {
-    this.setRoundNumber(this.getRoundNumber() + 1);
-  }
-
-  resetRoundNumber(): void {
-    this.state.roundNumber = 1;
-    this.gameStorage.removeRoundNumber();
+    const current = this.getRoundNumber();
+    this.setRoundNumber(current + 1);
   }
 
   // ===== Tara Methods =====
