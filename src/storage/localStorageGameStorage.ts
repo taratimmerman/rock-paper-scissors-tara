@@ -5,12 +5,7 @@ import {
   Participant,
   StandardMove,
 } from "../utils/dataObjectUtils";
-import {
-  DAMAGE_PER_LOSS,
-  INITIAL_HEALTH,
-  MOVES,
-  STANDARD_MOVE_NAMES,
-} from "../utils/dataUtils";
+import { MOVES, STANDARD_MOVE_NAMES } from "../utils/dataUtils";
 
 const KEY_SUFFIX_SCORE = "Score";
 const KEY_SUFFIX_TARA_COUNT = "TaraCount";
@@ -23,21 +18,12 @@ const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
 const KEY_CURRENT_MATCH = "currentMatch";
 
 const DEFAULT_NUMERIC_VALUE = 0;
-const DEFAULT_ROUND_NUMBER_GET = 1;
 const DEFAULT_MATCH_NUMBER_GET = 1;
 
 const DEFAULT_MOVE_COUNTS: MoveCount = {
   [MOVES.ROCK]: 0,
   [MOVES.PAPER]: 0,
   [MOVES.SCISSORS]: 0,
-};
-
-const DEFAULT_MATCH: Match = {
-  matchRoundNumber: DEFAULT_ROUND_NUMBER_GET,
-  playerHealth: INITIAL_HEALTH,
-  computerHealth: INITIAL_HEALTH,
-  initialHealth: INITIAL_HEALTH,
-  damagePerLoss: DAMAGE_PER_LOSS,
 };
 
 /**
@@ -91,14 +77,6 @@ export class LocalStorageGameStorage implements IGameStorage {
       console.warn(`LocalStorage Error: Failed to parse "${key}".`, e);
       return DEFAULT_MOVE_COUNTS;
     }
-  }
-
-  getRoundNumber(): number {
-    return parseInt(
-      localStorage.getItem(KEY_ROUND_NUMBER) ||
-        DEFAULT_ROUND_NUMBER_GET.toString(),
-      10
-    );
   }
 
   getGlobalMatchNumber(): number {
@@ -167,11 +145,6 @@ export class LocalStorageGameStorage implements IGameStorage {
     this.safelySetItem(key, JSON.stringify(moveCounts));
   }
 
-  setRoundNumber(round: number): void {
-    const key = KEY_ROUND_NUMBER;
-    this.safelySetItem(key, round.toString());
-  }
-
   setGlobalMatchNumber(matchNumber: number): void {
     this.safelySetItem(KEY_GLOBAL_MATCH_NUMBER, matchNumber.toString());
   }
@@ -204,10 +177,6 @@ export class LocalStorageGameStorage implements IGameStorage {
   removeMoveCounts(participant: Participant): void {
     const key = this.formatKey(participant, KEY_SUFFIX_MOVE_COUNTS);
     localStorage.removeItem(key);
-  }
-
-  removeRoundNumber(): void {
-    localStorage.removeItem(KEY_ROUND_NUMBER);
   }
 
   removeHistory(participant: Participant): void {

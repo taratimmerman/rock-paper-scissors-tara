@@ -31,7 +31,6 @@ describe("Controller", () => {
       resetMoves: jest.fn(),
       resetScores: jest.fn(),
       resetTaras: jest.fn(),
-      resetRoundNumber: jest.fn(),
       registerPlayerMove: jest.fn(),
       resetHistories: jest.fn(),
       resetBothMoveCounts: jest.fn(),
@@ -184,7 +183,6 @@ describe("Controller", () => {
     expect(mockModel.resetScores).toHaveBeenCalled();
     expect(mockModel.resetMoves).toHaveBeenCalled();
     expect(mockModel.resetTaras).toHaveBeenCalled();
-    expect(mockModel.resetRoundNumber).toHaveBeenCalled();
     expect(mockModel.resetHistories).toHaveBeenCalled();
     expect(mockModel.resetBothMoveCounts).toHaveBeenCalled();
     expect(mockModel.resetMostCommonMoves).toHaveBeenCalled();

@@ -26,7 +26,6 @@ export interface GameState {
   taras: Record<Participant, number>;
   mostCommonMove: Record<Participant, StandardMove | null>;
   moveCounts: Record<Participant, MoveCount>;
-  roundNumber: number;
   globalMatchNumber: number;
   currentMatch: Match | null;
 }
