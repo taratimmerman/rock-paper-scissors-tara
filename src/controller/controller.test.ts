@@ -37,6 +37,8 @@ describe("Controller", () => {
       resetMostCommonMoves: jest.fn(),
       getPlayerMostCommonMove: jest.fn(),
       getComputerMostCommonMove: jest.fn(),
+      isMatchActive: jest.fn(),
+      resetMatchData: jest.fn(),
     };
 
     mockView = {
@@ -54,6 +56,7 @@ describe("Controller", () => {
       updateTaraView: jest.fn(),
       toggleMostCommonMoveTable: jest.fn(),
       updateMostCommonMoves: jest.fn(),
+      updateStartButton: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
