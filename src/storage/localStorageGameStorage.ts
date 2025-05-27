@@ -79,12 +79,9 @@ export class LocalStorageGameStorage implements IGameStorage {
     }
   }
 
-  getGlobalMatchNumber(): number {
-    return parseInt(
-      localStorage.getItem(KEY_GLOBAL_MATCH_NUMBER) ||
-        DEFAULT_MATCH_NUMBER_GET.toString(),
-      10
-    );
+  getGlobalMatchNumber(): number | null {
+    const stored = localStorage.getItem(KEY_GLOBAL_MATCH_NUMBER);
+    return stored !== null ? parseInt(stored, 10) : null;
   }
 
   getMatch(): Match | null {
@@ -145,8 +142,12 @@ export class LocalStorageGameStorage implements IGameStorage {
     this.safelySetItem(key, JSON.stringify(moveCounts));
   }
 
-  setGlobalMatchNumber(matchNumber: number): void {
-    this.safelySetItem(KEY_GLOBAL_MATCH_NUMBER, matchNumber.toString());
+  setGlobalMatchNumber(matchNumber: number | null): void {
+    if (matchNumber) {
+      this.safelySetItem(KEY_GLOBAL_MATCH_NUMBER, matchNumber.toString());
+    } else {
+      localStorage.removeItem(KEY_GLOBAL_MATCH_NUMBER);
+    }
   }
 
   setMatch(match: Match | null): void {

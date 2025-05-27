@@ -1,12 +1,21 @@
-import { Move, MoveData, StandardMove } from "./dataObjectUtils";
+import { Match, Move, MoveData, StandardMove } from "./dataObjectUtils";
 
 export const PARTICIPANTS = {
   PLAYER: "player",
   COMPUTER: "computer",
 } as const;
 
+export const INITIAL_ROUND_NUMBER = 1;
 export const INITIAL_HEALTH = 100;
 export const DAMAGE_PER_LOSS = 50;
+
+export const DEFAULT_MATCH: Match = {
+  matchRoundNumber: INITIAL_ROUND_NUMBER,
+  playerHealth: INITIAL_HEALTH,
+  computerHealth: INITIAL_HEALTH,
+  initialHealth: INITIAL_HEALTH,
+  damagePerLoss: DAMAGE_PER_LOSS,
+};
 
 export const MOVES = {
   ROCK: "rock",

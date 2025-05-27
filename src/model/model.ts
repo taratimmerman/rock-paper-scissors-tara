@@ -39,7 +39,7 @@ export class Model {
       player: { rock: 0, paper: 0, scissors: 0 },
       computer: { rock: 0, paper: 0, scissors: 0 },
     },
-    globalMatchNumber: 1,
+    globalMatchNumber: null,
     currentMatch: null,
   };
   private gameStorage: IGameStorage;
@@ -111,7 +111,7 @@ export class Model {
   }
 
   isMatchActive(): boolean {
-    return this.state.currentMatch !== null;
+    return this.gameStorage.getMatch() !== null;
   }
 
   // ===== Score Methods =====
@@ -466,24 +466,22 @@ export class Model {
    * This method is called during Model construction. It checks for:
    * - A valid saved match (loads it and skips migration),
    * - An old-format global round number (migrates it into a new match),
-   * - Or no valid data (starts a new match with default values).
+   * - Or no valid data (leaves currentMatch unset).
    *
    * It also ensures the global match number is set appropriately.
    */
   private _loadOrMigrateMatchState(): void {
-    this.state.currentMatch = this.gameStorage.getMatch();
-
     if (this.isMatchActive()) {
       this._loadExistingMatchState();
-    } else {
-      const oldGlobalRoundNumber = this.gameStorage.getOldGlobalRoundNumber();
-
-      if (oldGlobalRoundNumber !== null && oldGlobalRoundNumber > 0) {
-        this._migrateOldData(oldGlobalRoundNumber);
-      } else {
-        this._startNewGameDefaults();
-      }
+      return;
     }
+
+    const oldGlobalRoundNumber = this.gameStorage.getOldGlobalRoundNumber();
+
+    if (oldGlobalRoundNumber !== null && oldGlobalRoundNumber > 0) {
+      this._migrateOldData(oldGlobalRoundNumber);
+    }
+    // Otherwise: no migration, and no existing match — do nothing.
   }
 
   /**
@@ -491,6 +489,7 @@ export class Model {
    */
   private _loadExistingMatchState(): void {
     this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
+    this.state.currentMatch = this.gameStorage.getMatch();
   }
 
   /**
@@ -510,15 +509,6 @@ export class Model {
     this.gameStorage.setMatch(this.state.currentMatch);
     this.gameStorage.removeOldGlobalRoundNumber();
 
-    this.state.globalMatchNumber = 1;
-    this.gameStorage.setGlobalMatchNumber(this.state.globalMatchNumber);
-  }
-
-  /**
-   * Initializes state for a completely new game with no saved data.
-   */
-  private _startNewGameDefaults(): void {
-    this.state.currentMatch = null;
     this.state.globalMatchNumber = 1;
     this.gameStorage.setGlobalMatchNumber(this.state.globalMatchNumber);
   }
