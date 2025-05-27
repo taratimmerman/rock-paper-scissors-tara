@@ -8,6 +8,7 @@ export const PARTICIPANTS = {
 export const INITIAL_ROUND_NUMBER = 1;
 export const INITIAL_HEALTH = 100;
 export const DAMAGE_PER_LOSS = 50;
+export const DEFAULT_MATCH_NUMBER = 1;
 
 export const DEFAULT_MATCH: Match = {
   matchRoundNumber: INITIAL_ROUND_NUMBER,

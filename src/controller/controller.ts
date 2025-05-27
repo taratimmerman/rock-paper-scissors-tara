@@ -43,11 +43,17 @@ export class Controller {
   }
 
   private startGame(): void {
+    const roundNumber = this.model.getRoundNumber();
+    const matchNumber = this.model.getMatchNumber();
+    const showMostCommonMove = this.model.showMostCommonMove();
+
+    this.model.setDefaultMatchData();
     this.view.toggleStartButton(false);
     this.view.toggleResetGameState(false);
-    this.view.toggleMostCommonMoveTable(this.model.showMostCommonMove());
+    this.view.toggleMostCommonMoveTable(showMostCommonMove);
     this.view.toggleMoveButtons(true);
-    this.view.updateRound(this.model.getRoundNumber());
+    this.view.updateRound(roundNumber);
+    this.view.updateMatch(matchNumber);
   }
 
   private endRound(): void {
@@ -78,11 +84,15 @@ export class Controller {
     this.model.resetHistories();
     this.model.resetBothMoveCounts();
     this.model.resetMostCommonMoves();
+    this.model.resetMatchData();
 
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
+
+    const isMatchActive = this.model.isMatchActive();
+    this.view.updateStartButton(isMatchActive);
   }
 
   handlePlayerMove(move: Move): void {
@@ -94,18 +104,21 @@ export class Controller {
   }
 
   initialize(): void {
+    const isMatchActive = this.model.isMatchActive();
+
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
+    this.view.updateStartButton(isMatchActive);
     this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleStartButton(true);
 
     document
-      .getElementById("start-game")
+      .getElementById("start")
       ?.addEventListener("click", () => this.startGame());
 
     document

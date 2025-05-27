@@ -14,6 +14,7 @@ export class View {
   private movesEl = document.getElementById("round-moves")!;
   private resultEl = document.getElementById("round-result")!;
   private taraBtn = document.getElementById("tara")!;
+  private startBtn = document.getElementById("start");
 
   // ===== General Methods =====
 
@@ -24,7 +25,7 @@ export class View {
   }
 
   toggleStartButton(show: boolean): void {
-    const btn = document.getElementById("start-game");
+    const btn = document.getElementById("start");
     if (btn) btn.style.display = show ? "inline" : "none";
   }
 
@@ -33,6 +34,14 @@ export class View {
     if (roundElem) {
       roundElem.textContent = `Round ${round}`;
       roundElem.style.display = "block";
+    }
+  }
+
+  updateMatch(match: number): void {
+    const matchElem = document.getElementById("match");
+    if (matchElem) {
+      matchElem.textContent = `Match ${match}`;
+      matchElem.style.display = "block";
     }
   }
 
@@ -76,6 +85,14 @@ export class View {
 
     this.movesEl.style.display = "none";
     this.resultEl.style.display = "none";
+  }
+
+  updateStartButton(isMatchActive: boolean): void {
+    if (this.startBtn && isMatchActive) {
+      this.startBtn.textContent = `Resume Match`;
+    } else if (this.startBtn && !isMatchActive) {
+      this.startBtn.textContent = `Start Match`;
+    }
   }
 
   // ===== Score Methods =====

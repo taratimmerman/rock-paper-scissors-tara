@@ -1,5 +1,6 @@
 import {
   GameState,
+  Match,
   Move,
   MoveCount,
   Participant,
@@ -8,6 +9,8 @@ import {
 import {
   ALL_MOVE_NAMES,
   DAMAGE_PER_LOSS,
+  DEFAULT_MATCH,
+  DEFAULT_MATCH_NUMBER,
   INITIAL_HEALTH,
   MOVES,
   MOVE_DATA_MAP,
@@ -460,6 +463,40 @@ export class Model {
 
   // ===== Match Methods =====
 
+  setMatch(match: Match | null): void {
+    this.state.currentMatch = match;
+    this.gameStorage.setMatch(match);
+  }
+
+  setMatchNumber(matchNumber: number | null): void {
+    this.state.globalMatchNumber = matchNumber;
+    this.gameStorage.setGlobalMatchNumber(matchNumber);
+  }
+
+  /**
+   * Sets default match data if no match is currently active.
+   *
+   * Used as a fallback when no match data is loaded (e.g., from `_loadOrMigrateMatchState()`).
+   * Does not overwrite existing match state.
+   */
+  setDefaultMatchData(): void {
+    const isMatchActive = this.isMatchActive();
+    if (!isMatchActive) {
+      this.setMatch(DEFAULT_MATCH);
+      this.setMatchNumber(DEFAULT_MATCH_NUMBER);
+    }
+  }
+
+  resetMatchData(): void {
+    this.state.currentMatch = null;
+    this.gameStorage.setMatch(null);
+    this.setMatchNumber(null);
+  }
+
+  getMatchNumber(): number {
+    return this.state.globalMatchNumber ?? 1;
+  }
+
   /**
    * Initializes the game state based on available storage.
    *
@@ -498,7 +535,7 @@ export class Model {
    * @param oldRoundNumber - The round number from the old game format.
    */
   private _migrateOldData(oldRoundNumber: number): void {
-    this.state.currentMatch = {
+    const migratedMatch = {
       matchRoundNumber: oldRoundNumber,
       playerHealth: INITIAL_HEALTH,
       computerHealth: INITIAL_HEALTH,
@@ -506,7 +543,7 @@ export class Model {
       damagePerLoss: DAMAGE_PER_LOSS,
     };
 
-    this.gameStorage.setMatch(this.state.currentMatch);
+    this.setMatch(migratedMatch);
     this.gameStorage.removeOldGlobalRoundNumber();
 
     this.state.globalMatchNumber = 1;

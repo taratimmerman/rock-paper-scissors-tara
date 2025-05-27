@@ -18,7 +18,6 @@ const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
 const KEY_CURRENT_MATCH = "currentMatch";
 
 const DEFAULT_NUMERIC_VALUE = 0;
-const DEFAULT_MATCH_NUMBER_GET = 1;
 
 const DEFAULT_MOVE_COUNTS: MoveCount = {
   [MOVES.ROCK]: 0,

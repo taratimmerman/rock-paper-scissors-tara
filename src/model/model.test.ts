@@ -894,7 +894,7 @@ describe("Model Constructor - Initialization and Migration", () => {
     jest.clearAllMocks();
   });
 
-  // Test Scenario 1: No stored matcb data (no new match, no old round)
+  // Test Scenario 1: No stored match data (no new match, no old round)
   test("should initialize with null match state if no match or old round number is stored", () => {
     // Explicitly set ALL necessary mock return values for this test scenario.
     // The Model constructor will call these methods to determine initial state.

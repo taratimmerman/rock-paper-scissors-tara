@@ -26,7 +26,7 @@ export interface IGameStorage {
   setTaraCount(participant: Participant, count: number): void;
   setMostCommonMove(participant: Participant, move: StandardMove | null): void;
   setMoveCounts(participant: Participant, moveCounts: MoveCount): void;
-  setGlobalMatchNumber(match: number): void;
+  setGlobalMatchNumber(match: number | null): void;
   setMatch(match: Match | null): void;
 
   // ===== Removers =====
