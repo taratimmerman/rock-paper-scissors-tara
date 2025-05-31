@@ -27,12 +27,9 @@ export class Controller {
   }
 
   private updateMostCommonMoveView(): void {
-    const playerMostCommonMove = this.model.getPlayerMostCommonMove();
-    const comptuterMostCommonMove = this.model.getComputerMostCommonMove();
-
     this.view.updateMostCommonMoves(
-      playerMostCommonMove,
-      comptuterMostCommonMove
+      this.model.getPlayerMostCommonMove(),
+      this.model.getComputerMostCommonMove()
     );
   }
 
@@ -48,24 +45,33 @@ export class Controller {
     const showMostCommonMove = this.model.showMostCommonMove();
 
     this.model.setDefaultMatchData();
+    this.view.updateRound(roundNumber);
+    this.view.updateMatch(matchNumber);
     this.view.toggleStartButton(false);
     this.view.toggleResetGameState(false);
     this.view.toggleMostCommonMoveTable(showMostCommonMove);
     this.view.toggleMoveButtons(true);
-    this.view.updateRound(roundNumber);
-    this.view.updateMatch(matchNumber);
   }
 
   private endRound(): void {
     const playerMove = this.model.getPlayerMove();
     const computerMove = this.model.getComputerMove();
     const result = this.model.evaluateRound();
+    const isMatchOver = this.model.isMatchOver();
 
-    this.view.showRoundOutcome(playerMove, computerMove, result);
+    if (isMatchOver) {
+      const winner = this.model.getMatchWinner();
+      this.view.showMatchOutcome(playerMove, computerMove, winner);
+      this.model.incrementMatchNumber();
+      this.model.setMatch(null);
+    } else {
+      this.view.showRoundOutcome(playerMove, computerMove, result);
+      this.model.increaseRoundNumber();
+    }
+
     this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
-    this.model.increaseRoundNumber();
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
@@ -73,7 +79,13 @@ export class Controller {
   }
 
   private handleNextRound(): void {
-    this.view.updateRound(this.model.getRoundNumber());
+    this.model.setDefaultMatchData();
+
+    const roundNumber = this.model.getRoundNumber();
+    const matchNumber = this.model.getMatchNumber();
+
+    this.view.updateRound(roundNumber);
+    this.view.updateMatch(matchNumber);
     this.view.resetForNextRound();
   }
 
