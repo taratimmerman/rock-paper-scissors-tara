@@ -505,6 +505,26 @@ export class Model {
     return this.state.globalMatchNumber ?? 1;
   }
 
+  isMatchOver(): boolean {
+    return (
+      this.isDefeated(PARTICIPANTS.PLAYER) ||
+      this.isDefeated(PARTICIPANTS.COMPUTER)
+    );
+  }
+
+  getMatchWinner(): Participant {
+    if (this.isDefeated(PARTICIPANTS.PLAYER)) {
+      return PARTICIPANTS.COMPUTER;
+    } else {
+      return PARTICIPANTS.PLAYER;
+    }
+  }
+
+  incrementMatchNumber(): void {
+    const currentMatchNumber = this.getMatchNumber();
+    this.setMatchNumber(currentMatchNumber + 1);
+  }
+
   /**
    * Initializes the game state based on available storage.
    *
@@ -588,26 +608,6 @@ export class Model {
   private isDefeated(participant: Participant): boolean {
     const health = this.getHealth(participant);
     return health !== null && health <= 0;
-  }
-
-  isMatchOver(): boolean {
-    return (
-      this.isDefeated(PARTICIPANTS.PLAYER) ||
-      this.isDefeated(PARTICIPANTS.COMPUTER)
-    );
-  }
-
-  getMatchWinner(): Participant {
-    if (this.isDefeated(PARTICIPANTS.PLAYER)) {
-      return PARTICIPANTS.COMPUTER;
-    } else {
-      return PARTICIPANTS.PLAYER;
-    }
-  }
-
-  incrementMatchNumber(): void {
-    const currentMatchNumber = this.getMatchNumber();
-    this.setMatchNumber(currentMatchNumber + 1);
   }
 
   // ===== END OF CLASS =====
