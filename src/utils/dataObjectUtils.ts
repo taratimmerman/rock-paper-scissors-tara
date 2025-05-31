@@ -1,4 +1,4 @@
-import { MOVES, PARTICIPANTS } from "./dataUtils";
+import { HEALTH_KEYS, MOVES, PARTICIPANTS } from "./dataUtils";
 
 export type Move = (typeof MOVES)[keyof typeof MOVES];
 export type StandardMove = Exclude<Move, "tara">;

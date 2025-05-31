@@ -10,7 +10,7 @@ import {
   ALL_MOVE_NAMES,
   DAMAGE_PER_LOSS,
   DEFAULT_MATCH,
-  DEFAULT_MATCH_NUMBER,
+  HEALTH_KEYS,
   INITIAL_HEALTH,
   MOVES,
   MOVE_DATA_MAP,
@@ -102,14 +102,18 @@ export class Model {
     this.handleTaraMove(PARTICIPANTS.PLAYER, playerMove);
     this.handleTaraMove(PARTICIPANTS.COMPUTER, computerMove);
 
-    if (playerMove === computerMove) return "It's a tie!";
+    if (playerMove === computerMove) {
+      return "It's a tie!";
+    }
 
     if (this.doesMoveBeat(playerMove, computerMove)) {
       this.handleRoundWin(PARTICIPANTS.PLAYER, playerMove);
-      return "You win!";
+      this.decrementHealth(PARTICIPANTS.COMPUTER);
+      return "You win the round!";
     } else {
       this.handleRoundWin(PARTICIPANTS.COMPUTER, computerMove);
-      return "Computer wins!";
+      this.decrementHealth(PARTICIPANTS.PLAYER);
+      return "Computer wins the round!";
     }
   }
 
@@ -171,19 +175,19 @@ export class Model {
   private determineMostCommonMove(moveCounts: MoveCount): StandardMove | null {
     let mostCommonMove: StandardMove | null = null;
     let highestCount = 0;
-    let tie = false;
+    let hasMoveFrequencyTie = false;
 
     for (const [move, count] of Object.entries(moveCounts)) {
       if (count > highestCount) {
         highestCount = count;
         mostCommonMove = move as StandardMove;
-        tie = false;
+        hasMoveFrequencyTie = false;
       } else if (count === highestCount && count !== 0) {
-        tie = true;
+        hasMoveFrequencyTie = true;
       }
     }
 
-    return tie ? null : mostCommonMove;
+    return hasMoveFrequencyTie ? null : mostCommonMove;
   }
 
   private resetMostCommonMove(key: Participant): void {
@@ -408,7 +412,11 @@ export class Model {
 
   private decrementTaraCount(key: Participant): void {
     const current = this.getTaraCount(key);
-    if (current > 0) this.setTaraCount(key, current - 1);
+    if (current > 1) {
+      this.setTaraCount(key, current - 1);
+    } else if (current === 1) {
+      this.resetTaraCount(key);
+    }
   }
 
   private handleTaraMove(key: Participant, move: Move): void {
@@ -481,9 +489,9 @@ export class Model {
    */
   setDefaultMatchData(): void {
     const isMatchActive = this.isMatchActive();
+
     if (!isMatchActive) {
-      this.setMatch(DEFAULT_MATCH);
-      this.setMatchNumber(DEFAULT_MATCH_NUMBER);
+      this.setMatch({ ...DEFAULT_MATCH });
     }
   }
 
@@ -548,6 +556,58 @@ export class Model {
 
     this.state.globalMatchNumber = 1;
     this.gameStorage.setGlobalMatchNumber(this.state.globalMatchNumber);
+  }
+
+  // ===== Health Methods =====
+
+  private getHealthKey(participant: Participant): keyof Match {
+    return HEALTH_KEYS[participant];
+  }
+
+  private getHealth(participant: Participant): number | null {
+    const match = this.state.currentMatch;
+    if (!match) return null;
+
+    const key = this.getHealthKey(participant);
+    return match[key];
+  }
+
+  private decrementHealth(participant: Participant): boolean {
+    const match = this.state.currentMatch;
+    if (!match) return false;
+
+    const key = this.getHealthKey(participant);
+    const currentHealth = match[key];
+
+    if (currentHealth <= 0) return false;
+
+    match[key] = Math.max(0, currentHealth - DAMAGE_PER_LOSS);
+    return true;
+  }
+
+  private isDefeated(participant: Participant): boolean {
+    const health = this.getHealth(participant);
+    return health !== null && health <= 0;
+  }
+
+  isMatchOver(): boolean {
+    return (
+      this.isDefeated(PARTICIPANTS.PLAYER) ||
+      this.isDefeated(PARTICIPANTS.COMPUTER)
+    );
+  }
+
+  getMatchWinner(): Participant {
+    if (this.isDefeated(PARTICIPANTS.PLAYER)) {
+      return PARTICIPANTS.COMPUTER;
+    } else {
+      return PARTICIPANTS.PLAYER;
+    }
+  }
+
+  incrementMatchNumber(): void {
+    const currentMatchNumber = this.getMatchNumber();
+    this.setMatchNumber(currentMatchNumber + 1);
   }
 
   // ===== END OF CLASS =====

@@ -1,4 +1,4 @@
-import { Move, StandardMove } from "./utils/dataObjectUtils";
+import { Move, Participant, StandardMove } from "./utils/dataObjectUtils";
 import { MOVES } from "./utils/dataUtils";
 
 export class View {
@@ -52,6 +52,17 @@ export class View {
   ): void {
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
     this.resultEl.textContent = result.toUpperCase();
+    this.movesEl.style.display = "block";
+    this.resultEl.style.display = "block";
+  }
+
+  showMatchOutcome(
+    playerMove: Move | null,
+    computerMove: Move | null,
+    winner: Participant
+  ): void {
+    this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
+    this.resultEl.textContent = `${winner.toUpperCase()} WON THE MATCH!`;
     this.movesEl.style.display = "block";
     this.resultEl.style.display = "block";
   }

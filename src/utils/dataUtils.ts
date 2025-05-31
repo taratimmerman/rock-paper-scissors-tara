@@ -18,6 +18,11 @@ export const DEFAULT_MATCH: Match = {
   damagePerLoss: DAMAGE_PER_LOSS,
 };
 
+export const HEALTH_KEYS = {
+  player: "playerHealth",
+  computer: "computerHealth",
+} as const;
+
 export const MOVES = {
   ROCK: "rock",
   PAPER: "paper",

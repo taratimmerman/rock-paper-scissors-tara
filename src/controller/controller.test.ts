@@ -38,6 +38,7 @@ describe("Controller", () => {
       getPlayerMostCommonMove: jest.fn(),
       getComputerMostCommonMove: jest.fn(),
       isMatchActive: jest.fn(),
+      isMatchOver: jest.fn(),
       resetMatchData: jest.fn(),
     };
 

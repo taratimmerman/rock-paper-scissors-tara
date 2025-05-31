@@ -178,20 +178,20 @@ describe("Model", () => {
       expect(model.getComputerScore()).toBe(0);
     });
 
-    test("returns 'You win!' if player beats computer and updates score", () => {
+    test("returns 'You win the round!' if player beats computer and updates score", () => {
       model.setPlayerMove(MOVES.ROCK);
       model.setComputerMove(MOVES.SCISSORS);
 
-      expect(model.evaluateRound()).toBe("You win!");
+      expect(model.evaluateRound()).toBe("You win the round!");
       expect(model.getPlayerScore()).toBe(1);
       expect(model.getComputerScore()).toBe(0);
     });
 
-    test("returns 'Computer wins!' if computer beats player and updates score", () => {
+    test("returns 'Computer wins the round!' if computer beats player and updates score", () => {
       model.setPlayerMove(MOVES.PAPER);
       model.setComputerMove(MOVES.SCISSORS);
 
-      expect(model.evaluateRound()).toBe("Computer wins!");
+      expect(model.evaluateRound()).toBe("Computer wins the round!");
       expect(model.getComputerScore()).toBe(1);
       expect(model.getPlayerScore()).toBe(0);
     });
@@ -287,7 +287,7 @@ describe("Model", () => {
       for (const move of STANDARD_MOVE_DATA_MAP.keys()) {
         model.setPlayerMove(MOVES.TARA);
         model.setComputerMove(move);
-        expect(model.evaluateRound()).toBe("You win!");
+        expect(model.evaluateRound()).toBe("You win the round!");
       }
     });
 
@@ -295,7 +295,7 @@ describe("Model", () => {
       for (const move of STANDARD_MOVE_DATA_MAP.keys()) {
         model.setPlayerMove(move);
         model.setComputerMove(MOVES.TARA);
-        expect(model.evaluateRound()).toBe("Computer wins!");
+        expect(model.evaluateRound()).toBe("Computer wins the round!");
       }
     });
 
