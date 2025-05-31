@@ -862,6 +862,172 @@ describe("Model", () => {
 
       expect(model["state"].currentMatch).toEqual(DEFAULT_MATCH);
     });
+
+    test("incrementMatchNumber increases the match number by 1", () => {
+      const initialMatchNumber = 1;
+      model["state"].globalMatchNumber = initialMatchNumber;
+
+      model.incrementMatchNumber();
+
+      expect(model["state"].globalMatchNumber).toEqual(initialMatchNumber + 1);
+    });
+  });
+
+  describe("Health", () => {
+    test("decrements computer's health when player wins round", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.SCISSORS);
+
+      // Verify initial state
+      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
+      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
+
+      expect(model.evaluateRound()).toBe("You win the round!");
+
+      // Verify health updates as expected
+      expect(model["state"].currentMatch?.computerHealth).toBe(
+        INITIAL_HEALTH - DAMAGE_PER_LOSS
+      );
+      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
+    });
+
+    test("decrements player's health when computer wins round", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setComputerMove(MOVES.PAPER);
+      model.setPlayerMove(MOVES.ROCK);
+
+      // Verify initial state
+      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
+      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
+
+      expect(model.evaluateRound()).toBe("Computer wins the round!");
+
+      // Verify health updates as expected
+      expect(model["state"].currentMatch?.playerHealth).toBe(
+        INITIAL_HEALTH - DAMAGE_PER_LOSS
+      );
+      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
+    });
+
+    test("doesn't decrement health round is tie", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.SCISSORS);
+      model.setComputerMove(MOVES.SCISSORS);
+
+      // Verify initial state
+      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
+      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
+
+      expect(model.evaluateRound()).toBe("It's a tie!");
+
+      // Verify health didn't update
+      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
+      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
+    });
+
+    test("returns false if both participants have health > 0", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+
+      expect(model.isMatchOver()).toBe(false);
+    });
+  });
+
+  describe("isMatchOver", () => {
+    test("returns true if player's health is 0", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.TARA);
+      model.evaluateRound();
+      model.setPlayerMove(MOVES.PAPER);
+      model.setComputerMove(MOVES.SCISSORS);
+      model.evaluateRound();
+
+      expect(model.isMatchOver()).toBe(true);
+    });
+
+    test("returns true if computer's health is 0", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.SCISSORS);
+      model.evaluateRound();
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.PAPER);
+      model.evaluateRound();
+
+      expect(model.isMatchOver()).toBe(true);
+    });
+
+    test("returns false if no match active", () => {
+      expect(model.isMatchActive()).toBe(false);
+      expect(model.isMatchOver()).toBe(false);
+    });
+  });
+
+  describe("getMatchWinner", () => {
+    test("returns PARTICIPANTS.COMPUTER if Player is defeated", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.TARA);
+      model.evaluateRound();
+      model.setPlayerMove(MOVES.PAPER);
+      model.setComputerMove(MOVES.SCISSORS);
+      model.evaluateRound();
+      expect(model.isMatchOver()).toBe(true);
+
+      expect(model.getMatchWinner()).toBe(PARTICIPANTS.COMPUTER);
+    });
+
+    test("returns PARTICIPANTS.PLAYER if Computer is defeated", () => {
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.SCISSORS);
+      model.evaluateRound();
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.PAPER);
+      model.evaluateRound();
+      expect(model.isMatchOver()).toBe(true);
+
+      expect(model.getMatchWinner()).toBe(PARTICIPANTS.PLAYER);
+    });
+  });
+
+  describe("setDefaultMatchData", () => {
+    test("creates new match object in memory when no match is active", () => {
+      const initialMatch = {
+        matchRoundNumber: 16,
+        playerHealth: INITIAL_HEALTH,
+        computerHealth: 50,
+        initialHealth: INITIAL_HEALTH,
+        damagePerLoss: DAMAGE_PER_LOSS,
+      };
+      model.setMatch(initialMatch);
+
+      model.setDefaultMatchData();
+      const actualMatch = model["state"].currentMatch;
+
+      expect(actualMatch).not.toBe(DEFAULT_MATCH);
+      expect(JSON.stringify(actualMatch)).toEqual(
+        JSON.stringify(DEFAULT_MATCH)
+      );
+    });
+
+    test("does not reset when a match is active", () => {
+      const activeMatchFromStorage: Match = {
+        matchRoundNumber: 16,
+        playerHealth: INITIAL_HEALTH,
+        computerHealth: 50, // The unique value we'll check
+        initialHealth: INITIAL_HEALTH,
+        damagePerLoss: DAMAGE_PER_LOSS,
+      };
+      model.setMatch(activeMatchFromStorage);
+      mockGameStorage.getMatch.mockReturnValue(activeMatchFromStorage);
+      expect(model.isMatchActive()).toBe(true);
+
+      expect(model["state"].currentMatch?.computerHealth).toBe(50);
+      model.setDefaultMatchData();
+      expect(model["state"].currentMatch?.computerHealth).toBe(50);
+    });
   });
 });
 
