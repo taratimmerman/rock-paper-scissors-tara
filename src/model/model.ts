@@ -375,9 +375,8 @@ export class Model {
 
   showMostCommonMove(): boolean {
     return (
-      this.getRoundNumber() > 1 &&
-      (this.getPlayerMostCommonMove() !== null ||
-        this.getComputerMostCommonMove() !== null)
+      this.getPlayerMostCommonMove() !== null ||
+      this.getComputerMostCommonMove() !== null
     );
   }
 

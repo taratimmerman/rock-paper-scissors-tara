@@ -582,29 +582,7 @@ describe("Model", () => {
       expect(model.getComputerMostCommonMove()).toBeNull();
     });
 
-    test("returns false when round is 1", () => {
-      jest.spyOn(model, "getRoundNumber").mockReturnValue(1);
-      jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(MOVES.ROCK);
-      jest
-        .spyOn(model, "getComputerMostCommonMove")
-        .mockReturnValue(MOVES.SCISSORS);
-
-      expect(model.showMostCommonMove()).toBe(false);
-    });
-
     describe("showMostCommonMove", () => {
-      test("returns false when round is 1", () => {
-        jest.spyOn(model, "getRoundNumber").mockReturnValue(1);
-        jest
-          .spyOn(model, "getPlayerMostCommonMove")
-          .mockReturnValue(MOVES.ROCK);
-        jest
-          .spyOn(model, "getComputerMostCommonMove")
-          .mockReturnValue(MOVES.SCISSORS);
-
-        expect(model.showMostCommonMove()).toBe(false);
-      });
-
       test("returns false when both player and computer most common moves are missing", () => {
         jest.spyOn(model, "getRoundNumber").mockReturnValue(3);
         jest.spyOn(model, "getPlayerMostCommonMove").mockReturnValue(null);
