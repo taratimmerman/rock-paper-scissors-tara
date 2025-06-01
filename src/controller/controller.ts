@@ -1,7 +1,7 @@
 import { Model } from "../model/model";
 import { View } from "../view";
 import { Move } from "../utils/dataObjectUtils";
-import { MOVES } from "../utils/dataUtils";
+import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 
 export class Controller {
   private model: Model;
@@ -33,6 +33,13 @@ export class Controller {
     );
   }
 
+  private updateHealthView(): void {
+    this.view.updateHealth(
+      this.model.getHealth(PARTICIPANTS.PLAYER),
+      this.model.getHealth(PARTICIPANTS.COMPUTER)
+    );
+  }
+
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
     const taraCount = this.model.getPlayerTaraCount();
@@ -49,8 +56,10 @@ export class Controller {
     this.view.updateMatch(matchNumber);
     this.view.toggleStartButton(false);
     this.view.toggleResetGameState(false);
+    this.view.toggleHealthTable(true);
     this.view.toggleMostCommonMoveTable(showMostCommonMove);
     this.view.toggleMoveButtons(true);
+    this.updateHealthView();
   }
 
   private endRound(): void {
@@ -58,6 +67,8 @@ export class Controller {
     const computerMove = this.model.getComputerMove();
     const result = this.model.evaluateRound();
     const isMatchOver = this.model.isMatchOver();
+
+    this.updateHealthView();
 
     if (isMatchOver) {
       const winner = this.model.getMatchWinner();
@@ -84,6 +95,7 @@ export class Controller {
     const roundNumber = this.model.getRoundNumber();
     const matchNumber = this.model.getMatchNumber();
 
+    this.updateHealthView();
     this.view.updateRound(roundNumber);
     this.view.updateMatch(matchNumber);
     this.view.resetForNextRound();
@@ -100,6 +112,7 @@ export class Controller {
 
     this.updateScoreView();
     this.updateTaraView();
+    this.updateHealthView();
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
 
@@ -124,6 +137,7 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
     this.view.updateStartButton(isMatchActive);
+    this.view.toggleHealthTable(false);
     this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);

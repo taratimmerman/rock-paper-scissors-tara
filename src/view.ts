@@ -5,6 +5,8 @@ export class View {
   private messageEl = document.getElementById("message");
   private playerScoreEl = document.getElementById("player-score");
   private computerScoreEl = document.getElementById("computer-score");
+  private playerHealthEl = document.getElementById("player-health");
+  private computerHealthEl = document.getElementById("computer-health");
   private playerMostCommonMoveEl = document.getElementById(
     "player-most-common-move"
   );
@@ -90,6 +92,7 @@ export class View {
   }
 
   resetForNextRound(): void {
+    this.toggleHealthTable(true);
     this.toggleMostCommonMoveTable(true);
     this.toggleMoveButtons(true);
     this.togglePlayAgain(false);
@@ -141,5 +144,20 @@ export class View {
       this.playerMostCommonMoveEl.textContent = player ?? "X";
     if (this.computerMostCommonMoveEl)
       this.computerMostCommonMoveEl.textContent = computer ?? "X";
+  }
+
+  // ===== Health Methods =====
+
+  updateHealth(
+    playerHealth: number | null,
+    computerHealth: number | null
+  ): void {
+    this.playerHealthEl!.textContent = (playerHealth ?? 0).toString();
+    this.computerHealthEl!.textContent = (computerHealth ?? 0).toString();
+  }
+
+  toggleHealthTable(show: boolean): void {
+    const table = document.getElementById("health-table");
+    if (table) table.style.display = show ? "table" : "none";
   }
 }
