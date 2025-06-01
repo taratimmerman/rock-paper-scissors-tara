@@ -83,8 +83,6 @@ export class Model {
   }
 
   private handleRoundWin(winner: Participant, winningMove: Move): void {
-    this.setScore(winner, this.getScore(winner) + 1);
-
     if (this.isStandardMove(winningMove)) {
       const currentTara = this.getTaraCount(winner);
       if (currentTara < 3) {
@@ -469,6 +467,14 @@ export class Model {
   }
 
   // ===== Match Methods =====
+
+  handleMatchWin(): Participant {
+    const winner = this.getMatchWinner();
+
+    this.setScore(winner, this.getScore(winner) + 1);
+
+    return winner;
+  }
 
   setMatch(match: Match | null): void {
     this.state.currentMatch = match;

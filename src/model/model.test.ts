@@ -124,6 +124,24 @@ describe("Model", () => {
       expect(model.getPlayerScore()).toBe(5);
       expect(model.getComputerScore()).toBe(3);
     });
+
+    test("does not increment on player round win", () => {
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.SCISSORS);
+
+      model.evaluateRound();
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
+    });
+
+    test("does not increment on computer round win", () => {
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.PAPER);
+
+      model.evaluateRound();
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
+    });
   });
 
   describe("Moves", () => {
@@ -183,8 +201,6 @@ describe("Model", () => {
       model.setComputerMove(MOVES.SCISSORS);
 
       expect(model.evaluateRound()).toBe("You win the round!");
-      expect(model.getPlayerScore()).toBe(1);
-      expect(model.getComputerScore()).toBe(0);
     });
 
     test("returns 'Computer wins the round!' if computer beats player and updates score", () => {
@@ -192,8 +208,6 @@ describe("Model", () => {
       model.setComputerMove(MOVES.SCISSORS);
 
       expect(model.evaluateRound()).toBe("Computer wins the round!");
-      expect(model.getComputerScore()).toBe(1);
-      expect(model.getPlayerScore()).toBe(0);
     });
   });
 
@@ -995,6 +1009,56 @@ describe("Model", () => {
       expect(model["state"].currentMatch?.computerHealth).toBe(50);
       model.setDefaultMatchData();
       expect(model["state"].currentMatch?.computerHealth).toBe(50);
+    });
+  });
+
+  describe("handleMatchWin", () => {
+    test("should increment the player's score and return PLAYER if player wins the match", () => {
+      // Setup the model state to make the Player the match winner
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.SCISSORS);
+      model.evaluateRound();
+
+      model.setPlayerMove(MOVES.TARA);
+      model.setComputerMove(MOVES.PAPER);
+      model.evaluateRound();
+
+      expect(model.isMatchOver()).toBe(true);
+      expect(model.getMatchWinner()).toBe(PARTICIPANTS.PLAYER);
+
+      const initialPlayerScore = model.getPlayerScore();
+      const initialComputerScore = model.getComputerScore();
+
+      const winner = model.handleMatchWin(); // Call the method being tested
+
+      expect(model.getPlayerScore()).toBe(initialPlayerScore + 1);
+      expect(model.getComputerScore()).toBe(initialComputerScore);
+      expect(winner).toBe(PARTICIPANTS.PLAYER);
+    });
+
+    test("should increment the computer's score and return COMPUTER if computer wins the match", () => {
+      // Setup the model state to make the Computer the match winner
+      model.setMatch({ ...DEFAULT_MATCH });
+      model.setPlayerMove(MOVES.ROCK);
+      model.setComputerMove(MOVES.TARA);
+      model.evaluateRound();
+
+      model.setPlayerMove(MOVES.PAPER);
+      model.setComputerMove(MOVES.SCISSORS);
+      model.evaluateRound();
+
+      expect(model.isMatchOver()).toBe(true);
+      expect(model.getMatchWinner()).toBe(PARTICIPANTS.COMPUTER);
+
+      const initialPlayerScore = model.getPlayerScore();
+      const initialComputerScore = model.getComputerScore();
+
+      const winner = model.handleMatchWin(); // Call the method being tested
+
+      expect(model.getPlayerScore()).toBe(initialPlayerScore);
+      expect(model.getComputerScore()).toBe(initialComputerScore + 1);
+      expect(winner).toBe(PARTICIPANTS.COMPUTER);
     });
   });
 });
