@@ -583,7 +583,7 @@ export class Model {
     return HEALTH_KEYS[participant];
   }
 
-  private getHealth(participant: Participant): number | null {
+  getHealth(participant: Participant): number | null {
     const match = this.state.currentMatch;
     if (!match) return null;
 

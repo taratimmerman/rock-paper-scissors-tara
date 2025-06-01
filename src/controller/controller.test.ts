@@ -50,6 +50,7 @@ describe("Controller", () => {
       getMatchWinner: jest.fn(),
       getMatchNumber: jest.fn(),
       setDefaultMatchData: jest.fn(),
+      getHealth: jest.fn(),
     };
 
     mockView = {
@@ -72,6 +73,7 @@ describe("Controller", () => {
       updateStartButton: jest.fn(),
       showMatchOutcome: jest.fn(),
       toggleTaraButton: jest.fn(),
+      updateHealth: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
