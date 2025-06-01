@@ -74,6 +74,7 @@ describe("Controller", () => {
       showMatchOutcome: jest.fn(),
       toggleTaraButton: jest.fn(),
       updateHealth: jest.fn(),
+      toggleHealthTable: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
