@@ -207,8 +207,6 @@ describe("Model", () => {
         matchRoundNumber: 1,
         playerHealth: INITIAL_HEALTH,
         computerHealth: INITIAL_HEALTH,
-        initialHealth: INITIAL_HEALTH,
-        damagePerLoss: DAMAGE_PER_LOSS,
       });
 
       const model = new Model(mockGameStorage);
@@ -225,8 +223,6 @@ describe("Model", () => {
         matchRoundNumber: 2,
         playerHealth: INITIAL_HEALTH,
         computerHealth: INITIAL_HEALTH,
-        initialHealth: INITIAL_HEALTH,
-        damagePerLoss: DAMAGE_PER_LOSS,
       });
 
       const model = new Model(mockGameStorage);
@@ -816,8 +812,6 @@ describe("Model", () => {
         matchRoundNumber: 1,
         playerHealth: 100,
         computerHealth: 50,
-        initialHealth: 100,
-        damagePerLoss: 50,
       };
 
       // Override getMatch to return a real match
@@ -976,8 +970,6 @@ describe("Model", () => {
         matchRoundNumber: 16,
         playerHealth: INITIAL_HEALTH,
         computerHealth: 50,
-        initialHealth: INITIAL_HEALTH,
-        damagePerLoss: DAMAGE_PER_LOSS,
       };
       model.setMatch(initialMatch);
 
@@ -995,8 +987,6 @@ describe("Model", () => {
         matchRoundNumber: 16,
         playerHealth: INITIAL_HEALTH,
         computerHealth: 50, // The unique value we'll check
-        initialHealth: INITIAL_HEALTH,
-        damagePerLoss: DAMAGE_PER_LOSS,
       };
       model.setMatch(activeMatchFromStorage);
       mockGameStorage.getMatch.mockReturnValue(activeMatchFromStorage);
@@ -1090,8 +1080,6 @@ describe("Model Constructor - Initialization and Migration", () => {
       matchRoundNumber: 3,
       playerHealth: 50,
       computerHealth: 100,
-      initialHealth: 100,
-      damagePerLoss: 50,
     };
     const existingGlobalMatchNumber = 5;
 
@@ -1225,8 +1213,6 @@ describe("Model Constructor - Initialization and Migration", () => {
       matchRoundNumber: 1,
       playerHealth: 100,
       computerHealth: 100,
-      initialHealth: 100,
-      damagePerLoss: 50,
     };
 
     constructorMockGameStorage.getMatch.mockReturnValue(existingMatch);

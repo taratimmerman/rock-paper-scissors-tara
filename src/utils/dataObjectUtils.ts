@@ -16,8 +16,6 @@ export interface Match {
   matchRoundNumber: number;
   playerHealth: number;
   computerHealth: number;
-  initialHealth: number;
-  damagePerLoss: number;
 }
 
 export interface GameState {

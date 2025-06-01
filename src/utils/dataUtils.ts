@@ -14,8 +14,6 @@ export const DEFAULT_MATCH: Match = {
   matchRoundNumber: INITIAL_ROUND_NUMBER,
   playerHealth: INITIAL_HEALTH,
   computerHealth: INITIAL_HEALTH,
-  initialHealth: INITIAL_HEALTH,
-  damagePerLoss: DAMAGE_PER_LOSS,
 };
 
 export const HEALTH_KEYS = {
