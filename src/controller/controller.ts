@@ -71,7 +71,7 @@ export class Controller {
     this.updateHealthView();
 
     if (isMatchOver) {
-      const winner = this.model.getMatchWinner();
+      const winner = this.model.handleMatchWin();
       this.view.showMatchOutcome(playerMove, computerMove, winner);
       this.model.incrementMatchNumber();
       this.model.setMatch(null);

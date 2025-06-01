@@ -49,6 +49,7 @@ describe("Controller", () => {
       incrementMatchNumber: jest.fn(),
       getMatchWinner: jest.fn(),
       getMatchNumber: jest.fn(),
+      handleMatchWin: jest.fn(),
       setDefaultMatchData: jest.fn(),
       getHealth: jest.fn(),
     };
@@ -271,7 +272,7 @@ describe("Controller", () => {
       mockModel.getPlayerMove.mockReturnValue("rock");
       mockModel.getComputerMove.mockReturnValue("scissors");
       mockModel.isMatchOver.mockReturnValue(true);
-      mockModel.getMatchWinner.mockReturnValue(PARTICIPANTS.PLAYER);
+      mockModel.handleMatchWin.mockReturnValue(PARTICIPANTS.PLAYER);
       mockModel.incrementMatchNumber.mockImplementation(() => {});
       mockModel.setMatch.mockImplementation(() => {});
       mockModel.increaseRoundNumber.mockImplementation(() => {});
@@ -300,7 +301,7 @@ describe("Controller", () => {
       // but good practice to mock it if it theoretically could be.
       mockModel.evaluateRound.mockReturnValue("Computer wins the round!");
       mockModel.isMatchOver.mockReturnValue(true); // Key for this test
-      mockModel.getMatchWinner.mockReturnValue(matchWinner); // Key for this test
+      mockModel.handleMatchWin.mockReturnValue(matchWinner); // Key for this test
       mockModel.incrementMatchNumber.mockImplementation(() => {});
       mockModel.setMatch.mockImplementation(() => {}); // Set to null after match end
 
