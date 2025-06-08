@@ -17,6 +17,7 @@ export class View {
   private resultEl = document.getElementById("round-result")!;
   private taraBtn = document.getElementById("tara")!;
   private startBtn = document.getElementById("start");
+  private playAgainBtn = document.getElementById("play-again");
 
   // ===== General Methods =====
 
@@ -106,6 +107,14 @@ export class View {
       this.startBtn.textContent = `Resume Match`;
     } else if (this.startBtn && !isMatchActive) {
       this.startBtn.textContent = `Start Match`;
+    }
+  }
+
+  updatePlayAgainButton(isMatchOver: boolean): void {
+    if (this.playAgainBtn && !isMatchOver) {
+      this.playAgainBtn.textContent = `Next Round`;
+    } else if (this.playAgainBtn && isMatchOver) {
+      this.playAgainBtn.textContent = `Start New Match`;
     }
   }
 
