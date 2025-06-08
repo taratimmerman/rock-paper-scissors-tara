@@ -70,14 +70,12 @@ describe("Controller", () => {
       toggleResetGameState: jest.fn(),
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
-      toggleMostCommonMoveTable: jest.fn(),
       updateMostCommonMoves: jest.fn(),
       updateStartButton: jest.fn(),
       showMatchOutcome: jest.fn(),
       toggleTaraButton: jest.fn(),
       updateHealth: jest.fn(),
-      toggleHealthTable: jest.fn(),
-      toggleTaraTable: jest.fn(),
+      toggleGameStats: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -231,7 +229,7 @@ describe("Controller", () => {
     mockView.updateMatch.mockImplementation(() => {});
     mockView.toggleStartButton.mockImplementation(() => {});
     mockView.toggleResetGameState.mockImplementation(() => {});
-    mockView.toggleMostCommonMoveTable.mockImplementation(() => {});
+    mockView.toggleGameStats.mockImplementation(() => {});
     mockView.toggleMoveButtons.mockImplementation(() => {});
 
     controller["startGame"]();
@@ -242,9 +240,7 @@ describe("Controller", () => {
     expect(mockView.updateMatch).toHaveBeenCalledWith(initialMatchNumber);
     expect(mockView.toggleStartButton).toHaveBeenCalledWith(false);
     expect(mockView.toggleResetGameState).toHaveBeenCalledWith(false);
-    expect(mockView.toggleMostCommonMoveTable).toHaveBeenCalledWith(
-      showMostCommonMove
-    );
+    expect(mockView.toggleGameStats).toHaveBeenCalledWith(true);
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(true);
   });
 
@@ -330,7 +326,6 @@ describe("Controller", () => {
       expect(mockModel.increaseRoundNumber).not.toHaveBeenCalled(); // Should NOT be called
 
       // Common calls for end of round (regardless of match end)
-      expect(mockView.toggleMostCommonMoveTable).toHaveBeenCalledWith(false);
       expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
       expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
       expect(mockView.updateScores).toHaveBeenCalledWith(0, 1);

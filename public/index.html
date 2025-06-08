@@ -37,63 +37,40 @@
     <main id="game-container">
       <h1 id="match" style="display: none"></h1>
       <h2 id="round" style="display: none"></h2>
-      <section id="game-stats">
-        <!-- Health Table -->
-        <table border="1" style="display: none" id="health-table">
-          <caption>
-            Health
-          </caption>
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Computer</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td id="player-health">0</td>
-              <td id="computer-health">0</td>
-            </tr>
-          </tbody>
-        </table>
+      <section id="game-stats" style="display: none">
+        <!-- Player Stats -->
+        <section id="player-stats" class="stats">
+          <h3>Player</h3>
+          <div class="stat">
+            <label for="player-health">Health:</label>
+            <div id="player-health" class="health-bar">100</div>
+          </div>
+          <div class="stat">
+            <label for="player-tara">Tara Count:</label>
+            <div id="player-tara">0</div>
+          </div>
+          <div class="stat">
+            <label for="player-most-common-move">Most Common Move:</label>
+            <div id="player-most-common-move">–</div>
+          </div>
+        </section>
 
-        <!-- Tara Count Table -->
-        <table border="1" style="display: none" id="tara-table">
-          <caption>
-            Tara Count
-          </caption>
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Computer</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td id="player-tara">0</td>
-              <td id="computer-tara">0</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Most Common Move Table -->
-        <table border="1" style="display: none" id="most-common-move-table">
-          <caption>
-            Most Common Move
-          </caption>
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Computer</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td id="player-most-common-move"></td>
-              <td id="computer-most-common-move"></td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Computer Stats -->
+        <section id="computer-stats" class="stats">
+          <h3>Computer</h3>
+          <div class="stat">
+            <label for="computer-health">Health:</label>
+            <div id="computer-health" class="health-bar">100</div>
+          </div>
+          <div class="stat">
+            <label for="computer-tara">Tara Count:</label>
+            <div id="computer-tara">0</div>
+          </div>
+          <div class="stat">
+            <label for="computer-most-common-move">Most Common Move:</label>
+            <div id="computer-most-common-move">–</div>
+          </div>
+        </section>
       </section>
 
       <div id="choices">

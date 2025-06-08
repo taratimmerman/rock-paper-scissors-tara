@@ -56,9 +56,7 @@ export class Controller {
     this.view.updateMatch(matchNumber);
     this.view.toggleStartButton(false);
     this.view.toggleResetGameState(false);
-    this.view.toggleTaraTable(true);
-    this.view.toggleHealthTable(true);
-    this.view.toggleMostCommonMoveTable(showMostCommonMove);
+    this.view.toggleGameStats(true);
     this.view.toggleMoveButtons(true);
     this.updateHealthView();
   }
@@ -86,8 +84,8 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
     this.view.updatePlayAgainButton(isMatchOver);
-    this.view.toggleTaraTable(false);
-    this.view.toggleMostCommonMoveTable(false);
+    // this.view.toggleTaraTable(false);
+    // this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
   }
@@ -140,9 +138,7 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
     this.view.updateStartButton(isMatchActive);
-    this.view.toggleTaraTable(false);
-    this.view.toggleHealthTable(false);
-    this.view.toggleMostCommonMoveTable(false);
+    this.view.toggleGameStats(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleStartButton(true);

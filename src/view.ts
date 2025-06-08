@@ -87,15 +87,15 @@ export class View {
     if (btn) btn.style.display = show ? "inline-block" : "none";
   }
 
-  toggleMostCommonMoveTable(show: boolean): void {
-    const table = document.getElementById("most-common-move-table");
-    if (table) table.style.display = show ? "table" : "none";
+  toggleGameStats(show: boolean) {
+    const gameStatsSection = document.getElementById("game-stats");
+    if (gameStatsSection) {
+      gameStatsSection.style.display = show ? "block" : "none";
+    }
   }
 
   resetForNextRound(): void {
-    this.toggleTaraTable(true);
-    this.toggleHealthTable(true);
-    this.toggleMostCommonMoveTable(true);
+    this.toggleGameStats(true);
     this.toggleMoveButtons(true);
     this.togglePlayAgain(false);
 
@@ -144,11 +144,6 @@ export class View {
     this.taraBtn.textContent = `Tara (x${taraCount})`;
   }
 
-  toggleTaraTable(show: boolean): void {
-    const table = document.getElementById("tara-table");
-    if (table) table.style.display = show ? "table" : "none";
-  }
-
   // ===== History Methods =====
 
   updateMostCommonMoves(
@@ -169,10 +164,5 @@ export class View {
   ): void {
     this.playerHealthEl!.textContent = (playerHealth ?? 0).toString();
     this.computerHealthEl!.textContent = (computerHealth ?? 0).toString();
-  }
-
-  toggleHealthTable(show: boolean): void {
-    const table = document.getElementById("health-table");
-    if (table) table.style.display = show ? "table" : "none";
   }
 }
