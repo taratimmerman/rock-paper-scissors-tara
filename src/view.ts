@@ -93,6 +93,7 @@ export class View {
   }
 
   resetForNextRound(): void {
+    this.toggleTaraTable(true);
     this.toggleHealthTable(true);
     this.toggleMostCommonMoveTable(true);
     this.toggleMoveButtons(true);
@@ -141,6 +142,11 @@ export class View {
     }
 
     this.taraBtn.textContent = `Tara (x${taraCount})`;
+  }
+
+  toggleTaraTable(show: boolean): void {
+    const table = document.getElementById("tara-table");
+    if (table) table.style.display = show ? "table" : "none";
   }
 
   // ===== History Methods =====
