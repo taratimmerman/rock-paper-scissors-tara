@@ -80,13 +80,14 @@ export class Controller {
       this.model.increaseRoundNumber();
     }
 
-    this.view.toggleMostCommonMoveTable(false);
-    this.view.toggleMoveButtons(false);
-    this.view.togglePlayAgain(true);
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
+    this.view.updatePlayAgainButton(isMatchOver);
+    this.view.toggleMostCommonMoveTable(false);
+    this.view.toggleMoveButtons(false);
+    this.view.togglePlayAgain(true);
   }
 
   private handleNextRound(): void {
