@@ -62,6 +62,7 @@ describe("Controller", () => {
       showRoundOutcome: jest.fn(),
       toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
+      updatePlayAgainButton: jest.fn(),
       toggleStartButton: jest.fn(),
       resetForNextRound: jest.fn(),
       updateTaraCounts: jest.fn(),
@@ -76,6 +77,7 @@ describe("Controller", () => {
       toggleTaraButton: jest.fn(),
       updateHealth: jest.fn(),
       toggleHealthTable: jest.fn(),
+      toggleTaraTable: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
