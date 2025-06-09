@@ -19,6 +19,11 @@ export class View {
   private startBtn = document.getElementById("start");
   private playAgainBtn = document.getElementById("play-again");
 
+  // ===== Helper =====
+  private toggle(el: HTMLElement | null, show: boolean): void {
+    if (el) el.classList.toggle("hidden", !show);
+  }
+
   // ===== General Methods =====
 
   updateMessage(text: string): void {
@@ -28,15 +33,14 @@ export class View {
   }
 
   toggleStartButton(show: boolean): void {
-    const btn = document.getElementById("start");
-    if (btn) btn.style.display = show ? "inline" : "none";
+    this.toggle(this.startBtn, show);
   }
 
   updateRound(round: number): void {
     const roundElem = document.getElementById("round");
     if (roundElem) {
       roundElem.textContent = `Round ${round}`;
-      roundElem.style.display = "block";
+      this.toggle(roundElem, true);
     }
   }
 
@@ -44,7 +48,7 @@ export class View {
     const matchElem = document.getElementById("match");
     if (matchElem) {
       matchElem.textContent = `Match ${match}`;
-      matchElem.style.display = "block";
+      this.toggle(matchElem, true);
     }
   }
 
@@ -55,8 +59,8 @@ export class View {
   ): void {
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
     this.resultEl.textContent = result.toUpperCase();
-    this.movesEl.style.display = "block";
-    this.resultEl.style.display = "block";
+    this.toggle(this.movesEl, true);
+    this.toggle(this.resultEl, true);
   }
 
   showMatchOutcome(
@@ -66,56 +70,52 @@ export class View {
   ): void {
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
     this.resultEl.textContent = `${winner.toUpperCase()} WON THE MATCH!`;
-    this.movesEl.style.display = "block";
-    this.resultEl.style.display = "block";
+    this.toggle(this.movesEl, true);
+    this.toggle(this.resultEl, true);
   }
 
   toggleResetGameState(show: boolean): void {
     const btn = document.getElementById("reset-game-state");
-    if (btn) btn.style.display = show ? "inline-block" : "none";
+    this.toggle(btn, show);
   }
 
   toggleMoveButtons(show: boolean): void {
     Object.values(MOVES).forEach((move) => {
       const btn = document.getElementById(move);
-      if (btn) btn.style.display = show ? "inline" : "none";
+      this.toggle(btn, show);
     });
   }
 
   togglePlayAgain(show: boolean): void {
-    const btn = document.getElementById("play-again");
-    if (btn) btn.style.display = show ? "inline-block" : "none";
+    this.toggle(this.playAgainBtn, show);
   }
 
   toggleGameStats(show: boolean) {
     const gameStatsSection = document.getElementById("game-stats");
-    if (gameStatsSection) {
-      gameStatsSection.style.display = show ? "block" : "none";
-    }
+    this.toggle(gameStatsSection, show);
   }
 
   resetForNextRound(): void {
     this.toggleGameStats(true);
     this.toggleMoveButtons(true);
     this.togglePlayAgain(false);
-
-    this.movesEl.style.display = "none";
-    this.resultEl.style.display = "none";
+    this.toggle(this.movesEl, false);
+    this.toggle(this.resultEl, false);
   }
 
   updateStartButton(isMatchActive: boolean): void {
-    if (this.startBtn && isMatchActive) {
-      this.startBtn.textContent = `Resume Match`;
-    } else if (this.startBtn && !isMatchActive) {
-      this.startBtn.textContent = `Start Match`;
+    if (this.startBtn) {
+      this.startBtn.textContent = isMatchActive
+        ? "Resume Match"
+        : "Start Match";
     }
   }
 
   updatePlayAgainButton(isMatchOver: boolean): void {
-    if (this.playAgainBtn && !isMatchOver) {
-      this.playAgainBtn.textContent = `Next Round`;
-    } else if (this.playAgainBtn && isMatchOver) {
-      this.playAgainBtn.textContent = `Start New Match`;
+    if (this.playAgainBtn) {
+      this.playAgainBtn.textContent = isMatchOver
+        ? "Start New Match"
+        : "Next Round";
     }
   }
 
@@ -140,7 +140,6 @@ export class View {
     if (this.taraBtn instanceof HTMLButtonElement) {
       this.taraBtn.disabled = !isEnabled;
     }
-
     this.taraBtn.textContent = `Tara (x${taraCount})`;
   }
 
@@ -150,10 +149,12 @@ export class View {
     player: StandardMove | null,
     computer: StandardMove | null
   ): void {
-    if (this.playerMostCommonMoveEl)
+    if (this.playerMostCommonMoveEl) {
       this.playerMostCommonMoveEl.textContent = player ?? "X";
-    if (this.computerMostCommonMoveEl)
+    }
+    if (this.computerMostCommonMoveEl) {
       this.computerMostCommonMoveEl.textContent = computer ?? "X";
+    }
   }
 
   // ===== Health Methods =====
@@ -162,7 +163,11 @@ export class View {
     playerHealth: number | null,
     computerHealth: number | null
   ): void {
-    this.playerHealthEl!.textContent = (playerHealth ?? 0).toString();
-    this.computerHealthEl!.textContent = (computerHealth ?? 0).toString();
+    if (this.playerHealthEl) {
+      this.playerHealthEl.textContent = (playerHealth ?? 0).toString();
+    }
+    if (this.computerHealthEl) {
+      this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
+    }
   }
 }
