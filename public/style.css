@@ -37,7 +37,54 @@ header,
   padding: 1rem;
 }
 
+#computer-stats {
+  text-align: right;
+}
+
 /* Utility class to hide elements */
 .hidden {
   display: none !important;
+}
+
+/* Health Bar */
+.bar-wrapper {
+  position: relative;
+  width: 100px;
+  height: 20px;
+  overflow: hidden;
+  border: 1px solid black;
+}
+
+.bar {
+  position: relative;
+  height: 100%;
+  transition: width 0.3s ease;
+  background-color: green; /* updated by class like .full/.half/.zero */
+  display: block;
+  overflow: hidden;
+}
+
+.bar-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Health states */
+.bar.full {
+  width: 100%;
+  background-color: #4caf50;
+}
+
+.bar.half {
+  width: 50%;
+  background-color: #ff9800;
+}
+
+.bar.zero {
+  width: 5%;
+  background-color: #f44336;
 }

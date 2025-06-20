@@ -34,10 +34,12 @@ export class Controller {
   }
 
   private updateHealthView(): void {
-    this.view.updateHealth(
-      this.model.getHealth(PARTICIPANTS.PLAYER),
-      this.model.getHealth(PARTICIPANTS.COMPUTER)
-    );
+    const playerHealth = this.model.getHealth(PARTICIPANTS.PLAYER);
+    const computerHealth = this.model.getHealth(PARTICIPANTS.COMPUTER);
+
+    this.view.updateHealth(playerHealth, computerHealth);
+    this.view.updateHealthBar(PARTICIPANTS.PLAYER, playerHealth);
+    this.view.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
   }
 
   private updateTaraButtonView(): void {

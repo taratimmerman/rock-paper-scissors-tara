@@ -42,35 +42,29 @@
         <!-- Player Stats -->
         <section id="player-stats" class="stats">
           <h3>Player</h3>
-          <div class="stat">
-            <label for="player-health">Health:</label>
-            <div id="player-health" class="health-bar">100</div>
+          <div class="bar-wrapper">
+            <div class="bar" id="player-health">
+              <span class="bar-text" id="player-health-text"></span>
+            </div>
           </div>
-          <div class="stat">
-            <label for="player-tara">Tara Count:</label>
-            <div id="player-tara">0</div>
-          </div>
-          <div class="stat">
-            <label for="player-most-common-move">Most Common Move:</label>
-            <div id="player-most-common-move">–</div>
-          </div>
+          <p>Tara x<span id="player-tara">0</span></p>
+          <p>
+            <small>Common: <span id="player-most-common-move">–</span></small>
+          </p>
         </section>
 
         <!-- Computer Stats -->
         <section id="computer-stats" class="stats">
           <h3>Computer</h3>
-          <div class="stat">
-            <label for="computer-health">Health:</label>
-            <div id="computer-health" class="health-bar">100</div>
+          <div class="bar-wrapper">
+            <div class="bar" id="computer-health">
+              <span class="bar-text" id="computer-health-text"></span>
+            </div>
           </div>
-          <div class="stat">
-            <label for="computer-tara">Tara Count:</label>
-            <div id="computer-tara">0</div>
-          </div>
-          <div class="stat">
-            <label for="computer-most-common-move">Most Common Move:</label>
-            <div id="computer-most-common-move">–</div>
-          </div>
+          <p>Tara x<span id="computer-tara">0</span></p>
+          <p>
+            <small>Common: <span id="computer-most-common-move">–</span></small>
+          </p>
         </section>
       </section>
 

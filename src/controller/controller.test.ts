@@ -75,6 +75,7 @@ describe("Controller", () => {
       showMatchOutcome: jest.fn(),
       toggleTaraButton: jest.fn(),
       updateHealth: jest.fn(),
+      updateHealthBar: jest.fn(),
       toggleGameStats: jest.fn(),
     };
 

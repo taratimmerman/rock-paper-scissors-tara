@@ -1,5 +1,6 @@
 import {
   GameState,
+  Health,
   Match,
   Move,
   MoveCount,
@@ -16,6 +17,7 @@ import {
   MOVE_DATA_MAP,
   PARTICIPANTS,
   STANDARD_MOVE_NAMES,
+  VALID_HEALTH,
 } from "../utils/dataUtils";
 import { IGameStorage } from "../storage/gameStorage";
 import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
@@ -589,12 +591,14 @@ export class Model {
     return HEALTH_KEYS[participant];
   }
 
-  getHealth(participant: Participant): number | null {
+  getHealth(participant: Participant): Health {
     const match = this.state.currentMatch;
     if (!match) return null;
 
     const key = this.getHealthKey(participant);
-    return match[key];
+    const value = match[key];
+
+    return VALID_HEALTH.includes(value as Health) ? (value as Health) : null;
   }
 
   private decrementHealth(participant: Participant): boolean {

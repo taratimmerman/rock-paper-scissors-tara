@@ -1,12 +1,17 @@
-import { Move, Participant, StandardMove } from "./utils/dataObjectUtils";
+import {
+  Health,
+  Move,
+  Participant,
+  StandardMove,
+} from "./utils/dataObjectUtils";
 import { MOVES } from "./utils/dataUtils";
 
 export class View {
   private messageEl = document.getElementById("message");
   private playerScoreEl = document.getElementById("player-score");
   private computerScoreEl = document.getElementById("computer-score");
-  private playerHealthEl = document.getElementById("player-health");
-  private computerHealthEl = document.getElementById("computer-health");
+  private playerHealthEl = document.getElementById("player-health-text");
+  private computerHealthEl = document.getElementById("computer-health-text");
   private playerMostCommonMoveEl = document.getElementById(
     "player-most-common-move"
   );
@@ -150,10 +155,10 @@ export class View {
     computer: StandardMove | null
   ): void {
     if (this.playerMostCommonMoveEl) {
-      this.playerMostCommonMoveEl.textContent = player ?? "X";
+      this.playerMostCommonMoveEl.textContent = player ?? "N/A";
     }
     if (this.computerMostCommonMoveEl) {
-      this.computerMostCommonMoveEl.textContent = computer ?? "X";
+      this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
     }
   }
 
@@ -168,6 +173,28 @@ export class View {
     }
     if (this.computerHealthEl) {
       this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
+    }
+  }
+
+  updateHealthBar(participant: Participant, health: Health): void {
+    const barId = `${participant}-health`;
+    const bar = document.getElementById(barId);
+    if (!bar) return;
+
+    // Reset classes but keep the base 'bar'
+    bar.className = "bar";
+
+    switch (health) {
+      case 100:
+        bar.classList.add("full");
+        break;
+      case 50:
+        bar.classList.add("half");
+        break;
+      case 0:
+      case null:
+        bar.classList.add("zero");
+        break;
     }
   }
 }
