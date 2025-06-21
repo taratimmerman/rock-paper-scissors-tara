@@ -56,8 +56,7 @@ export class Controller {
     this.model.setDefaultMatchData();
     this.view.updateRound(roundNumber);
     this.view.updateMatch(matchNumber);
-    this.view.toggleStartButton(false);
-    this.view.toggleResetGameState(false);
+    this.view.toggleControls(false);
     this.view.toggleGameStats(true);
     this.view.toggleMoveButtons(true);
     this.updateHealthView();
@@ -143,7 +142,7 @@ export class Controller {
     this.view.toggleGameStats(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
-    this.view.toggleStartButton(true);
+    this.view.toggleControls(true);
 
     document
       .getElementById("start")

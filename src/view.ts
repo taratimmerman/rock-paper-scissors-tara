@@ -4,27 +4,40 @@ import {
   Participant,
   StandardMove,
 } from "./utils/dataObjectUtils";
-import { MOVES } from "./utils/dataUtils";
 
 export class View {
-  private messageEl = document.getElementById("message");
-  private playerScoreEl = document.getElementById("player-score");
-  private computerScoreEl = document.getElementById("computer-score");
-  private playerHealthEl = document.getElementById("player-health-text");
-  private computerHealthEl = document.getElementById("computer-health-text");
-  private playerMostCommonMoveEl = document.getElementById(
+  private messageEl = this.getEl<HTMLElement>("message");
+  private controls = this.getEl<HTMLElement>("initial-controls");
+  private playerScoreEl = this.getEl<HTMLElement>("player-score");
+  private computerScoreEl = this.getEl<HTMLElement>("computer-score");
+  private playerHealthEl = this.getEl<HTMLElement>("player-health-text");
+  private computerHealthEl = this.getEl<HTMLElement>("computer-health-text");
+  private playerHealthBarEl = this.getEl<HTMLElement>("player-health");
+  private computerHealthBarEl = this.getEl<HTMLElement>("computer-health");
+  private playerTaraCountEl = this.getEl<HTMLElement>("player-tara");
+  private computerTaraCountEl = this.getEl<HTMLElement>("computer-tara");
+  private playerMostCommonMoveEl = this.getEl<HTMLElement>(
     "player-most-common-move"
   );
-  private computerMostCommonMoveEl = document.getElementById(
+  private computerMostCommonMoveEl = this.getEl<HTMLElement>(
     "computer-most-common-move"
   );
-  private movesEl = document.getElementById("round-moves")!;
-  private resultEl = document.getElementById("round-result")!;
-  private taraBtn = document.getElementById("tara")!;
-  private startBtn = document.getElementById("start");
-  private playAgainBtn = document.getElementById("play-again");
+  private matchEl = this.getEl<HTMLElement>("match");
+  private roundEl = this.getEl<HTMLElement>("round");
+  private outcomeEl = this.getEl<HTMLElement>("result-display");
+  private movesEl = this.getEl<HTMLElement>("round-moves");
+  private resultEl = this.getEl<HTMLElement>("round-result");
+  private moveChoicesEl = this.getEl<HTMLElement>("choices");
+  private taraBtn = this.getEl<HTMLButtonElement>("tara");
+  private startBtn = this.getEl<HTMLButtonElement>("start");
+  private playAgainBtn = this.getEl<HTMLButtonElement>("play-again");
+  private gameStatsEl = this.getEl<HTMLButtonElement>("game-stats");
 
-  // ===== Helper =====
+  // ===== Helper Methods =====
+  private getEl<T extends HTMLElement>(id: string): T | null {
+    return document.getElementById(id) as T | null;
+  }
+
   private toggle(el: HTMLElement | null, show: boolean): void {
     if (el) el.classList.toggle("hidden", !show);
   }
@@ -32,63 +45,16 @@ export class View {
   // ===== General Methods =====
 
   updateMessage(text: string): void {
-    if (this.messageEl) {
-      this.messageEl.textContent = text;
-    }
+    if (!this.messageEl) return;
+    this.messageEl.textContent = text;
   }
 
-  toggleStartButton(show: boolean): void {
-    this.toggle(this.startBtn, show);
-  }
-
-  updateRound(round: number): void {
-    const roundElem = document.getElementById("round");
-    if (roundElem) {
-      roundElem.textContent = `Round ${round}`;
-      this.toggle(roundElem, true);
-    }
-  }
-
-  updateMatch(match: number): void {
-    const matchElem = document.getElementById("match");
-    if (matchElem) {
-      matchElem.textContent = `Match ${match}`;
-      this.toggle(matchElem, true);
-    }
-  }
-
-  showRoundOutcome(
-    playerMove: Move | null,
-    computerMove: Move | null,
-    result: string
-  ): void {
-    this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
-    this.resultEl.textContent = result.toUpperCase();
-    this.toggle(this.movesEl, true);
-    this.toggle(this.resultEl, true);
-  }
-
-  showMatchOutcome(
-    playerMove: Move | null,
-    computerMove: Move | null,
-    winner: Participant
-  ): void {
-    this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
-    this.resultEl.textContent = `${winner.toUpperCase()} WON THE MATCH!`;
-    this.toggle(this.movesEl, true);
-    this.toggle(this.resultEl, true);
-  }
-
-  toggleResetGameState(show: boolean): void {
-    const btn = document.getElementById("reset-game-state");
-    this.toggle(btn, show);
+  toggleControls(show: boolean): void {
+    this.toggle(this.controls, show);
   }
 
   toggleMoveButtons(show: boolean): void {
-    Object.values(MOVES).forEach((move) => {
-      const btn = document.getElementById(move);
-      this.toggle(btn, show);
-    });
+    this.toggle(this.moveChoicesEl, show);
   }
 
   togglePlayAgain(show: boolean): void {
@@ -96,55 +62,92 @@ export class View {
   }
 
   toggleGameStats(show: boolean) {
-    const gameStatsSection = document.getElementById("game-stats");
-    this.toggle(gameStatsSection, show);
+    this.toggle(this.gameStatsEl, show);
+  }
+
+  updateRound(round: number): void {
+    if (!this.roundEl) return;
+    this.roundEl.textContent = `Round ${round}`;
+    this.toggle(this.roundEl, true);
+  }
+
+  updateMatch(match: number): void {
+    if (!this.matchEl) return;
+    this.matchEl.textContent = `Match ${match}`;
+    this.toggle(this.matchEl, true);
   }
 
   resetForNextRound(): void {
     this.toggleGameStats(true);
     this.toggleMoveButtons(true);
     this.togglePlayAgain(false);
-    this.toggle(this.movesEl, false);
-    this.toggle(this.resultEl, false);
+    this.toggle(this.outcomeEl, false);
   }
 
   updateStartButton(isMatchActive: boolean): void {
-    if (this.startBtn) {
-      this.startBtn.textContent = isMatchActive
-        ? "Resume Match"
-        : "Start Match";
-    }
+    if (!this.startBtn) return;
+    this.startBtn.textContent = isMatchActive ? "Resume Match" : "Start Match";
   }
 
   updatePlayAgainButton(isMatchOver: boolean): void {
-    if (this.playAgainBtn) {
-      this.playAgainBtn.textContent = isMatchOver
-        ? "Start New Match"
-        : "Next Round";
-    }
+    if (!this.playAgainBtn) return;
+    this.playAgainBtn.textContent = isMatchOver
+      ? "Start New Match"
+      : "Next Round";
+  }
+
+  // ===== Outcome Methods =====
+
+  private showOutcomeText(
+    playerMove: Move | null,
+    computerMove: Move | null,
+    resultText: string
+  ): void {
+    if (!this.outcomeEl || !this.movesEl || !this.resultEl) return;
+    this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
+    this.resultEl.textContent = resultText;
+    this.toggle(this.outcomeEl, true);
+  }
+
+  showRoundOutcome(
+    playerMove: Move | null,
+    computerMove: Move | null,
+    result: string
+  ): void {
+    this.showOutcomeText(playerMove, computerMove, result.toUpperCase());
+  }
+
+  showMatchOutcome(
+    playerMove: Move | null,
+    computerMove: Move | null,
+    winner: Participant
+  ): void {
+    this.showOutcomeText(
+      playerMove,
+      computerMove,
+      `${winner.toUpperCase()} WON THE MATCH!`
+    );
   }
 
   // ===== Score Methods =====
 
   updateScores(player: number, computer: number): void {
-    if (this.playerScoreEl) this.playerScoreEl.textContent = player.toString();
-    if (this.computerScoreEl)
-      this.computerScoreEl.textContent = computer.toString();
+    if (!this.playerScoreEl || !this.computerScoreEl) return;
+    this.playerScoreEl.textContent = player.toString();
+    this.computerScoreEl.textContent = computer.toString();
   }
 
   // ===== Tara Methods =====
 
   updateTaraCounts(playerCount: number, computerCount: number): void {
-    document.getElementById("player-tara")!.textContent =
-      playerCount.toString();
-    document.getElementById("computer-tara")!.textContent =
-      computerCount.toString();
+    if (!this.playerTaraCountEl || !this.computerTaraCountEl) return;
+    this.playerTaraCountEl.textContent = playerCount.toString();
+    this.computerTaraCountEl.textContent = computerCount.toString();
   }
 
   updateTaraButton(isEnabled: boolean, taraCount: number): void {
-    if (this.taraBtn instanceof HTMLButtonElement) {
-      this.taraBtn.disabled = !isEnabled;
-    }
+    if (!this.taraBtn) return;
+    this.taraBtn.disabled = !isEnabled;
     this.taraBtn.textContent = `Tara (x${taraCount})`;
   }
 
@@ -154,31 +157,27 @@ export class View {
     player: StandardMove | null,
     computer: StandardMove | null
   ): void {
-    if (this.playerMostCommonMoveEl) {
-      this.playerMostCommonMoveEl.textContent = player ?? "N/A";
-    }
-    if (this.computerMostCommonMoveEl) {
-      this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
-    }
+    if (!this.playerMostCommonMoveEl || !this.computerMostCommonMoveEl) return;
+    this.playerMostCommonMoveEl.textContent = player ?? "N/A";
+    this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
   }
 
   // ===== Health Methods =====
 
-  updateHealth(
-    playerHealth: number | null,
-    computerHealth: number | null
-  ): void {
-    if (this.playerHealthEl) {
-      this.playerHealthEl.textContent = (playerHealth ?? 0).toString();
-    }
-    if (this.computerHealthEl) {
-      this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
-    }
+  updateHealth(playerHealth: Health, computerHealth: Health): void {
+    if (!this.playerHealthEl || !this.computerHealthEl) return;
+    this.playerHealthEl.textContent = (playerHealth ?? 0).toString();
+    this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
+  }
+
+  private getHealthBar(participant: Participant): HTMLElement | null {
+    return participant === "player"
+      ? this.playerHealthBarEl
+      : this.computerHealthBarEl;
   }
 
   updateHealthBar(participant: Participant, health: Health): void {
-    const barId = `${participant}-health`;
-    const bar = document.getElementById(barId);
+    const bar = this.getHealthBar(participant);
     if (!bar) return;
 
     // Reset classes but keep the base 'bar'
