@@ -1,5 +1,5 @@
 import { Model } from "../model/model";
-import { View } from "../view";
+import { View } from "../view/view";
 import { Move } from "../utils/dataObjectUtils";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 
@@ -56,8 +56,7 @@ export class Controller {
     this.model.setDefaultMatchData();
     this.view.updateRound(roundNumber);
     this.view.updateMatch(matchNumber);
-    this.view.toggleStartButton(false);
-    this.view.toggleResetGameState(false);
+    this.view.toggleControls(false);
     this.view.toggleGameStats(true);
     this.view.toggleMoveButtons(true);
     this.updateHealthView();
@@ -86,8 +85,6 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
     this.view.updatePlayAgainButton(isMatchOver);
-    // this.view.toggleTaraTable(false);
-    // this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
   }
@@ -143,7 +140,7 @@ export class Controller {
     this.view.toggleGameStats(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
-    this.view.toggleStartButton(true);
+    this.view.toggleControls(true);
 
     document
       .getElementById("start")

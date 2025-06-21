@@ -63,11 +63,10 @@ describe("Controller", () => {
       toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
       updatePlayAgainButton: jest.fn(),
-      toggleStartButton: jest.fn(),
+      toggleControls: jest.fn(),
       resetForNextRound: jest.fn(),
       updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
-      toggleResetGameState: jest.fn(),
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
       updateMostCommonMoves: jest.fn(),
@@ -228,8 +227,7 @@ describe("Controller", () => {
     // Mock all view methods that startGame interacts with
     mockView.updateRound.mockImplementation(() => {});
     mockView.updateMatch.mockImplementation(() => {});
-    mockView.toggleStartButton.mockImplementation(() => {});
-    mockView.toggleResetGameState.mockImplementation(() => {});
+    mockView.toggleControls.mockImplementation(() => {});
     mockView.toggleGameStats.mockImplementation(() => {});
     mockView.toggleMoveButtons.mockImplementation(() => {});
 
@@ -239,8 +237,7 @@ describe("Controller", () => {
     expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
     expect(mockView.updateRound).toHaveBeenCalledWith(initialRoundNumber);
     expect(mockView.updateMatch).toHaveBeenCalledWith(initialMatchNumber);
-    expect(mockView.toggleStartButton).toHaveBeenCalledWith(false);
-    expect(mockView.toggleResetGameState).toHaveBeenCalledWith(false);
+    expect(mockView.toggleControls).toHaveBeenCalledWith(false);
     expect(mockView.toggleGameStats).toHaveBeenCalledWith(true);
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(true);
   });
