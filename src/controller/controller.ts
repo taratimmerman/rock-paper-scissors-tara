@@ -1,5 +1,5 @@
 import { Model } from "../model/model";
-import { View } from "../view";
+import { View } from "../view/view";
 import { Move } from "../utils/dataObjectUtils";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 
@@ -85,8 +85,6 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
     this.view.updatePlayAgainButton(isMatchOver);
-    // this.view.toggleTaraTable(false);
-    // this.view.toggleMostCommonMoveTable(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(true);
   }

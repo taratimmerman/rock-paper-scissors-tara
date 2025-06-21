@@ -3,7 +3,7 @@ import {
   Move,
   Participant,
   StandardMove,
-} from "./utils/dataObjectUtils";
+} from "../utils/dataObjectUtils";
 
 export class View {
   private messageEl = this.getEl<HTMLElement>("message");

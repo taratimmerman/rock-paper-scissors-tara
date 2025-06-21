@@ -1,5 +1,5 @@
 import { Model } from "./model/model";
-import { View } from "./view";
+import { View } from "./view/view";
 import { Controller } from "./controller/controller";
 
 document.addEventListener("DOMContentLoaded", () => {
