@@ -1,10 +1,23 @@
 import { Controller } from "./controller";
+import { IModel } from "../model/IModel";
+import { IView } from "../view/IView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
+interface ControllerWithPrivates {
+  updateScoreView(): void;
+  updateTaraView(): void;
+  updateTaraButtonView(): void;
+}
+
+interface ModelWithPrivates {
+  resetMoves(): void;
+  registerPlayerMove(move: Move): void;
+}
+
 describe("Controller", () => {
-  let mockModel: any;
-  let mockView: any;
+  let mockModel: jest.Mocked<IModel>;
+  let mockView: jest.Mocked<IView>;
   let controller: Controller;
 
   beforeEach(() => {
@@ -15,43 +28,41 @@ describe("Controller", () => {
       <button id=${MOVES.TARA}></button>
     `;
 
+    // Create fully typed jest mocks
     mockModel = {
       getPlayerScore: jest.fn().mockReturnValue(0),
       getComputerScore: jest.fn().mockReturnValue(0),
       setPlayerScore: jest.fn(),
       setComputerScore: jest.fn(),
       getPlayerMove: jest.fn().mockReturnValue(MOVES.ROCK),
-      setComputerMove: jest.fn(),
       getComputerMove: jest.fn().mockReturnValue(MOVES.SCISSORS),
+      registerPlayerMove: jest.fn(),
       chooseComputerMove: jest.fn(),
       evaluateRound: jest.fn().mockReturnValue("You win!"),
-      increaseRoundNumber: jest.fn(),
+      resetMoves: jest.fn(),
       getPlayerTaraCount: jest.fn().mockReturnValue(0),
       getComputerTaraCount: jest.fn().mockReturnValue(0),
       taraIsEnabled: jest.fn(),
       isTaraButtonVisible: jest.fn(),
-      resetMoves: jest.fn(),
-      resetScores: jest.fn(),
       resetTaras: jest.fn(),
-      registerPlayerMove: jest.fn(),
-      resetHistories: jest.fn(),
-      resetBothMoveCounts: jest.fn(),
-      resetMostCommonMoves: jest.fn(),
       getPlayerMostCommonMove: jest.fn(),
       getComputerMostCommonMove: jest.fn(),
+      resetBothMoveCounts: jest.fn(),
+      resetMostCommonMoves: jest.fn(),
       showMostCommonMove: jest.fn(),
       isMatchActive: jest.fn(),
       isMatchOver: jest.fn(),
-      setMatch: jest.fn(),
-      resetMatchData: jest.fn(),
-      getRoundNumber: jest.fn(),
-      updateRound: jest.fn(),
-      incrementMatchNumber: jest.fn(),
-      getMatchWinner: jest.fn(),
-      getMatchNumber: jest.fn(),
       handleMatchWin: jest.fn(),
+      incrementMatchNumber: jest.fn(),
+      increaseRoundNumber: jest.fn(),
+      getRoundNumber: jest.fn().mockReturnValue(1),
+      getMatchNumber: jest.fn().mockReturnValue(1),
+      setMatch: jest.fn(),
       setDefaultMatchData: jest.fn(),
+      resetHistories: jest.fn(),
+      resetMatchData: jest.fn(),
       getHealth: jest.fn(),
+      resetScores: jest.fn(),
     };
 
     mockView = {
@@ -60,22 +71,22 @@ describe("Controller", () => {
       updateRound: jest.fn(),
       updateMatch: jest.fn(),
       showRoundOutcome: jest.fn(),
+      showMatchOutcome: jest.fn(),
       toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
-      updatePlayAgainButton: jest.fn(),
-      toggleControls: jest.fn(),
-      resetForNextRound: jest.fn(),
       updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
+      updateMostCommonMoves: jest.fn(),
+      updatePlayAgainButton: jest.fn(),
+      resetForNextRound: jest.fn(),
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
-      updateMostCommonMoves: jest.fn(),
-      updateStartButton: jest.fn(),
-      showMatchOutcome: jest.fn(),
-      toggleTaraButton: jest.fn(),
+      updateTaraButtonView: jest.fn(),
+      toggleControls: jest.fn(),
+      toggleGameStats: jest.fn(),
       updateHealth: jest.fn(),
       updateHealthBar: jest.fn(),
-      toggleGameStats: jest.fn(),
+      updateStartButton: jest.fn(),
     };
 
     controller = new Controller(mockModel, mockView);
@@ -184,21 +195,37 @@ describe("Controller", () => {
   });
 
   test("should call resetMoves before registerPlayerMove", () => {
-    const resetSpy = jest.spyOn(mockModel, "resetMoves");
-    const registerPlayerMoveSpy = jest.spyOn(mockModel, "registerPlayerMove");
+    const resetMoves = jest.spyOn(
+      controller["model"] as unknown as ModelWithPrivates,
+      "resetMoves"
+    );
+
+    const registerPlayerMove = jest.spyOn(
+      controller["model"] as unknown as ModelWithPrivates,
+      "registerPlayerMove"
+    );
 
     controller.handlePlayerMove(MOVES.SCISSORS);
 
-    const resetCall = resetSpy.mock.invocationCallOrder[0];
-    const setMoveCall = registerPlayerMoveSpy.mock.invocationCallOrder[0];
+    const resetCall = resetMoves.mock.invocationCallOrder[0];
+    const setMoveCall = registerPlayerMove.mock.invocationCallOrder[0];
 
     expect(resetCall).toBeLessThan(setMoveCall);
   });
 
   test("resetGameState should reset model and update view", () => {
-    jest.spyOn(controller as any, "updateScoreView");
-    jest.spyOn(controller as any, "updateTaraView");
-    jest.spyOn(controller as any, "updateTaraButtonView");
+    const updateScoreView = jest.spyOn(
+      controller as unknown as ControllerWithPrivates,
+      "updateScoreView"
+    );
+    const updateTaraView = jest.spyOn(
+      controller as unknown as ControllerWithPrivates,
+      "updateTaraView"
+    );
+    const updateTaraButtonView = jest.spyOn(
+      controller as unknown as ControllerWithPrivates,
+      "updateTaraButtonView"
+    );
 
     controller.resetGameState();
 
@@ -209,9 +236,9 @@ describe("Controller", () => {
     expect(mockModel.resetBothMoveCounts).toHaveBeenCalled();
     expect(mockModel.resetMostCommonMoves).toHaveBeenCalled();
 
-    expect((controller as any).updateScoreView).toHaveBeenCalled();
-    expect((controller as any).updateTaraView).toHaveBeenCalled();
-    expect((controller as any).updateTaraButtonView).toHaveBeenCalled();
+    expect(updateScoreView).toHaveBeenCalled();
+    expect(updateTaraView).toHaveBeenCalled();
+    expect(updateTaraButtonView).toHaveBeenCalled();
   });
 
   test("startGame performs initial game setup with correct view updates", () => {
