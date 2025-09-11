@@ -1069,32 +1069,32 @@ describe("Model Constructor - Initialization and Migration", () => {
 
   beforeEach(() => {
     constructorMockGameStorage = {
-      getScore: jest.fn((participant: Participant) => 0),
-      setScore: jest.fn((participant: Participant, score: number) => {}),
-      removeScore: jest.fn((participant: Participant) => {}),
+      getScore: jest.fn((_participant: Participant) => 0),
+      setScore: jest.fn((_participant: Participant, _score: number) => {}),
+      removeScore: jest.fn((_participant: Participant) => {}),
 
-      getTaraCount: jest.fn((participant: Participant) => 0),
-      setTaraCount: jest.fn((participant: Participant, count: number) => {}),
-      removeTaraCount: jest.fn((participant: Participant) => {}),
+      getTaraCount: jest.fn((_participant: Participant) => 0),
+      setTaraCount: jest.fn((_participant: Participant, _count: number) => {}),
+      removeTaraCount: jest.fn((_participant: Participant) => {}),
 
-      getMostCommonMove: jest.fn((participant: Participant) => null),
+      getMostCommonMove: jest.fn((_participant: Participant) => null),
       setMostCommonMove: jest.fn(
-        (participant: Participant, move: StandardMove | null) => {}
+        (_participant: Participant, _move: StandardMove | null) => {}
       ),
-      removeMostCommonMove: jest.fn((participant: Participant) => {}),
+      removeMostCommonMove: jest.fn((_participant: Participant) => {}),
 
-      getMoveCounts: jest.fn((participant: Participant) => ({
+      getMoveCounts: jest.fn((_participant: Participant) => ({
         rock: 0,
         paper: 0,
         scissors: 0,
       })),
       setMoveCounts: jest.fn(
-        (participant: Participant, moveCounts: MoveCount) => {}
+        (_participant: Participant, _moveCounts: MoveCount) => {}
       ),
-      removeMoveCounts: jest.fn((participant: Participant) => {}),
+      removeMoveCounts: jest.fn((_participant: Participant) => {}),
 
       getRoundNumber: jest.fn(() => 1),
-      removeHistory: jest.fn((participant: Participant) => {}),
+      removeHistory: jest.fn((_participant: Participant) => {}),
 
       getMatch: jest.fn(() => null),
       setMatch: jest.fn(),

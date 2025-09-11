@@ -1,13 +1,13 @@
-import { Model } from "../model/model";
-import { View } from "../view/view";
+import { IModel } from "../model/IModel";
+import { IView } from "../view/IView";
 import { Move } from "../utils/dataObjectUtils";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 
 export class Controller {
-  private model: Model;
-  private view: View;
+  private model: IModel;
+  private view: IView;
 
-  constructor(model: Model, view: View) {
+  constructor(model: IModel, view: IView) {
     this.model = model;
     this.view = view;
   }
@@ -45,13 +45,13 @@ export class Controller {
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
     const taraCount = this.model.getPlayerTaraCount();
+
     this.view.updateTaraButton(isEnabled, taraCount);
   }
 
   private startGame(): void {
     const roundNumber = this.model.getRoundNumber();
     const matchNumber = this.model.getMatchNumber();
-    const showMostCommonMove = this.model.showMostCommonMove();
 
     this.model.setDefaultMatchData();
     this.view.updateRound(roundNumber);
