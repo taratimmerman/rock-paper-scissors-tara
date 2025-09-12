@@ -1,5 +1,7 @@
 import { Match, Move, MoveData, StandardMove } from "./dataObjectUtils";
 
+export const DEFAULT_DELAY = 500;
+
 export const PARTICIPANTS = {
   PLAYER: "player",
   COMPUTER: "computer",

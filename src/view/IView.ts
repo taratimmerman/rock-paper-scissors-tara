@@ -1,6 +1,7 @@
 import { Move, Participant } from "../utils/dataObjectUtils";
 
 export interface IView {
+  activateSpinner(shouldActivate: boolean): void;
   updateMessage(msg: string): void;
   updateScores(playerScore: number, computerScore: number): void;
   updateRound(roundNumber: number): void;
