@@ -1,7 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../view/IView";
-import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
+import { DEFAULT_DELAY, MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
 interface ControllerWithPrivates {
@@ -66,6 +66,7 @@ describe("Controller", () => {
     };
 
     mockView = {
+      activateSpinner: jest.fn(),
       updateMessage: jest.fn(),
       updateScores: jest.fn(),
       updateRound: jest.fn(),
@@ -90,17 +91,25 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, mockView);
+
+    jest.useFakeTimers();
   });
 
-  test("initialize updates the message and scores", () => {
-    controller.initialize();
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
-    expect(mockModel.getPlayerScore).toHaveBeenCalled();
-    expect(mockModel.getComputerScore).toHaveBeenCalled();
+  test("initialize updates the message and scores", async () => {
+    const initializationPromise = controller.initialize();
+    expect(mockView.updateScores).toHaveBeenCalled();
+
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
     expect(mockView.updateMessage).toHaveBeenCalledWith(
       "Rock, Paper, Scissors, Tara"
     );
-    expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
+    expect(mockView.activateSpinner).toHaveBeenCalledWith(false);
   });
 
   test("initialize calls view.updateMostCommonMoves when both most common moves exist", () => {
@@ -109,7 +118,6 @@ describe("Controller", () => {
     mockView.updateMostCommonMoves = jest.fn();
 
     controller.initialize();
-
     expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.PAPER
@@ -122,7 +130,6 @@ describe("Controller", () => {
     mockView.updateMostCommonMoves = jest.fn();
 
     controller.initialize();
-
     expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
       null,
       MOVES.PAPER
@@ -145,42 +152,63 @@ describe("Controller", () => {
 
   // ===== Move Tests =====
 
-  test("clicking rock button sets player move to 'rock'", () => {
-    controller.initialize();
-    const rockBtn = document.getElementById(MOVES.ROCK)!;
-    rockBtn.click();
+  test("clicking rock button calls registerPlayerMove with 'rock'", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
 
+    document.getElementById(MOVES.ROCK)!.click();
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
   });
 
-  test("clicking paper button sets player move to 'paper'", () => {
-    controller.initialize();
+  test("clicking paper button calls registerPlayerMove with 'paper'", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
     document.getElementById(MOVES.PAPER)!.click();
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
-  test("clicking scissors button sets player move to 'scissors'", () => {
-    controller.initialize();
+  test("clicking scissors button calls registerPlayerMove with 'scissors'", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
     document.getElementById(MOVES.SCISSORS)!.click();
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
   });
 
-  test("clicking tara button sets player move to 'tara'", () => {
-    controller.initialize();
+  test("clicking tara button calls registerPlayerMove with 'tara'", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
     document.getElementById(MOVES.TARA)!.click();
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
   });
 
-  test("clicking a move button triggers computer to choose a move", () => {
-    controller.initialize();
-    document.getElementById(MOVES.ROCK)!.click();
+  test("clicking a move button triggers computer to choose a move", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
 
+    document.getElementById(MOVES.ROCK)!.click();
     expect(mockModel.chooseComputerMove).toHaveBeenCalled();
   });
 
-  test("clicking a move button displays outcome and toggles UI", () => {
-    controller.initialize();
+  test("clicking a move button displays outcome and toggles UI", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
     document.getElementById(MOVES.ROCK)!.click();
+
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await Promise.resolve();
+
+    jest.advanceTimersByTime(DEFAULT_DELAY / 2);
+    await Promise.resolve();
 
     expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
       MOVES.ROCK,
@@ -192,6 +220,15 @@ describe("Controller", () => {
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraButton).toHaveBeenCalled();
+  });
+
+  test("Clicking a move button makes move buttons disappear", async () => {
+    const initializationPromise = controller.initialize();
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
+    document.getElementById(MOVES.SCISSORS)!.click();
+    expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
   });
 
   test("should call resetMoves before registerPlayerMove", () => {
@@ -228,6 +265,7 @@ describe("Controller", () => {
     );
 
     controller.resetGameState();
+    jest.advanceTimersByTime(DEFAULT_DELAY * 1.5);
 
     expect(mockModel.resetScores).toHaveBeenCalled();
     expect(mockModel.resetMoves).toHaveBeenCalled();
@@ -351,7 +389,6 @@ describe("Controller", () => {
       expect(mockModel.increaseRoundNumber).not.toHaveBeenCalled(); // Should NOT be called
 
       // Common calls for end of round (regardless of match end)
-      expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
       expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
       expect(mockView.updateScores).toHaveBeenCalledWith(0, 1);
       expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
