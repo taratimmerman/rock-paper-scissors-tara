@@ -67,6 +67,10 @@ describe("Controller", () => {
 
     mockView = {
       activateSpinner: jest.fn(),
+      bindStartGame: jest.fn(),
+      bindPlayAgain: jest.fn(),
+      bindResetGame: jest.fn(),
+      bindPlayerMove: jest.fn(),
       updateMessage: jest.fn(),
       updateScores: jest.fn(),
       updateRound: jest.fn(),
@@ -157,7 +161,8 @@ describe("Controller", () => {
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await initializationPromise;
 
-    document.getElementById(MOVES.ROCK)!.click();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.ROCK);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
   });
 
@@ -166,7 +171,8 @@ describe("Controller", () => {
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await initializationPromise;
 
-    document.getElementById(MOVES.PAPER)!.click();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.PAPER);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
@@ -175,7 +181,8 @@ describe("Controller", () => {
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await initializationPromise;
 
-    document.getElementById(MOVES.SCISSORS)!.click();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.SCISSORS);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
   });
 
@@ -184,7 +191,8 @@ describe("Controller", () => {
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await initializationPromise;
 
-    document.getElementById(MOVES.TARA)!.click();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.TARA);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
   });
 
@@ -193,7 +201,8 @@ describe("Controller", () => {
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await initializationPromise;
 
-    document.getElementById(MOVES.ROCK)!.click();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.ROCK);
     expect(mockModel.chooseComputerMove).toHaveBeenCalled();
   });
 
@@ -202,7 +211,8 @@ describe("Controller", () => {
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await initializationPromise;
 
-    document.getElementById(MOVES.ROCK)!.click();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.ROCK);
 
     jest.advanceTimersByTime(DEFAULT_DELAY);
     await Promise.resolve();

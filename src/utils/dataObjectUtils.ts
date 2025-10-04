@@ -14,6 +14,8 @@ export type MoveData = {
 
 export type MoveCount = Record<StandardMove, number>;
 
+export type VoidHandler = () => void;
+
 export interface Match {
   matchRoundNumber: number;
   playerHealth: number;

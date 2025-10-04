@@ -3,7 +3,9 @@ import {
   Move,
   Participant,
   StandardMove,
+  VoidHandler,
 } from "../utils/dataObjectUtils";
+import { MOVES } from "../utils/dataUtils";
 
 export class View {
   private messageEl = this.getEl<HTMLElement>("message");
@@ -33,6 +35,7 @@ export class View {
   private startBtn = this.getEl<HTMLButtonElement>("start");
   private playAgainBtn = this.getEl<HTMLButtonElement>("play-again");
   private gameStatsEl = this.getEl<HTMLButtonElement>("game-stats");
+  private resetBtn = this.getEl<HTMLButtonElement>("reset-game-state");
 
   // ===== Helper Methods =====
   private getEl<T extends HTMLElement>(id: string): T | null {
@@ -41,6 +44,26 @@ export class View {
 
   private toggle(el: HTMLElement | null, show: boolean): void {
     if (el) el.classList.toggle("hidden", !show);
+  }
+
+  // ===== Binding Methods =====
+
+  bindStartGame(handler: VoidHandler) {
+    this.startBtn?.addEventListener("click", handler);
+  }
+
+  bindPlayAgain(handler: VoidHandler) {
+    this.playAgainBtn?.addEventListener("click", handler);
+  }
+
+  bindResetGame(handler: VoidHandler) {
+    this.resetBtn?.addEventListener("click", handler);
+  }
+
+  bindPlayerMove(handler: (move: Move) => void) {
+    Object.values(MOVES).forEach((move) => {
+      this.getEl(move)?.addEventListener("click", () => handler(move));
+    });
   }
 
   // ===== General Methods =====

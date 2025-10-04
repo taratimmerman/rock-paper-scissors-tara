@@ -160,22 +160,9 @@ export class Controller {
     this.view.togglePlayAgain(false);
     this.view.toggleControls(true);
 
-    document
-      .getElementById("start")
-      ?.addEventListener("click", () => this.startGame());
-
-    document
-      .getElementById("play-again")
-      ?.addEventListener("click", () => this.handleNextRound());
-
-    Object.values(MOVES).forEach((move) => {
-      document
-        .getElementById(move)
-        ?.addEventListener("click", () => this.handlePlayerMove(move));
-    });
-
-    document
-      .getElementById("reset-game-state")
-      ?.addEventListener("click", () => this.resetGameState());
+    this.view.bindStartGame(() => this.startGame());
+    this.view.bindPlayAgain(() => this.handleNextRound());
+    this.view.bindResetGame(() => this.resetGameState());
+    this.view.bindPlayerMove((move) => this.handlePlayerMove(move));
   }
 }
