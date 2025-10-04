@@ -10,6 +10,8 @@ const setupDOM = () => {
     <div id="message"></div>
     <div id="player-score"></div>
     <div id="computer-score"></div>
+    <div id="overlay"></div>
+    <div id="initial-controls"></div>
     <div id="player-health-text"></div>
     <div id="computer-health-text"></div>
     <div id="player-health" class="bar"></div>

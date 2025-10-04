@@ -38,12 +38,16 @@ export class View {
   private resetBtn = this.getEl<HTMLButtonElement>("reset-game-state");
 
   // ===== Helper Methods =====
-  private getEl<T extends HTMLElement>(id: string): T | null {
-    return document.getElementById(id) as T | null;
+  private getEl<T extends HTMLElement>(id: string): T {
+    const element = document.getElementById(id);
+    if (!element) {
+      throw new Error(`Critical element not found: #${id}`);
+    }
+    return element as T;
   }
 
-  private toggle(el: HTMLElement | null, show: boolean): void {
-    if (el) el.classList.toggle("hidden", !show);
+  private toggle(el: HTMLElement, show: boolean): void {
+    el.classList.toggle("hidden", !show);
   }
 
   // ===== Binding Methods =====
@@ -94,13 +98,11 @@ export class View {
   }
 
   updateRound(round: number): void {
-    if (!this.roundEl) return;
     this.roundEl.textContent = `Round ${round}`;
     this.toggle(this.roundEl, true);
   }
 
   updateMatch(match: number): void {
-    if (!this.matchEl) return;
     this.matchEl.textContent = `Match ${match}`;
     this.toggle(this.matchEl, true);
   }
@@ -113,12 +115,10 @@ export class View {
   }
 
   updateStartButton(isMatchActive: boolean): void {
-    if (!this.startBtn) return;
     this.startBtn.textContent = isMatchActive ? "Resume Match" : "Start Match";
   }
 
   updatePlayAgainButton(isMatchOver: boolean): void {
-    if (!this.playAgainBtn) return;
     this.playAgainBtn.textContent = isMatchOver
       ? "Start New Match"
       : "Next Round";
@@ -135,7 +135,6 @@ export class View {
     computerMove: Move | null,
     resultText: string
   ): void {
-    if (!this.outcomeEl || !this.movesEl || !this.resultEl) return;
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
     this.resultEl.textContent = resultText;
     this.toggle(this.outcomeEl, true);
@@ -164,7 +163,6 @@ export class View {
   // ===== Score Methods =====
 
   updateScores(player: number, computer: number): void {
-    if (!this.playerScoreEl || !this.computerScoreEl) return;
     this.playerScoreEl.textContent = player.toString();
     this.computerScoreEl.textContent = computer.toString();
   }
@@ -172,13 +170,11 @@ export class View {
   // ===== Tara Methods =====
 
   updateTaraCounts(playerCount: number, computerCount: number): void {
-    if (!this.playerTaraCountEl || !this.computerTaraCountEl) return;
     this.playerTaraCountEl.textContent = playerCount.toString();
     this.computerTaraCountEl.textContent = computerCount.toString();
   }
 
   updateTaraButton(isEnabled: boolean, taraCount: number): void {
-    if (!this.taraBtn) return;
     this.taraBtn.disabled = !isEnabled;
     this.taraBtn.textContent = `Tara (x${taraCount})`;
   }
@@ -189,7 +185,6 @@ export class View {
     player: StandardMove | null,
     computer: StandardMove | null
   ): void {
-    if (!this.playerMostCommonMoveEl || !this.computerMostCommonMoveEl) return;
     this.playerMostCommonMoveEl.textContent = player ?? "N/A";
     this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
   }
@@ -197,12 +192,11 @@ export class View {
   // ===== Health Methods =====
 
   updateHealth(playerHealth: Health, computerHealth: Health): void {
-    if (!this.playerHealthEl || !this.computerHealthEl) return;
     this.playerHealthEl.textContent = (playerHealth ?? 0).toString();
     this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
   }
 
-  private getHealthBar(participant: Participant): HTMLElement | null {
+  private getHealthBar(participant: Participant): HTMLElement {
     return participant === "player"
       ? this.playerHealthBarEl
       : this.computerHealthBarEl;
@@ -210,7 +204,6 @@ export class View {
 
   updateHealthBar(participant: Participant, health: Health): void {
     const bar = this.getHealthBar(participant);
-    if (!bar) return;
 
     // Reset classes but keep the base 'bar'
     bar.className = "bar";
