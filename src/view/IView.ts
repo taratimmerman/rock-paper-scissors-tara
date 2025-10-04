@@ -1,7 +1,11 @@
-import { Move, Participant } from "../utils/dataObjectUtils";
+import { Move, Participant, VoidHandler } from "../utils/dataObjectUtils";
 
 export interface IView {
   activateSpinner(shouldActivate: boolean): void;
+  bindStartGame(handler: VoidHandler): void;
+  bindPlayAgain(handler: VoidHandler): void;
+  bindResetGame(handler: VoidHandler): void;
+  bindPlayerMove(handler: (move: Move) => void): void;
   updateMessage(msg: string): void;
   updateScores(playerScore: number, computerScore: number): void;
   updateRound(roundNumber: number): void;
