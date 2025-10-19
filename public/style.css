@@ -139,3 +139,38 @@ header,
   align-items: flex-start;
   padding-top: 7vh;
 }
+
+/* --- Card Component Styles --- */
+#choices {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.card-container {
+  flex: 1 1 auto;
+  max-width: 150px;
+  height: 210px;
+  perspective: 1000px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-container:not(:disabled):hover {
+  transform: translateY(-5px) scale(1.03) rotateY(var(--card-rotation, 0deg));
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-container:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
