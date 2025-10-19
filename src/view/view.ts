@@ -174,9 +174,8 @@ export class View {
     this.computerTaraCountEl.textContent = computerCount.toString();
   }
 
-  updateTaraButton(isEnabled: boolean, taraCount: number): void {
+  updateTaraButton(isEnabled: boolean): void {
     this.taraBtn.disabled = !isEnabled;
-    this.taraBtn.textContent = `Tara (x${taraCount})`;
   }
 
   // ===== History Methods =====

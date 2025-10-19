@@ -1,7 +1,7 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../view/IView";
 import { Move } from "../utils/dataObjectUtils";
-import { DEFAULT_DELAY, MOVES, PARTICIPANTS } from "../utils/dataUtils";
+import { DEFAULT_DELAY, PARTICIPANTS } from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
