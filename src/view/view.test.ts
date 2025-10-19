@@ -56,11 +56,10 @@ describe("View", () => {
     expect(document.getElementById("computer-score")?.textContent).toBe("5");
   });
 
-  test("updateTaraButton enables and sets text", () => {
+  test("updateTaraButton enables", () => {
     const taraBtn = document.getElementById("tara") as HTMLButtonElement;
-    view.updateTaraButton(true, 2);
+    view.updateTaraButton(true);
     expect(taraBtn.disabled).toBe(false);
-    expect(taraBtn.textContent).toBe("Tara (x2)");
   });
 
   test("updateHealth updates health text", () => {

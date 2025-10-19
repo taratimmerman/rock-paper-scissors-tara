@@ -91,12 +91,10 @@ header,
   width: 100%;
   background-color: #4caf50;
 }
-
 .bar.half {
   width: 50%;
   background-color: #ff9800;
 }
-
 .bar.zero {
   width: 5%;
   background-color: #f44336;
@@ -143,29 +141,48 @@ header,
 /* --- Card Component Styles --- */
 #choices {
   display: flex;
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: nowrap;
   width: 100%;
+  gap: 0.5rem;
 }
 
 .card-container {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-width: 80px;
   max-width: 150px;
-  height: 210px;
-  perspective: 1000px;
+  aspect-ratio: 150 / 210;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #f9f9f9;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+  position: relative;
 }
 
 .card-container:not(:disabled):hover {
-  transform: translateY(-5px) scale(1.03) rotateY(var(--card-rotation, 0deg));
+  transform: translateY(-5px) scale(1.03);
   border-color: rgba(0, 0, 0, 0.2);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #777;
 }
 
 .card-container:disabled {
