@@ -153,7 +153,6 @@ header,
   min-width: 80px;
   max-width: 150px;
   aspect-ratio: 150 / 210;
-  perspective: 1000px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #f9f9f9;
@@ -165,14 +164,25 @@ header,
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.25rem;
   text-align: center;
   position: relative;
 }
 
 .card-container:not(:disabled):hover {
-  transform: translateY(-5px) scale(1.03) rotateY(var(--card-rotation, 0deg));
+  transform: translateY(-5px) scale(1.03);
   border-color: rgba(0, 0, 0, 0.2);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #777;
 }
 
 .card-container:disabled {
@@ -180,24 +190,4 @@ header,
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none;
-}
-
-.corner {
-  position: absolute;
-  font-size: 1.2rem;
-}
-
-.corner.top-left {
-  top: 8px;
-  left: 8px;
-}
-.corner.bottom-right {
-  bottom: 8px;
-  right: 8px;
-}
-
-.center-text {
-  font-size: 1rem;
-  font-weight: bold;
-  pointer-events: none;
 }
