@@ -1,7 +1,121 @@
-import { Match, Move, MoveData, StandardMove } from "./dataObjectUtils";
+// =============================================================================
+// 🧱 CONFIGURATION FILE: GAME CONSTANTS
+//
+// This module defines all core game data (moves, health, etc.).
+// All move-related constants (lists, maps, types) are generated dynamically
+// from the MOVES_DATABASE to ensure data consistency.
+// =============================================================================
+
+import { Match, MoveData } from "./dataObjectUtils";
+
+// -----------------------------------------------------------------------------
+// SECTION 1: SINGLE SOURCE OF TRUTH (MOVES_DATABASE)
+//
+// This is the only place where a move's definition should be edited.
+// 'as const' ensures TypeScript treats values strictly (e.g., "rock" vs. string).
+// -----------------------------------------------------------------------------
+const MOVES_DATABASE = {
+  ROCK: {
+    id: "rock",
+    beats: ["scissors"],
+    isStandard: true, // Flag used to filter standard vs. special moves
+  },
+  PAPER: {
+    id: "paper",
+    beats: ["rock"],
+    isStandard: true,
+  },
+  SCISSORS: {
+    id: "scissors",
+    beats: ["paper"],
+    isStandard: true,
+  },
+  TARA: {
+    id: "tara",
+    beats: ["rock", "paper", "scissors"],
+    isStandard: false,
+  },
+} as const;
+
+type DbType = typeof MOVES_DATABASE;
+
+// -----------------------------------------------------------------------------
+// SECTION 2: DYNAMIC TYPES (Derived from the Database)
+//
+// These types prevent manual errors. They update automatically when MOVES_DATABASE
+// changes.
+// -----------------------------------------------------------------------------
+
+/**
+ * Type: Move
+ * A union type of all move IDs defined in the database.
+ * Result: "rock" | "paper" | "scissors" | "tara"
+ */
+export type Move = DbType[keyof DbType]["id"];
+
+/**
+ * Type: StandardMove
+ * A union type that only includes move IDs where 'isStandard: true'.
+ *
+ * This uses advanced TypeScript logic (Conditional Types) to automatically filter
+ * the database entries.
+ * Result: "rock" | "paper" | "scissors"
+ */
+export type StandardMove = {
+  [K in keyof DbType]: DbType[K]["isStandard"] extends true
+    ? DbType[K]["id"] // Include the ID if the flag is true
+    : never; // Use 'never' to exclude the ID from the final type
+}[keyof DbType];
+
+// -----------------------------------------------------------------------------
+// SECTION 3: DYNAMIC CONSTANTS (Runtime Data Structures)
+//
+// Generated at runtime by mapping over the MOVES_DATABASE.
+// -----------------------------------------------------------------------------
+
+// Helper for iteration
+const DB_VALUES = Object.values(MOVES_DATABASE);
+
+/**
+ * MOVES: Object mapping internal keys to move IDs.
+ * { ROCK: "rock", PAPER: "paper", ... }
+ */
+export const MOVES = Object.fromEntries(
+  Object.entries(MOVES_DATABASE).map(([key, val]) => [key, val.id])
+) as { [K in keyof DbType]: DbType[K]["id"] };
+
+/**
+ * MOVE_DATA: Array of objects used by the core game logic (name/beats).
+ */
+export const MOVE_DATA = DB_VALUES.map((entry) => ({
+  name: entry.id as Move,
+  beats: entry.beats as readonly Move[],
+}));
+
+// All Move Lists and Maps
+export const ALL_MOVE_NAMES: Move[] = DB_VALUES.map((entry) => entry.id);
+
+export const MOVE_DATA_MAP: ReadonlyMap<Move, MoveData> = new Map(
+  MOVE_DATA.map((m) => [m.name, m])
+);
+
+// Standard Move Lists and Maps (Filtered based on 'isStandard' flag)
+export const STANDARD_MOVE_DATA = MOVE_DATA.filter(
+  (_, i) => DB_VALUES[i].isStandard
+);
+
+export const STANDARD_MOVE_NAMES = STANDARD_MOVE_DATA.map(
+  (data) => data.name
+) as StandardMove[];
+
+export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<StandardMove, MoveData> =
+  new Map(STANDARD_MOVE_DATA.map((m) => [m.name as StandardMove, m]));
+
+// -----------------------------------------------------------------------------
+// SECTION 4: BASIC GAME CONSTANTS
+// -----------------------------------------------------------------------------
 
 export const DEFAULT_DELAY = 500;
-
 export const PARTICIPANTS = {
   PLAYER: "player",
   COMPUTER: "computer",
@@ -23,36 +137,3 @@ export const HEALTH_KEYS = {
   player: "playerHealth",
   computer: "computerHealth",
 } as const;
-
-export const MOVES = {
-  ROCK: "rock",
-  PAPER: "paper",
-  SCISSORS: "scissors",
-  TARA: "tara",
-} as const;
-
-export const MOVE_DATA = [
-  { name: MOVES.ROCK, beats: [MOVES.SCISSORS] },
-  { name: MOVES.PAPER, beats: [MOVES.ROCK] },
-  { name: MOVES.SCISSORS, beats: [MOVES.PAPER] },
-  {
-    name: MOVES.TARA,
-    beats: [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS],
-  },
-] as const;
-
-export const ALL_MOVE_NAMES: Move[] = MOVE_DATA.map((data) => data.name);
-
-export const MOVE_DATA_MAP: ReadonlyMap<Move, MoveData> = new Map(
-  MOVE_DATA.map((move) => [move.name, move])
-);
-
-export const STANDARD_MOVE_DATA = MOVE_DATA.filter(
-  (move) => move.name !== MOVES.TARA
-);
-export const STANDARD_MOVE_NAMES: StandardMove[] = STANDARD_MOVE_DATA.map(
-  (data) => data.name
-);
-
-export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<StandardMove, MoveData> =
-  new Map(STANDARD_MOVE_DATA.map((move) => [move.name, move]));
