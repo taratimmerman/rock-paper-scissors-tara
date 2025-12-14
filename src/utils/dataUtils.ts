@@ -19,21 +19,29 @@ const MOVES_DATABASE = {
     id: "rock",
     beats: ["scissors"],
     isStandard: true, // Flag used to filter standard vs. special moves
+    text: "Rock",
+    icon: "🪨",
   },
   PAPER: {
     id: "paper",
     beats: ["rock"],
     isStandard: true,
+    text: "Paper",
+    icon: "📄",
   },
   SCISSORS: {
     id: "scissors",
     beats: ["paper"],
     isStandard: true,
+    text: "Scissors",
+    icon: "✂️",
   },
   TARA: {
     id: "tara",
     beats: ["rock", "paper", "scissors"],
     isStandard: false,
+    text: "Tara",
+    icon: "⭐",
   },
 } as const;
 
@@ -110,6 +118,16 @@ export const STANDARD_MOVE_NAMES = STANDARD_MOVE_DATA.map(
 
 export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<StandardMove, MoveData> =
   new Map(STANDARD_MOVE_DATA.map((m) => [m.name as StandardMove, m]));
+
+/**
+ * PLAYER_MOVES_DATA: Array used by the View to render cards dynamically.
+ * It maps the database structure to the specific data needed by the UI.
+ */
+export const PLAYER_MOVES_DATA = DB_VALUES.map((entry) => ({
+  id: entry.id as Move,
+  text: entry.text,
+  icon: entry.icon,
+}));
 
 // -----------------------------------------------------------------------------
 // SECTION 4: BASIC GAME CONSTANTS
