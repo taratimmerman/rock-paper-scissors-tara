@@ -31,3 +31,9 @@ export interface GameState {
   globalMatchNumber: number | null;
   currentMatch: Match | null;
 }
+
+export interface MoveCard {
+  id: Move;
+  text: string;
+  icon: string;
+}

@@ -154,6 +154,32 @@ describe("Controller", () => {
     );
   });
 
+  test("initialize sets Tara button state (updateTaraButton) only AFTER rendering buttons (bindPlayerMove)", async () => {
+    // ARRANGE: Ensure the model indicates Tara is disabled initially
+    mockModel.taraIsEnabled.mockReturnValue(false);
+
+    // ACT: Run the initialization process
+    const initializationPromise = controller.initialize();
+
+    // Advance timers past the internal delay to allow async logic to proceed
+    jest.advanceTimersByTime(DEFAULT_DELAY);
+    await initializationPromise;
+
+    // ASSERT 1: The correct state was passed (initially disabled)
+    expect(mockView.updateTaraButton).toHaveBeenCalledWith(false);
+
+    // ASSERT 2: The order of calls is correct.
+    // We check the internal call order property of the mock functions.
+
+    const bindPlayerMoveCallOrder =
+      mockView.bindPlayerMove.mock.invocationCallOrder[0];
+    const updateTaraButtonCallOrder =
+      mockView.updateTaraButton.mock.invocationCallOrder[0];
+
+    // bindPlayerMove (rendering) must happen before updateTaraButton (setting state)
+    expect(updateTaraButtonCallOrder).toBeGreaterThan(bindPlayerMoveCallOrder);
+  });
+
   // ===== Move Tests =====
 
   test("clicking rock button calls registerPlayerMove with 'rock'", async () => {

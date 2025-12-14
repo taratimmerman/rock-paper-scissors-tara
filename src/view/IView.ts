@@ -19,7 +19,7 @@ export interface IView {
   toggleMoveButtons(enabled: boolean): void;
   togglePlayAgain(enabled: boolean): void;
   updateTaraCounts(playerTara: number, computerTara: number): void;
-  updateTaraButton(isEnabled: boolean, taraCount: number): void;
+  updateTaraButton(isEnabled: boolean): void;
   updateMostCommonMoves(
     playerMove: Move | null,
     computerMove: Move | null

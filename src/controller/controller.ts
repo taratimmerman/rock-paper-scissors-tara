@@ -44,9 +44,8 @@ export class Controller {
 
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
-    const taraCount = this.model.getPlayerTaraCount();
 
-    this.view.updateTaraButton(isEnabled, taraCount);
+    this.view.updateTaraButton(isEnabled);
   }
 
   private startGame(): void {
@@ -148,7 +147,6 @@ export class Controller {
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
-    this.updateTaraButtonView();
 
     await this.waitForTimeout(DEFAULT_DELAY);
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
@@ -164,5 +162,6 @@ export class Controller {
     this.view.bindPlayAgain(() => this.handleNextRound());
     this.view.bindResetGame(() => this.resetGameState());
     this.view.bindPlayerMove((move) => this.handlePlayerMove(move));
+    this.updateTaraButtonView();
   }
 }
