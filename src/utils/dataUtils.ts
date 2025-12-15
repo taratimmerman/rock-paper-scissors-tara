@@ -133,7 +133,6 @@ export const PLAYER_MOVES_DATA = DB_VALUES.map((entry) => ({
 // SECTION 4: BASIC GAME CONSTANTS
 // -----------------------------------------------------------------------------
 
-export const DEFAULT_DELAY = 500;
 export const PARTICIPANTS = {
   PLAYER: "player",
   COMPUTER: "computer",

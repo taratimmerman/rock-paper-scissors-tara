@@ -1,7 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../view/IView";
-import { DEFAULT_DELAY, MOVES, PARTICIPANTS } from "../utils/dataUtils";
+import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
 interface ControllerWithPrivates {
@@ -66,7 +66,6 @@ describe("Controller", () => {
     };
 
     mockView = {
-      activateSpinner: jest.fn(),
       bindStartGame: jest.fn(),
       bindPlayAgain: jest.fn(),
       bindResetGame: jest.fn(),
@@ -95,58 +94,50 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, mockView);
-
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   test("initialize updates the message and scores", async () => {
-    const initializationPromise = controller.initialize();
+    await controller.initialize();
+
     expect(mockView.updateScores).toHaveBeenCalled();
-
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
     expect(mockView.updateMessage).toHaveBeenCalledWith(
       "Rock, Paper, Scissors, Tara"
     );
-    expect(mockView.activateSpinner).toHaveBeenCalledWith(false);
   });
 
-  test("initialize calls view.updateMostCommonMoves when both most common moves exist", () => {
+  test("initialize calls view.updateMostCommonMoves when both most common moves exist", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
     mockView.updateMostCommonMoves = jest.fn();
 
-    controller.initialize();
+    await controller.initialize();
     expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.PAPER
     );
   });
 
-  test("initialize calls updateMostCommonMoves when one move is present", () => {
+  test("initialize calls updateMostCommonMoves when one move is present", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(null);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
     mockView.updateMostCommonMoves = jest.fn();
 
-    controller.initialize();
+    await controller.initialize();
     expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
       null,
       MOVES.PAPER
     );
   });
 
-  test("endRound calls view.updateMostCommonMoves when both most common moves exist", () => {
+  test("endRound calls view.updateMostCommonMoves when both most common moves exist", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.SCISSORS);
     mockView.updateMostCommonMoves = jest.fn();
 
-    controller.initialize();
-    document.getElementById(MOVES.PAPER)!.click();
+    await controller.initialize();
+    // call the registered player move handler directly
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    await playerMoveHandler(MOVES.PAPER);
 
     expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
@@ -159,18 +150,12 @@ describe("Controller", () => {
     mockModel.taraIsEnabled.mockReturnValue(false);
 
     // ACT: Run the initialization process
-    const initializationPromise = controller.initialize();
-
-    // Advance timers past the internal delay to allow async logic to proceed
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
+    await controller.initialize();
 
     // ASSERT 1: The correct state was passed (initially disabled)
     expect(mockView.updateTaraButton).toHaveBeenCalledWith(false);
 
     // ASSERT 2: The order of calls is correct.
-    // We check the internal call order property of the mock functions.
-
     const bindPlayerMoveCallOrder =
       mockView.bindPlayerMove.mock.invocationCallOrder[0];
     const updateTaraButtonCallOrder =
@@ -183,68 +168,44 @@ describe("Controller", () => {
   // ===== Move Tests =====
 
   test("clicking rock button calls registerPlayerMove with 'rock'", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
+    await controller.initialize();
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.ROCK);
+    await playerMoveHandler(MOVES.ROCK);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
   });
 
   test("clicking paper button calls registerPlayerMove with 'paper'", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
+    await controller.initialize();
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.PAPER);
+    await playerMoveHandler(MOVES.PAPER);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
   test("clicking scissors button calls registerPlayerMove with 'scissors'", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
+    await controller.initialize();
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.SCISSORS);
+    await playerMoveHandler(MOVES.SCISSORS);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
   });
 
   test("clicking tara button calls registerPlayerMove with 'tara'", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
+    await controller.initialize();
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.TARA);
+    await playerMoveHandler(MOVES.TARA);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
   });
 
   test("clicking a move button triggers computer to choose a move", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
+    await controller.initialize();
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.ROCK);
+    await playerMoveHandler(MOVES.ROCK);
     expect(mockModel.chooseComputerMove).toHaveBeenCalled();
   });
 
   test("clicking a move button displays outcome and toggles UI", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
+    await controller.initialize();
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.ROCK);
-
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await Promise.resolve();
-
-    jest.advanceTimersByTime(DEFAULT_DELAY / 2);
-    await Promise.resolve();
+    await playerMoveHandler(MOVES.ROCK);
 
     expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
       MOVES.ROCK,
@@ -259,15 +220,13 @@ describe("Controller", () => {
   });
 
   test("Clicking a move button makes move buttons disappear", async () => {
-    const initializationPromise = controller.initialize();
-    jest.advanceTimersByTime(DEFAULT_DELAY);
-    await initializationPromise;
-
-    document.getElementById(MOVES.SCISSORS)!.click();
+    await controller.initialize();
+    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    await playerMoveHandler(MOVES.SCISSORS);
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
   });
 
-  test("should call resetMoves before registerPlayerMove", () => {
+  test("should call resetMoves before registerPlayerMove", async () => {
     const resetMoves = jest.spyOn(
       controller["model"] as unknown as ModelWithPrivates,
       "resetMoves"
@@ -278,7 +237,7 @@ describe("Controller", () => {
       "registerPlayerMove"
     );
 
-    controller.handlePlayerMove(MOVES.SCISSORS);
+    await controller.handlePlayerMove(MOVES.SCISSORS);
 
     const resetCall = resetMoves.mock.invocationCallOrder[0];
     const setMoveCall = registerPlayerMove.mock.invocationCallOrder[0];
@@ -286,7 +245,7 @@ describe("Controller", () => {
     expect(resetCall).toBeLessThan(setMoveCall);
   });
 
-  test("resetGameState should reset model and update view", () => {
+  test("resetGameState should reset model and update view", async () => {
     const updateScoreView = jest.spyOn(
       controller as unknown as ControllerWithPrivates,
       "updateScoreView"
@@ -300,9 +259,7 @@ describe("Controller", () => {
       "updateTaraButtonView"
     );
 
-    controller.resetGameState();
-    jest.advanceTimersByTime(DEFAULT_DELAY * 1.5);
-
+    await controller.resetGameState();
     expect(mockModel.resetScores).toHaveBeenCalled();
     expect(mockModel.resetMoves).toHaveBeenCalled();
     expect(mockModel.resetTaras).toHaveBeenCalled();

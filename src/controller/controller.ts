@@ -1,7 +1,7 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../view/IView";
 import { Move } from "../utils/dataObjectUtils";
-import { DEFAULT_DELAY, PARTICIPANTS } from "../utils/dataUtils";
+import { PARTICIPANTS } from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
@@ -99,13 +99,7 @@ export class Controller {
     this.view.resetForNextRound();
   }
 
-  private waitForTimeout(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   async resetGameState(): Promise<void> {
-    this.view.activateSpinner(true);
-
     this.model.resetScores();
     this.model.resetMoves();
     this.model.resetTaras();
@@ -122,22 +116,14 @@ export class Controller {
 
     const isMatchActive = this.model.isMatchActive();
     this.view.updateStartButton(isMatchActive);
-
-    await this.waitForTimeout(DEFAULT_DELAY / 2);
-    this.view.activateSpinner(false);
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
-    this.view.activateSpinner(true);
     this.view.toggleMoveButtons(false);
 
     this.model.resetMoves();
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
-
-    await this.waitForTimeout(DEFAULT_DELAY);
-    this.view.activateSpinner(false);
-    await this.waitForTimeout(DEFAULT_DELAY / 2);
 
     this.endRound();
   }
@@ -148,9 +134,7 @@ export class Controller {
     this.updateTaraView();
     this.updateMostCommonMoveView();
 
-    await this.waitForTimeout(DEFAULT_DELAY);
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
-    this.view.activateSpinner(false);
 
     this.view.updateStartButton(isMatchActive);
     this.view.toggleGameStats(false);

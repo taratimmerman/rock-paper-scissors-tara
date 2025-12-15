@@ -10,7 +10,6 @@ import { MOVES, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 export class View {
   private messageEl = this.getEl<HTMLElement>("message");
-  private overlay = this.getEl<HTMLElement>("overlay");
   private controls = this.getEl<HTMLElement>("initial-controls");
   private playerScoreEl = this.getEl<HTMLElement>("player-score");
   private computerScoreEl = this.getEl<HTMLElement>("computer-score");
@@ -76,10 +75,6 @@ export class View {
     this.messageEl.textContent = text;
   }
 
-  toggleOverlay(show: boolean): void {
-    this.toggle(this.overlay, show);
-  }
-
   toggleControls(show: boolean): void {
     this.toggle(this.controls, show);
   }
@@ -121,10 +116,6 @@ export class View {
     this.playAgainBtn.textContent = isMatchOver
       ? "Start New Match"
       : "Next Round";
-  }
-
-  activateSpinner(shouldActivate: boolean): void {
-    this.toggleOverlay(shouldActivate);
   }
 
   // ===== Outcome Methods =====
