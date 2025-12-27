@@ -43,7 +43,6 @@ describe("Controller", () => {
       getPlayerTaraCount: jest.fn().mockReturnValue(0),
       getComputerTaraCount: jest.fn().mockReturnValue(0),
       taraIsEnabled: jest.fn(),
-      isTaraButtonVisible: jest.fn(),
       resetTaras: jest.fn(),
       getPlayerMostCommonMove: jest.fn(),
       getComputerMostCommonMove: jest.fn(),
@@ -366,7 +365,6 @@ describe("Controller", () => {
       mockModel.getComputerTaraCount.mockReturnValue(3);
       mockModel.getPlayerMostCommonMove.mockReturnValue(null);
       mockModel.getComputerMostCommonMove.mockReturnValue("scissors");
-      mockModel.isTaraButtonVisible.mockReturnValue(false);
 
       controller["endRound"](); // Accessing private method for testing
 
