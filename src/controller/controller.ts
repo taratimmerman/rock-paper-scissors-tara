@@ -1,5 +1,5 @@
 import { IModel } from "../model/IModel";
-import { IView } from "../view/IView";
+import { IView } from "../views/IView";
 import { Move } from "../utils/dataObjectUtils";
 import { PARTICIPANTS } from "../utils/dataUtils";
 

@@ -19,7 +19,6 @@ export interface IModel {
   getPlayerTaraCount(): number;
   getComputerTaraCount(): number;
   taraIsEnabled(): boolean;
-  isTaraButtonVisible(): boolean;
   resetTaras(): void;
 
   // Most common moves
