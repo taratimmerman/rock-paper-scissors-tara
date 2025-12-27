@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { View } from "./viewOld";
+import { ViewOld } from "./viewOld";
 import { PARTICIPANTS, PLAYER_MOVES_DATA, MOVES } from "../utils/dataUtils";
 
 // --- MOCKING SETUP ---
@@ -54,11 +54,11 @@ const setupDOM = () => {
 
 // --- TESTS ---
 describe("View", () => {
-  let view: View;
+  let view: ViewOld;
 
   beforeEach(() => {
     setupDOM();
-    view = new View();
+    view = new ViewOld();
   });
 
   // === Dynamic Rendering Tests ===
