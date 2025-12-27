@@ -1,6 +1,6 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
-import { IView } from "../view/IView";
+import { IView } from "../views/IView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { View } from "./view";
+import { View } from "./viewOld";
 import { PARTICIPANTS, PLAYER_MOVES_DATA, MOVES } from "../utils/dataUtils";
 
 // --- MOCKING SETUP ---
