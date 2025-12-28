@@ -1,6 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
@@ -20,6 +21,7 @@ interface ModelWithPrivates {
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockView: jest.Mocked<IView>;
+  let mockScoreView: jest.Mocked<IScoreView>;
   let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
 
@@ -73,7 +75,6 @@ describe("Controller", () => {
       bindResetGame: jest.fn(),
       bindPlayerMove: jest.fn(),
       updateMessage: jest.fn(),
-      updateScores: jest.fn(),
       updateRound: jest.fn(),
       updateMatch: jest.fn(),
       showRoundOutcome: jest.fn(),
@@ -82,11 +83,14 @@ describe("Controller", () => {
       togglePlayAgain: jest.fn(),
       updateTaraButton: jest.fn(),
       updatePlayAgainButton: jest.fn(),
-      updateScoreView: jest.fn(),
       updateTaraButtonView: jest.fn(),
       toggleControls: jest.fn(),
       updateStartButton: jest.fn(),
       toggleOutcome: jest.fn(),
+    };
+
+    mockScoreView = {
+      updateScores: jest.fn(),
     };
 
     mockStatsView = {
@@ -99,6 +103,7 @@ describe("Controller", () => {
 
     controller = new Controller(mockModel, {
       mainView: mockView,
+      scoreView: mockScoreView,
       statsView: mockStatsView,
     });
   });
@@ -106,7 +111,7 @@ describe("Controller", () => {
   test("initialize updates the message and scores", async () => {
     await controller.initialize();
 
-    expect(mockView.updateScores).toHaveBeenCalled();
+    expect(mockScoreView.updateScores).toHaveBeenCalled();
     expect(mockView.updateMessage).toHaveBeenCalledWith(
       "Rock, Paper, Scissors, Tara"
     );
@@ -221,7 +226,7 @@ describe("Controller", () => {
     );
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
     expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
-    expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
+    expect(mockScoreView.updateScores).toHaveBeenCalledWith(0, 0);
     expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraButton).toHaveBeenCalled();
   });
@@ -389,7 +394,7 @@ describe("Controller", () => {
 
       // Common calls for end of round (regardless of match end)
       expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
-      expect(mockView.updateScores).toHaveBeenCalledWith(0, 1);
+      expect(mockScoreView.updateScores).toHaveBeenCalledWith(0, 1);
       expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
       expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
         null,

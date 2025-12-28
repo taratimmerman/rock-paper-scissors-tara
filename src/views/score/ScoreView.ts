@@ -18,6 +18,13 @@ class ScoreView extends View implements IScoreView {
     // Intentional: Returning empty because HTML exists in index.html
     return ``;
   }
+
+  // ===== Score Methods =====
+
+  updateScores(player: number, computer: number): void {
+    this._playerScoreElement.textContent = player.toString();
+    this._computerScoreElement.textContent = computer.toString();
+  }
 }
 
 export default new ScoreView();

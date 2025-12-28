@@ -28,4 +28,10 @@ describe("ScoreView", () => {
   });
 
   // ===== General Tests =====
+
+  test("updateScores updates player and computer score", () => {
+    scoreView.updateScores(3, 5);
+    expect(document.getElementById("player-score")?.textContent).toBe("3");
+    expect(document.getElementById("computer-score")?.textContent).toBe("5");
+  });
 });

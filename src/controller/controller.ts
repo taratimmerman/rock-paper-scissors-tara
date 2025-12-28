@@ -1,5 +1,6 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { Move } from "../utils/dataObjectUtils";
 import { PARTICIPANTS } from "../utils/dataUtils";
@@ -7,19 +8,21 @@ import { PARTICIPANTS } from "../utils/dataUtils";
 export class Controller {
   private model: IModel;
   private view: IView;
+  private scoreView: IScoreView;
   private statsView: IStatsView;
 
   constructor(
     model: IModel,
-    views: { mainView: IView; statsView: IStatsView }
+    views: { mainView: IView; scoreView: IScoreView; statsView: IStatsView }
   ) {
     this.model = model;
     this.view = views.mainView;
+    this.scoreView = views.scoreView;
     this.statsView = views.statsView;
   }
 
   private updateScoreView(): void {
-    this.view.updateScores(
+    this.scoreView.updateScores(
       this.model.getPlayerScore(),
       this.model.getComputerScore()
     );

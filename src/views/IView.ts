@@ -6,7 +6,6 @@ export interface IView {
   bindResetGame(handler: VoidHandler): void;
   bindPlayerMove(handler: (move: Move) => void): void;
   updateMessage(msg: string): void;
-  updateScores(playerScore: number, computerScore: number): void;
   updateRound(roundNumber: number): void;
   updateMatch(matchNumber: number): void;
   showRoundOutcome(playerMove: Move, computerMove: Move, result: string): void;
@@ -19,7 +18,6 @@ export interface IView {
   togglePlayAgain(enabled: boolean): void;
   updateTaraButton(isEnabled: boolean): void;
   updatePlayAgainButton(isMatchOver: boolean): void;
-  updateScoreView(): void;
   updateTaraButtonView(): void;
   toggleControls(enabled: boolean): void;
   toggleOutcome(show: boolean): void;
