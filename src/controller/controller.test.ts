@@ -1,7 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
-import { IStatsView } from "../views/StatsView";
+import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 

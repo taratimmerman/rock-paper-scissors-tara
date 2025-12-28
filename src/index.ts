@@ -1,6 +1,6 @@
 import { Model } from "./model/model";
 import { ViewOld } from "./views/viewOld";
-import statsView from "./views/StatsView";
+import statsView from "./views/stats/StatsView";
 import { Controller } from "./controller/controller";
 
 document.addEventListener("DOMContentLoaded", () => {
