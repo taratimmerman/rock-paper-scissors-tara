@@ -33,7 +33,6 @@ export class ViewOld {
   private moveChoicesEl = this.getEl<HTMLElement>("choices");
   private startBtn = this.getEl<HTMLButtonElement>("start");
   private playAgainBtn = this.getEl<HTMLButtonElement>("play-again");
-  private gameStatsEl = this.getEl<HTMLButtonElement>("game-stats");
   private resetBtn = this.getEl<HTMLButtonElement>("reset-game-state");
   private moveButtons = new Map<Move, HTMLButtonElement>();
 
@@ -87,8 +86,8 @@ export class ViewOld {
     this.toggle(this.playAgainBtn, show);
   }
 
-  toggleGameStats(show: boolean) {
-    this.toggle(this.gameStatsEl, show);
+  toggleOutcome(show: boolean): void {
+    this.toggle(this.outcomeEl, show);
   }
 
   updateRound(round: number): void {
@@ -99,13 +98,6 @@ export class ViewOld {
   updateMatch(match: number): void {
     this.matchEl.textContent = `Match ${match}`;
     this.toggle(this.matchEl, true);
-  }
-
-  resetForNextRound(): void {
-    this.toggleGameStats(true);
-    this.toggleMoveButtons(true);
-    this.togglePlayAgain(false);
-    this.toggle(this.outcomeEl, false);
   }
 
   updateStartButton(isMatchActive: boolean): void {
@@ -127,7 +119,7 @@ export class ViewOld {
   ): void {
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
     this.resultEl.textContent = resultText;
-    this.toggle(this.outcomeEl, true);
+    this.toggleOutcome(true);
   }
 
   showRoundOutcome(

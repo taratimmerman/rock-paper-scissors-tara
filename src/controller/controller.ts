@@ -1,15 +1,21 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IStatsView } from "../views/StatsView";
 import { Move } from "../utils/dataObjectUtils";
 import { PARTICIPANTS } from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
   private view: IView;
+  private statsView: IStatsView;
 
-  constructor(model: IModel, view: IView) {
+  constructor(
+    model: IModel,
+    views: { mainView: IView; statsView: IStatsView }
+  ) {
     this.model = model;
-    this.view = view;
+    this.view = views.mainView;
+    this.statsView = views.statsView;
   }
 
   private updateScoreView(): void {
@@ -56,7 +62,7 @@ export class Controller {
     this.view.updateRound(roundNumber);
     this.view.updateMatch(matchNumber);
     this.view.toggleControls(false);
-    this.view.toggleGameStats(true);
+    this.statsView.toggleGameStatsVisibility(true);
     this.view.toggleMoveButtons(true);
     this.updateHealthView();
   }
@@ -87,6 +93,13 @@ export class Controller {
     this.view.togglePlayAgain(true);
   }
 
+  private resetForNextRound(): void {
+    this.statsView.toggleGameStatsVisibility(true);
+    this.view.toggleMoveButtons(true);
+    this.view.togglePlayAgain(false);
+    this.view.toggleOutcome(false);
+  }
+
   private handleNextRound(): void {
     this.model.setDefaultMatchData();
 
@@ -96,7 +109,7 @@ export class Controller {
     this.updateHealthView();
     this.view.updateRound(roundNumber);
     this.view.updateMatch(matchNumber);
-    this.view.resetForNextRound();
+    this.resetForNextRound();
   }
 
   async resetGameState(): Promise<void> {
@@ -137,7 +150,7 @@ export class Controller {
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
 
     this.view.updateStartButton(isMatchActive);
-    this.view.toggleGameStats(false);
+    this.statsView.toggleGameStatsVisibility(false);
     this.view.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleControls(true);

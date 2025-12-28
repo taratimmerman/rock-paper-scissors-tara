@@ -1,6 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IStatsView } from "../views/StatsView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
@@ -8,6 +9,7 @@ interface ControllerWithPrivates {
   updateScoreView(): void;
   updateTaraView(): void;
   updateTaraButtonView(): void;
+  resetForNextRound(): void;
 }
 
 interface ModelWithPrivates {
@@ -18,6 +20,7 @@ interface ModelWithPrivates {
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockView: jest.Mocked<IView>;
+  let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
 
   beforeEach(() => {
@@ -81,18 +84,24 @@ describe("Controller", () => {
       updateTaraButton: jest.fn(),
       updateMostCommonMoves: jest.fn(),
       updatePlayAgainButton: jest.fn(),
-      resetForNextRound: jest.fn(),
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
       updateTaraButtonView: jest.fn(),
       toggleControls: jest.fn(),
-      toggleGameStats: jest.fn(),
       updateHealth: jest.fn(),
       updateHealthBar: jest.fn(),
       updateStartButton: jest.fn(),
+      toggleOutcome: jest.fn(),
     };
 
-    controller = new Controller(mockModel, mockView);
+    mockStatsView = {
+      toggleGameStatsVisibility: jest.fn(),
+    };
+
+    controller = new Controller(mockModel, {
+      mainView: mockView,
+      statsView: mockStatsView,
+    });
   });
 
   test("initialize updates the message and scores", async () => {
@@ -285,7 +294,7 @@ describe("Controller", () => {
     mockView.updateRound.mockImplementation(() => {});
     mockView.updateMatch.mockImplementation(() => {});
     mockView.toggleControls.mockImplementation(() => {});
-    mockView.toggleGameStats.mockImplementation(() => {});
+    mockStatsView.toggleGameStatsVisibility.mockImplementation(() => {});
     mockView.toggleMoveButtons.mockImplementation(() => {});
 
     controller["startGame"]();
@@ -295,7 +304,7 @@ describe("Controller", () => {
     expect(mockView.updateRound).toHaveBeenCalledWith(initialRoundNumber);
     expect(mockView.updateMatch).toHaveBeenCalledWith(initialMatchNumber);
     expect(mockView.toggleControls).toHaveBeenCalledWith(false);
-    expect(mockView.toggleGameStats).toHaveBeenCalledWith(true);
+    expect(mockStatsView.toggleGameStatsVisibility).toHaveBeenCalledWith(true);
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(true);
   });
 
@@ -392,6 +401,11 @@ describe("Controller", () => {
 
   describe("handleNextRound", () => {
     test("prepares for the next round within a match", () => {
+      const resetForNextRound = jest.spyOn(
+        controller as unknown as ControllerWithPrivates,
+        "resetForNextRound"
+      );
+
       const nextRoundNumber = 3;
       const currentMatchNumber = 1;
 
@@ -400,14 +414,13 @@ describe("Controller", () => {
       mockModel.setDefaultMatchData.mockImplementation(() => {});
       mockView.updateRound.mockImplementation(() => {});
       mockView.updateMatch.mockImplementation(() => {});
-      mockView.resetForNextRound.mockImplementation(() => {});
 
       controller["handleNextRound"]();
 
       expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
       expect(mockView.updateRound).toHaveBeenCalledWith(nextRoundNumber);
       expect(mockView.updateMatch).toHaveBeenCalledWith(currentMatchNumber);
-      expect(mockView.resetForNextRound).toHaveBeenCalled();
+      expect(resetForNextRound).toHaveBeenCalled();
     });
   });
 });

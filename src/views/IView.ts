@@ -24,12 +24,11 @@ export interface IView {
     computerMove: Move | null
   ): void;
   updatePlayAgainButton(isMatchOver: boolean): void;
-  resetForNextRound(): void;
   updateScoreView(): void;
   updateTaraView(): void;
   updateTaraButtonView(): void;
   toggleControls(enabled: boolean): void;
-  toggleGameStats(enabled: boolean): void;
+  toggleOutcome(show: boolean): void;
   updateHealth(playerHealth: number, computerHealth: number): void;
   updateHealthBar(participant: Participant, health: number): void;
   updateStartButton(isMatchActive: boolean): void;
