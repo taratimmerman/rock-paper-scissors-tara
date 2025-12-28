@@ -8,7 +8,7 @@ import {
 } from "../utils/dataObjectUtils";
 import { MOVES, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
-export class View {
+export class ViewOld {
   private messageEl = this.getEl<HTMLElement>("message");
   private controls = this.getEl<HTMLElement>("initial-controls");
   private playerScoreEl = this.getEl<HTMLElement>("player-score");
