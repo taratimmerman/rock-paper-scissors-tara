@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import statsView from "./StatsView";
-import { PARTICIPANTS } from "../../utils/dataUtils";
+import { PARTICIPANTS, MOVES } from "../../utils/dataUtils";
 
 describe("StatsView", () => {
   let parentElement: HTMLElement;
@@ -93,5 +93,29 @@ describe("StatsView", () => {
 
     expect(bar.classList.contains("full")).toBe(false);
     expect(bar.classList.contains("half")).toBe(true);
+  });
+
+  // ===== History Tests =====
+
+  test("updateMostCommonMoves() updates move text correctly", () => {
+    statsView.updateMostCommonMoves(MOVES.ROCK, MOVES.PAPER);
+
+    expect(
+      document.getElementById("player-most-common-move")?.textContent
+    ).toBe(MOVES.ROCK);
+    expect(
+      document.getElementById("computer-most-common-move")?.textContent
+    ).toBe(MOVES.PAPER);
+  });
+
+  test("updateMostCommonMoves() defaults to 'N/A' when moves are null", () => {
+    statsView.updateMostCommonMoves(null, null);
+
+    expect(
+      document.getElementById("player-most-common-move")?.textContent
+    ).toBe("N/A");
+    expect(
+      document.getElementById("computer-most-common-move")?.textContent
+    ).toBe("N/A");
   });
 });

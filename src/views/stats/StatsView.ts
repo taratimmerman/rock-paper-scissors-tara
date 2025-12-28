@@ -1,6 +1,6 @@
 import View from "../View";
 import { IStatsView } from "./IStatsView";
-import { Health, Participant } from "../../utils/dataObjectUtils";
+import { Health, Participant, StandardMove } from "../../utils/dataObjectUtils";
 
 class StatsView extends View implements IStatsView {
   protected declare _parentElement: HTMLElement;
@@ -9,6 +9,8 @@ class StatsView extends View implements IStatsView {
   private _computerHealthEl!: HTMLElement;
   private _playerHealthBarEl!: HTMLElement;
   private _computerHealthBarEl!: HTMLElement;
+  private _playerMostCommonMoveEl!: HTMLElement;
+  private _computerMostCommonMoveEl!: HTMLElement;
 
   // ===== General Methods =====
 
@@ -62,6 +64,23 @@ class StatsView extends View implements IStatsView {
     return participant === "player"
       ? this._playerHealthBarEl
       : this._computerHealthBarEl;
+  }
+
+  // ===== History Methods =====
+
+  updateMostCommonMoves(
+    player: StandardMove | null,
+    computer: StandardMove | null
+  ): void {
+    this._playerMostCommonMoveEl = this._getElement<HTMLElement>(
+      "player-most-common-move"
+    );
+    this._computerMostCommonMoveEl = this._getElement<HTMLElement>(
+      "computer-most-common-move"
+    );
+
+    this._playerMostCommonMoveEl.textContent = player ?? "N/A";
+    this._computerMostCommonMoveEl.textContent = computer ?? "N/A";
   }
 }
 

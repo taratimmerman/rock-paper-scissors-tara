@@ -82,7 +82,6 @@ describe("Controller", () => {
       togglePlayAgain: jest.fn(),
       updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
-      updateMostCommonMoves: jest.fn(),
       updatePlayAgainButton: jest.fn(),
       updateScoreView: jest.fn(),
       updateTaraView: jest.fn(),
@@ -96,6 +95,7 @@ describe("Controller", () => {
       toggleGameStatsVisibility: jest.fn(),
       updateHealth: jest.fn(),
       updateHealthBar: jest.fn(),
+      updateMostCommonMoves: jest.fn(),
     };
 
     controller = new Controller(mockModel, {
@@ -116,10 +116,10 @@ describe("Controller", () => {
   test("initialize calls view.updateMostCommonMoves when both most common moves exist", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
-    mockView.updateMostCommonMoves = jest.fn();
+    mockStatsView.updateMostCommonMoves = jest.fn();
 
     await controller.initialize();
-    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.PAPER
     );
@@ -128,10 +128,10 @@ describe("Controller", () => {
   test("initialize calls updateMostCommonMoves when one move is present", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(null);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
-    mockView.updateMostCommonMoves = jest.fn();
+    mockStatsView.updateMostCommonMoves = jest.fn();
 
     await controller.initialize();
-    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
       null,
       MOVES.PAPER
     );
@@ -140,14 +140,14 @@ describe("Controller", () => {
   test("endRound calls view.updateMostCommonMoves when both most common moves exist", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.SCISSORS);
-    mockView.updateMostCommonMoves = jest.fn();
+    mockStatsView.updateMostCommonMoves = jest.fn();
 
     await controller.initialize();
     // call the registered player move handler directly
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.PAPER);
+    playerMoveHandler(MOVES.PAPER);
 
-    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.SCISSORS
     );
@@ -392,7 +392,7 @@ describe("Controller", () => {
       expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
       expect(mockView.updateScores).toHaveBeenCalledWith(0, 1);
       expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
-      expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+      expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
         null,
         "scissors"
       );

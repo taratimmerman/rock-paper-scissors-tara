@@ -33,7 +33,7 @@ export class Controller {
   }
 
   private updateMostCommonMoveView(): void {
-    this.view.updateMostCommonMoves(
+    this.statsView.updateMostCommonMoves(
       this.model.getPlayerMostCommonMove(),
       this.model.getComputerMostCommonMove()
     );

@@ -14,12 +14,6 @@ export class ViewOld {
   private computerScoreEl = this.getEl<HTMLElement>("computer-score");
   private playerTaraCountEl = this.getEl<HTMLElement>("player-tara");
   private computerTaraCountEl = this.getEl<HTMLElement>("computer-tara");
-  private playerMostCommonMoveEl = this.getEl<HTMLElement>(
-    "player-most-common-move"
-  );
-  private computerMostCommonMoveEl = this.getEl<HTMLElement>(
-    "computer-most-common-move"
-  );
   private matchEl = this.getEl<HTMLElement>("match");
   private roundEl = this.getEl<HTMLElement>("round");
   private outcomeEl = this.getEl<HTMLElement>("result-display");
@@ -158,16 +152,6 @@ export class ViewOld {
     if (taraBtn) {
       taraBtn.disabled = !isEnabled;
     }
-  }
-
-  // ===== History Methods =====
-
-  updateMostCommonMoves(
-    player: StandardMove | null,
-    computer: StandardMove | null
-  ): void {
-    this.playerMostCommonMoveEl.textContent = player ?? "N/A";
-    this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
   }
 
   // ===== Move Cards Methods =====

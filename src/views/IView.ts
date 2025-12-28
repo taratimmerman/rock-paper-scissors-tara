@@ -19,10 +19,6 @@ export interface IView {
   togglePlayAgain(enabled: boolean): void;
   updateTaraCounts(playerTara: number, computerTara: number): void;
   updateTaraButton(isEnabled: boolean): void;
-  updateMostCommonMoves(
-    playerMove: Move | null,
-    computerMove: Move | null
-  ): void;
   updatePlayAgainButton(isMatchOver: boolean): void;
   updateScoreView(): void;
   updateTaraView(): void;
