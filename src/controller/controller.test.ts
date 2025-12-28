@@ -88,14 +88,14 @@ describe("Controller", () => {
       updateTaraView: jest.fn(),
       updateTaraButtonView: jest.fn(),
       toggleControls: jest.fn(),
-      updateHealth: jest.fn(),
-      updateHealthBar: jest.fn(),
       updateStartButton: jest.fn(),
       toggleOutcome: jest.fn(),
     };
 
     mockStatsView = {
       toggleGameStatsVisibility: jest.fn(),
+      updateHealth: jest.fn(),
+      updateHealthBar: jest.fn(),
     };
 
     controller = new Controller(mockModel, {

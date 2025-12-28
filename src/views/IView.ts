@@ -29,7 +29,5 @@ export interface IView {
   updateTaraButtonView(): void;
   toggleControls(enabled: boolean): void;
   toggleOutcome(show: boolean): void;
-  updateHealth(playerHealth: number, computerHealth: number): void;
-  updateHealthBar(participant: Participant, health: number): void;
   updateStartButton(isMatchActive: boolean): void;
 }

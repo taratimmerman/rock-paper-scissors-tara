@@ -43,9 +43,9 @@ export class Controller {
     const playerHealth = this.model.getHealth(PARTICIPANTS.PLAYER);
     const computerHealth = this.model.getHealth(PARTICIPANTS.COMPUTER);
 
-    this.view.updateHealth(playerHealth, computerHealth);
-    this.view.updateHealthBar(PARTICIPANTS.PLAYER, playerHealth);
-    this.view.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
+    this.statsView.updateHealth(playerHealth, computerHealth);
+    this.statsView.updateHealthBar(PARTICIPANTS.PLAYER, playerHealth);
+    this.statsView.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
   }
 
   private updateTaraButtonView(): void {

@@ -1,5 +1,4 @@
 import {
-  Health,
   Move,
   MoveCard,
   Participant,
@@ -13,10 +12,6 @@ export class ViewOld {
   private controls = this.getEl<HTMLElement>("initial-controls");
   private playerScoreEl = this.getEl<HTMLElement>("player-score");
   private computerScoreEl = this.getEl<HTMLElement>("computer-score");
-  private playerHealthEl = this.getEl<HTMLElement>("player-health-text");
-  private computerHealthEl = this.getEl<HTMLElement>("computer-health-text");
-  private playerHealthBarEl = this.getEl<HTMLElement>("player-health");
-  private computerHealthBarEl = this.getEl<HTMLElement>("computer-health");
   private playerTaraCountEl = this.getEl<HTMLElement>("player-tara");
   private computerTaraCountEl = this.getEl<HTMLElement>("computer-tara");
   private playerMostCommonMoveEl = this.getEl<HTMLElement>(
@@ -173,39 +168,6 @@ export class ViewOld {
   ): void {
     this.playerMostCommonMoveEl.textContent = player ?? "N/A";
     this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
-  }
-
-  // ===== Health Methods =====
-
-  updateHealth(playerHealth: Health, computerHealth: Health): void {
-    this.playerHealthEl.textContent = (playerHealth ?? 0).toString();
-    this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
-  }
-
-  private getHealthBar(participant: Participant): HTMLElement {
-    return participant === "player"
-      ? this.playerHealthBarEl
-      : this.computerHealthBarEl;
-  }
-
-  updateHealthBar(participant: Participant, health: Health): void {
-    const bar = this.getHealthBar(participant);
-
-    // Reset classes but keep the base 'bar'
-    bar.className = "bar";
-
-    switch (health) {
-      case 100:
-        bar.classList.add("full");
-        break;
-      case 50:
-        bar.classList.add("half");
-        break;
-      case 0:
-      case null:
-        bar.classList.add("zero");
-        break;
-    }
   }
 
   // ===== Move Cards Methods =====
