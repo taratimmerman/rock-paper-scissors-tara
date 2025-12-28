@@ -115,22 +115,6 @@ describe("View", () => {
     expect(document.getElementById("computer-score")?.textContent).toBe("5");
   });
 
-  test("updateHealth updates health text", () => {
-    view.updateHealth(50, 100);
-    expect(document.getElementById("player-health-text")?.textContent).toBe(
-      "50"
-    );
-    expect(document.getElementById("computer-health-text")?.textContent).toBe(
-      "100"
-    );
-  });
-
-  test("updateHealthBar applies correct class for full health", () => {
-    const bar = document.getElementById("player-health")!;
-    view.updateHealthBar(PARTICIPANTS.PLAYER, 100);
-    expect(bar.classList.contains("full")).toBe(true);
-  });
-
   test("toggleOutcome shows result display when moves and result are provided", () => {
     view.showRoundOutcome("rock", "scissors", "win");
     const outcomeEl = document.getElementById("result-display")!;

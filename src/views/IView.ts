@@ -17,20 +17,11 @@ export interface IView {
   ): void;
   toggleMoveButtons(enabled: boolean): void;
   togglePlayAgain(enabled: boolean): void;
-  updateTaraCounts(playerTara: number, computerTara: number): void;
   updateTaraButton(isEnabled: boolean): void;
-  updateMostCommonMoves(
-    playerMove: Move | null,
-    computerMove: Move | null
-  ): void;
   updatePlayAgainButton(isMatchOver: boolean): void;
-  resetForNextRound(): void;
   updateScoreView(): void;
-  updateTaraView(): void;
   updateTaraButtonView(): void;
   toggleControls(enabled: boolean): void;
-  toggleGameStats(enabled: boolean): void;
-  updateHealth(playerHealth: number, computerHealth: number): void;
-  updateHealthBar(participant: Participant, health: number): void;
+  toggleOutcome(show: boolean): void;
   updateStartButton(isMatchActive: boolean): void;
 }

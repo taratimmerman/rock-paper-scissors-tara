@@ -1,4 +1,4 @@
-import { Match, Move, Participant } from "../utils/dataObjectUtils";
+import { Health, Match, Move, Participant } from "../utils/dataObjectUtils";
 
 export interface IModel {
   // Score
@@ -42,7 +42,7 @@ export interface IModel {
   resetMatchData(): void;
 
   // Health
-  getHealth(participant: Participant): number;
+  getHealth(participant: Participant): Health;
 
   // Optional setters for testing or future expansion
   resetScores(): void;

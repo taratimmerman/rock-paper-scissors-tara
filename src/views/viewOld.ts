@@ -1,9 +1,7 @@
 import {
-  Health,
   Move,
   MoveCard,
   Participant,
-  StandardMove,
   VoidHandler,
 } from "../utils/dataObjectUtils";
 import { MOVES, PLAYER_MOVES_DATA } from "../utils/dataUtils";
@@ -13,18 +11,6 @@ export class ViewOld {
   private controls = this.getEl<HTMLElement>("initial-controls");
   private playerScoreEl = this.getEl<HTMLElement>("player-score");
   private computerScoreEl = this.getEl<HTMLElement>("computer-score");
-  private playerHealthEl = this.getEl<HTMLElement>("player-health-text");
-  private computerHealthEl = this.getEl<HTMLElement>("computer-health-text");
-  private playerHealthBarEl = this.getEl<HTMLElement>("player-health");
-  private computerHealthBarEl = this.getEl<HTMLElement>("computer-health");
-  private playerTaraCountEl = this.getEl<HTMLElement>("player-tara");
-  private computerTaraCountEl = this.getEl<HTMLElement>("computer-tara");
-  private playerMostCommonMoveEl = this.getEl<HTMLElement>(
-    "player-most-common-move"
-  );
-  private computerMostCommonMoveEl = this.getEl<HTMLElement>(
-    "computer-most-common-move"
-  );
   private matchEl = this.getEl<HTMLElement>("match");
   private roundEl = this.getEl<HTMLElement>("round");
   private outcomeEl = this.getEl<HTMLElement>("result-display");
@@ -33,7 +19,6 @@ export class ViewOld {
   private moveChoicesEl = this.getEl<HTMLElement>("choices");
   private startBtn = this.getEl<HTMLButtonElement>("start");
   private playAgainBtn = this.getEl<HTMLButtonElement>("play-again");
-  private gameStatsEl = this.getEl<HTMLButtonElement>("game-stats");
   private resetBtn = this.getEl<HTMLButtonElement>("reset-game-state");
   private moveButtons = new Map<Move, HTMLButtonElement>();
 
@@ -87,8 +72,8 @@ export class ViewOld {
     this.toggle(this.playAgainBtn, show);
   }
 
-  toggleGameStats(show: boolean) {
-    this.toggle(this.gameStatsEl, show);
+  toggleOutcome(show: boolean): void {
+    this.toggle(this.outcomeEl, show);
   }
 
   updateRound(round: number): void {
@@ -99,13 +84,6 @@ export class ViewOld {
   updateMatch(match: number): void {
     this.matchEl.textContent = `Match ${match}`;
     this.toggle(this.matchEl, true);
-  }
-
-  resetForNextRound(): void {
-    this.toggleGameStats(true);
-    this.toggleMoveButtons(true);
-    this.togglePlayAgain(false);
-    this.toggle(this.outcomeEl, false);
   }
 
   updateStartButton(isMatchActive: boolean): void {
@@ -127,7 +105,7 @@ export class ViewOld {
   ): void {
     this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
     this.resultEl.textContent = resultText;
-    this.toggle(this.outcomeEl, true);
+    this.toggleOutcome(true);
   }
 
   showRoundOutcome(
@@ -157,12 +135,7 @@ export class ViewOld {
     this.computerScoreEl.textContent = computer.toString();
   }
 
-  // ===== Tara Methods =====
-
-  updateTaraCounts(playerCount: number, computerCount: number): void {
-    this.playerTaraCountEl.textContent = playerCount.toString();
-    this.computerTaraCountEl.textContent = computerCount.toString();
-  }
+  // ===== Move Cards Methods =====
 
   updateTaraButton(isEnabled: boolean): void {
     const taraId = MOVES.TARA as Move;
@@ -172,51 +145,6 @@ export class ViewOld {
       taraBtn.disabled = !isEnabled;
     }
   }
-
-  // ===== History Methods =====
-
-  updateMostCommonMoves(
-    player: StandardMove | null,
-    computer: StandardMove | null
-  ): void {
-    this.playerMostCommonMoveEl.textContent = player ?? "N/A";
-    this.computerMostCommonMoveEl.textContent = computer ?? "N/A";
-  }
-
-  // ===== Health Methods =====
-
-  updateHealth(playerHealth: Health, computerHealth: Health): void {
-    this.playerHealthEl.textContent = (playerHealth ?? 0).toString();
-    this.computerHealthEl.textContent = (computerHealth ?? 0).toString();
-  }
-
-  private getHealthBar(participant: Participant): HTMLElement {
-    return participant === "player"
-      ? this.playerHealthBarEl
-      : this.computerHealthBarEl;
-  }
-
-  updateHealthBar(participant: Participant, health: Health): void {
-    const bar = this.getHealthBar(participant);
-
-    // Reset classes but keep the base 'bar'
-    bar.className = "bar";
-
-    switch (health) {
-      case 100:
-        bar.classList.add("full");
-        break;
-      case 50:
-        bar.classList.add("half");
-        break;
-      case 0:
-      case null:
-        bar.classList.add("zero");
-        break;
-    }
-  }
-
-  // ===== Move Cards Methods =====
 
   /**
    * Creates a single interactive card element for a move.

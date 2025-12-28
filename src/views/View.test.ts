@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import View from "./View";
 
 class MockView extends View<{ title: string }> {

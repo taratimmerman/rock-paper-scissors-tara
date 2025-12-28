@@ -1,6 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
 
@@ -8,6 +9,7 @@ interface ControllerWithPrivates {
   updateScoreView(): void;
   updateTaraView(): void;
   updateTaraButtonView(): void;
+  resetForNextRound(): void;
 }
 
 interface ModelWithPrivates {
@@ -18,6 +20,7 @@ interface ModelWithPrivates {
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockView: jest.Mocked<IView>;
+  let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
 
   beforeEach(() => {
@@ -77,22 +80,27 @@ describe("Controller", () => {
       showMatchOutcome: jest.fn(),
       toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
-      updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
-      updateMostCommonMoves: jest.fn(),
       updatePlayAgainButton: jest.fn(),
-      resetForNextRound: jest.fn(),
       updateScoreView: jest.fn(),
-      updateTaraView: jest.fn(),
       updateTaraButtonView: jest.fn(),
       toggleControls: jest.fn(),
-      toggleGameStats: jest.fn(),
-      updateHealth: jest.fn(),
-      updateHealthBar: jest.fn(),
       updateStartButton: jest.fn(),
+      toggleOutcome: jest.fn(),
     };
 
-    controller = new Controller(mockModel, mockView);
+    mockStatsView = {
+      toggleGameStatsVisibility: jest.fn(),
+      updateHealth: jest.fn(),
+      updateHealthBar: jest.fn(),
+      updateMostCommonMoves: jest.fn(),
+      updateTaraCounts: jest.fn(),
+    };
+
+    controller = new Controller(mockModel, {
+      mainView: mockView,
+      statsView: mockStatsView,
+    });
   });
 
   test("initialize updates the message and scores", async () => {
@@ -107,10 +115,10 @@ describe("Controller", () => {
   test("initialize calls view.updateMostCommonMoves when both most common moves exist", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
-    mockView.updateMostCommonMoves = jest.fn();
+    mockStatsView.updateMostCommonMoves = jest.fn();
 
     await controller.initialize();
-    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.PAPER
     );
@@ -119,10 +127,10 @@ describe("Controller", () => {
   test("initialize calls updateMostCommonMoves when one move is present", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(null);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
-    mockView.updateMostCommonMoves = jest.fn();
+    mockStatsView.updateMostCommonMoves = jest.fn();
 
     await controller.initialize();
-    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
       null,
       MOVES.PAPER
     );
@@ -131,14 +139,14 @@ describe("Controller", () => {
   test("endRound calls view.updateMostCommonMoves when both most common moves exist", async () => {
     mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
     mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.SCISSORS);
-    mockView.updateMostCommonMoves = jest.fn();
+    mockStatsView.updateMostCommonMoves = jest.fn();
 
     await controller.initialize();
     // call the registered player move handler directly
     const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.PAPER);
+    playerMoveHandler(MOVES.PAPER);
 
-    expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.SCISSORS
     );
@@ -214,7 +222,7 @@ describe("Controller", () => {
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
     expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
-    expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
+    expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraButton).toHaveBeenCalled();
   });
 
@@ -285,7 +293,7 @@ describe("Controller", () => {
     mockView.updateRound.mockImplementation(() => {});
     mockView.updateMatch.mockImplementation(() => {});
     mockView.toggleControls.mockImplementation(() => {});
-    mockView.toggleGameStats.mockImplementation(() => {});
+    mockStatsView.toggleGameStatsVisibility.mockImplementation(() => {});
     mockView.toggleMoveButtons.mockImplementation(() => {});
 
     controller["startGame"]();
@@ -295,7 +303,7 @@ describe("Controller", () => {
     expect(mockView.updateRound).toHaveBeenCalledWith(initialRoundNumber);
     expect(mockView.updateMatch).toHaveBeenCalledWith(initialMatchNumber);
     expect(mockView.toggleControls).toHaveBeenCalledWith(false);
-    expect(mockView.toggleGameStats).toHaveBeenCalledWith(true);
+    expect(mockStatsView.toggleGameStatsVisibility).toHaveBeenCalledWith(true);
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(true);
   });
 
@@ -382,8 +390,8 @@ describe("Controller", () => {
       // Common calls for end of round (regardless of match end)
       expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
       expect(mockView.updateScores).toHaveBeenCalledWith(0, 1);
-      expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
-      expect(mockView.updateMostCommonMoves).toHaveBeenCalledWith(
+      expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
+      expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
         null,
         "scissors"
       );
@@ -392,6 +400,11 @@ describe("Controller", () => {
 
   describe("handleNextRound", () => {
     test("prepares for the next round within a match", () => {
+      const resetForNextRound = jest.spyOn(
+        controller as unknown as ControllerWithPrivates,
+        "resetForNextRound"
+      );
+
       const nextRoundNumber = 3;
       const currentMatchNumber = 1;
 
@@ -400,14 +413,13 @@ describe("Controller", () => {
       mockModel.setDefaultMatchData.mockImplementation(() => {});
       mockView.updateRound.mockImplementation(() => {});
       mockView.updateMatch.mockImplementation(() => {});
-      mockView.resetForNextRound.mockImplementation(() => {});
 
       controller["handleNextRound"]();
 
       expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
       expect(mockView.updateRound).toHaveBeenCalledWith(nextRoundNumber);
       expect(mockView.updateMatch).toHaveBeenCalledWith(currentMatchNumber);
-      expect(mockView.resetForNextRound).toHaveBeenCalled();
+      expect(resetForNextRound).toHaveBeenCalled();
     });
   });
 });
