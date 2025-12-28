@@ -5,12 +5,37 @@ import { Health, Participant, StandardMove } from "../../utils/dataObjectUtils";
 class StatsView extends View implements IStatsView {
   protected declare _parentElement: HTMLElement;
 
-  private _playerHealthEl!: HTMLElement;
-  private _computerHealthEl!: HTMLElement;
-  private _playerHealthBarEl!: HTMLElement;
-  private _computerHealthBarEl!: HTMLElement;
-  private _playerMostCommonMoveEl!: HTMLElement;
-  private _computerMostCommonMoveEl!: HTMLElement;
+  private get _computerHealthBarElement() {
+    return this._getElement<HTMLElement>("computer-health");
+  }
+
+  private get _computerHealthElement() {
+    return this._getElement<HTMLElement>("computer-health-text");
+  }
+
+  private get _computerMostCommonMoveElement() {
+    return this._getElement<HTMLElement>("computer-most-common-move");
+  }
+
+  private get _computerTaraCountElement() {
+    return this._getElement<HTMLElement>("computer-tara");
+  }
+
+  private get _playerHealthBarElement() {
+    return this._getElement<HTMLElement>("player-health");
+  }
+
+  private get _playerHealthElement() {
+    return this._getElement<HTMLElement>("player-health-text");
+  }
+
+  private get _playerMostCommonMoveElement() {
+    return this._getElement<HTMLElement>("player-most-common-move");
+  }
+
+  private get _playerTaraCountElement() {
+    return this._getElement<HTMLElement>("player-tara");
+  }
 
   // ===== General Methods =====
 
@@ -27,13 +52,8 @@ class StatsView extends View implements IStatsView {
   // ===== Health Methods =====
 
   public updateHealth(playerHealth: Health, computerHealth: Health): void {
-    this._playerHealthEl = this._getElement<HTMLElement>("player-health-text");
-    this._computerHealthEl = this._getElement<HTMLElement>(
-      "computer-health-text"
-    );
-
-    this._playerHealthEl.textContent = (playerHealth ?? 0).toString();
-    this._computerHealthEl.textContent = (computerHealth ?? 0).toString();
+    this._playerHealthElement.textContent = (playerHealth ?? 0).toString();
+    this._computerHealthElement.textContent = (computerHealth ?? 0).toString();
   }
 
   public updateHealthBar(participant: Participant, health: Health): void {
@@ -57,13 +77,9 @@ class StatsView extends View implements IStatsView {
   }
 
   private _getHealthBar(participant: Participant): HTMLElement {
-    this._playerHealthBarEl = this._getElement<HTMLElement>("player-health");
-    this._computerHealthBarEl =
-      this._getElement<HTMLElement>("computer-health");
-
     return participant === "player"
-      ? this._playerHealthBarEl
-      : this._computerHealthBarEl;
+      ? this._playerHealthBarElement
+      : this._computerHealthBarElement;
   }
 
   // ===== History Methods =====
@@ -72,15 +88,15 @@ class StatsView extends View implements IStatsView {
     player: StandardMove | null,
     computer: StandardMove | null
   ): void {
-    this._playerMostCommonMoveEl = this._getElement<HTMLElement>(
-      "player-most-common-move"
-    );
-    this._computerMostCommonMoveEl = this._getElement<HTMLElement>(
-      "computer-most-common-move"
-    );
+    this._playerMostCommonMoveElement.textContent = player ?? "N/A";
+    this._computerMostCommonMoveElement.textContent = computer ?? "N/A";
+  }
 
-    this._playerMostCommonMoveEl.textContent = player ?? "N/A";
-    this._computerMostCommonMoveEl.textContent = computer ?? "N/A";
+  // ===== Tara Methods =====
+
+  updateTaraCounts(playerCount: number, computerCount: number): void {
+    this._playerTaraCountElement.textContent = playerCount.toString();
+    this._computerTaraCountElement.textContent = computerCount.toString();
   }
 }
 

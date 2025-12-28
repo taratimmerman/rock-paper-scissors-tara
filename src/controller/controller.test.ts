@@ -80,11 +80,9 @@ describe("Controller", () => {
       showMatchOutcome: jest.fn(),
       toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
-      updateTaraCounts: jest.fn(),
       updateTaraButton: jest.fn(),
       updatePlayAgainButton: jest.fn(),
       updateScoreView: jest.fn(),
-      updateTaraView: jest.fn(),
       updateTaraButtonView: jest.fn(),
       toggleControls: jest.fn(),
       updateStartButton: jest.fn(),
@@ -96,6 +94,7 @@ describe("Controller", () => {
       updateHealth: jest.fn(),
       updateHealthBar: jest.fn(),
       updateMostCommonMoves: jest.fn(),
+      updateTaraCounts: jest.fn(),
     };
 
     controller = new Controller(mockModel, {
@@ -223,7 +222,7 @@ describe("Controller", () => {
     expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
     expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
     expect(mockView.updateScores).toHaveBeenCalledWith(0, 0);
-    expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
+    expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
     expect(mockView.updateTaraButton).toHaveBeenCalled();
   });
 
@@ -391,7 +390,7 @@ describe("Controller", () => {
       // Common calls for end of round (regardless of match end)
       expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
       expect(mockView.updateScores).toHaveBeenCalledWith(0, 1);
-      expect(mockView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
+      expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
       expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
         null,
         "scissors"

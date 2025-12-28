@@ -26,7 +26,7 @@ export class Controller {
   }
 
   private updateTaraView(): void {
-    this.view.updateTaraCounts(
+    this.statsView.updateTaraCounts(
       this.model.getPlayerTaraCount(),
       this.model.getComputerTaraCount()
     );

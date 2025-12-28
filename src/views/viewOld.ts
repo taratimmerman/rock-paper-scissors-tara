@@ -2,7 +2,6 @@ import {
   Move,
   MoveCard,
   Participant,
-  StandardMove,
   VoidHandler,
 } from "../utils/dataObjectUtils";
 import { MOVES, PLAYER_MOVES_DATA } from "../utils/dataUtils";
@@ -12,8 +11,6 @@ export class ViewOld {
   private controls = this.getEl<HTMLElement>("initial-controls");
   private playerScoreEl = this.getEl<HTMLElement>("player-score");
   private computerScoreEl = this.getEl<HTMLElement>("computer-score");
-  private playerTaraCountEl = this.getEl<HTMLElement>("player-tara");
-  private computerTaraCountEl = this.getEl<HTMLElement>("computer-tara");
   private matchEl = this.getEl<HTMLElement>("match");
   private roundEl = this.getEl<HTMLElement>("round");
   private outcomeEl = this.getEl<HTMLElement>("result-display");
@@ -138,12 +135,7 @@ export class ViewOld {
     this.computerScoreEl.textContent = computer.toString();
   }
 
-  // ===== Tara Methods =====
-
-  updateTaraCounts(playerCount: number, computerCount: number): void {
-    this.playerTaraCountEl.textContent = playerCount.toString();
-    this.computerTaraCountEl.textContent = computerCount.toString();
-  }
+  // ===== Move Cards Methods =====
 
   updateTaraButton(isEnabled: boolean): void {
     const taraId = MOVES.TARA as Move;
@@ -153,8 +145,6 @@ export class ViewOld {
       taraBtn.disabled = !isEnabled;
     }
   }
-
-  // ===== Move Cards Methods =====
 
   /**
    * Creates a single interactive card element for a move.

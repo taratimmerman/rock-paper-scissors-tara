@@ -118,4 +118,12 @@ describe("StatsView", () => {
       document.getElementById("computer-most-common-move")?.textContent
     ).toBe("N/A");
   });
+
+  // ===== Tara Count/Amount Tests =====
+
+  test("updateTaraCounts() updates tara count text", () => {
+    statsView.updateTaraCounts(2, 1);
+    expect(document.getElementById("player-tara")?.textContent).toBe("2");
+    expect(document.getElementById("computer-tara")?.textContent).toBe("1");
+  });
 });

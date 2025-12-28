@@ -8,4 +8,5 @@ export interface IStatsView {
     playerMove: Move | null,
     computerMove: Move | null
   ): void;
+  updateTaraCounts(playerTara: number, computerTara: number): void;
 }
