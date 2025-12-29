@@ -3,7 +3,6 @@
  */
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
-import { IView } from "../views/IView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
@@ -14,7 +13,6 @@ import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
-  let mockView: jest.Mocked<IView>;
   let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
   let mockOutcomeView: jest.Mocked<IOutcomeView>;
@@ -61,16 +59,6 @@ describe("Controller", () => {
       resetScores: jest.fn(),
     } as any;
 
-    mockView = {
-      bindStartGame: jest.fn(),
-      bindResetGame: jest.fn(),
-      updateMessage: jest.fn(),
-      toggleControls: jest.fn(),
-      updateStartButton: jest.fn(),
-      updateRound: jest.fn(),
-      updateMatch: jest.fn(),
-    } as any;
-
     mockMenuView = {
       render: jest.fn(),
       updateMenu: jest.fn(),
@@ -109,7 +97,6 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, {
-      mainView: mockView,
       menuView: mockMenuView,
       moveView: mockMoveView,
       outcomeView: mockOutcomeView,
@@ -131,9 +118,6 @@ describe("Controller", () => {
         moves: PLAYER_MOVES_DATA,
         taraIsEnabled: false,
       });
-      expect(mockView.updateMessage).toHaveBeenCalledWith(
-        "Rock, Paper, Scissors, Tara"
-      );
 
       // Order Verification: Bind (Render) must happen BEFORE setting Tara state
       const bindOrder = mockMoveView.bindPlayerMove.mock.invocationCallOrder[0];
