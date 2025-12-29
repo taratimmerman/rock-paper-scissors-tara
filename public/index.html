@@ -33,8 +33,16 @@
     <section id="initial-controls"></section>
 
     <main id="game-container">
-      <h1 id="match" class="hidden"></h1>
-      <h2 id="round" class="hidden"></h2>
+      <section
+        id="game-progress-container"
+        class="hidden"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <h1 id="match"></h1>
+        <h2 id="round"></h2>
+      </section>
+
       <section id="game-stats" class="hidden">
         <!-- Player Stats -->
         <aside id="player-stats" class="stats">

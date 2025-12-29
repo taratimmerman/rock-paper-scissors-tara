@@ -3,6 +3,7 @@ import { IView } from "../views/IView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
+import { IProgressView } from "../views/progress/IProgressView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { Move } from "../utils/dataObjectUtils";
@@ -14,6 +15,7 @@ export class Controller {
   private menuView: IMenuView;
   private moveView: IMoveView;
   private outcomeView: IOutcomeView;
+  private progressView: IProgressView;
   private scoreView: IScoreView;
   private statsView: IStatsView;
 
@@ -24,6 +26,7 @@ export class Controller {
       mainView: IView;
       moveView: IMoveView;
       outcomeView: IOutcomeView;
+      progressView: IProgressView;
       scoreView: IScoreView;
       statsView: IStatsView;
     }
@@ -33,8 +36,17 @@ export class Controller {
     this.menuView = views.menuView;
     this.moveView = views.moveView;
     this.outcomeView = views.outcomeView;
+    this.progressView = views.progressView;
     this.scoreView = views.scoreView;
     this.statsView = views.statsView;
+  }
+
+  private updateProgressView(options: { isVisible: boolean }): void {
+    this.progressView.update({
+      matchNumber: this.model.getMatchNumber(),
+      roundNumber: this.model.getRoundNumber(),
+      isVisible: options.isVisible,
+    });
   }
 
   private updateScoreView(): void {
@@ -74,9 +86,7 @@ export class Controller {
   private startGame(): void {
     this.model.setDefaultMatchData();
 
-    this.view.updateRound(this.model.getRoundNumber());
-    this.view.updateMatch(this.model.getMatchNumber());
-
+    this.updateProgressView({ isVisible: true });
     this.menuView.toggleMenuVisibility(false);
     this.statsView.toggleGameStatsVisibility(true);
     this.moveView.toggleMoveButtons(true);
@@ -117,11 +127,9 @@ export class Controller {
 
   private handleNextRound(): void {
     this.model.setDefaultMatchData();
-    this.updateHealthView();
 
-    // Sync headers via monolith
-    this.view.updateRound(this.model.getRoundNumber());
-    this.view.updateMatch(this.model.getMatchNumber());
+    this.updateHealthView();
+    this.updateProgressView({ isVisible: true });
 
     this.outcomeView.toggleOutcomeVisibility(false);
     this.moveView.toggleMoveButtons(true);
@@ -161,6 +169,12 @@ export class Controller {
     const isMatchActive = this.model.isMatchActive();
 
     this.menuView.render({ isMatchActive });
+
+    this.progressView.render({
+      matchNumber: this.model.getMatchNumber(),
+      roundNumber: this.model.getRoundNumber(),
+      isVisible: false,
+    });
 
     this.moveView.render({
       moves: PLAYER_MOVES_DATA,
