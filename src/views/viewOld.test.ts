@@ -61,45 +61,6 @@ describe("View", () => {
     view = new ViewOld();
   });
 
-  // === Dynamic Rendering Tests ===
-
-  test("bindPlayerMove dynamically renders all move choice buttons", () => {
-    const choicesEl = document.getElementById("choices")!;
-    view.bindPlayerMove(jest.fn());
-
-    expect(choicesEl.children.length).toBe(PLAYER_MOVES_DATA.length);
-    expect(document.getElementById(MOVES.TARA)).not.toBeNull();
-  });
-
-  test("bindPlayerMove attaches click listener to rendered buttons", () => {
-    const mockHandler = jest.fn();
-    view.bindPlayerMove(mockHandler);
-
-    const rockBtn = document.getElementById(MOVES.ROCK)!;
-    rockBtn.click();
-
-    expect(mockHandler).toHaveBeenCalledWith(MOVES.ROCK);
-  });
-
-  test("updateTaraButton disables the dynamically rendered Tara button", () => {
-    view.bindPlayerMove(jest.fn());
-    const taraBtn = document.getElementById(MOVES.TARA) as HTMLButtonElement;
-
-    view.updateTaraButton(false);
-
-    expect(taraBtn.disabled).toBe(true);
-  });
-
-  test("updateTaraButton enables the dynamically rendered Tara button", () => {
-    view.bindPlayerMove(jest.fn());
-    const taraBtn = document.getElementById(MOVES.TARA) as HTMLButtonElement;
-    taraBtn.disabled = true;
-
-    view.updateTaraButton(true);
-
-    expect(taraBtn.disabled).toBe(false);
-  });
-
   // === Standard Update Tests ===
 
   test("updateMessage sets the message text", () => {

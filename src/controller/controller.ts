@@ -1,22 +1,30 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IMoveView } from "../views/move/IMoveView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { Move } from "../utils/dataObjectUtils";
-import { PARTICIPANTS } from "../utils/dataUtils";
+import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
   private view: IView;
+  private moveView: IMoveView;
   private scoreView: IScoreView;
   private statsView: IStatsView;
 
   constructor(
     model: IModel,
-    views: { mainView: IView; scoreView: IScoreView; statsView: IStatsView }
+    views: {
+      mainView: IView;
+      moveView: IMoveView;
+      scoreView: IScoreView;
+      statsView: IStatsView;
+    }
   ) {
     this.model = model;
     this.view = views.mainView;
+    this.moveView = views.moveView;
     this.scoreView = views.scoreView;
     this.statsView = views.statsView;
   }
@@ -54,7 +62,7 @@ export class Controller {
   private updateTaraButtonView(): void {
     const isEnabled = this.model.taraIsEnabled();
 
-    this.view.updateTaraButton(isEnabled);
+    this.moveView.updateTaraButton(isEnabled);
   }
 
   private startGame(): void {
@@ -66,7 +74,7 @@ export class Controller {
     this.view.updateMatch(matchNumber);
     this.view.toggleControls(false);
     this.statsView.toggleGameStatsVisibility(true);
-    this.view.toggleMoveButtons(true);
+    this.moveView.toggleMoveButtons(true);
     this.updateHealthView();
   }
 
@@ -98,7 +106,7 @@ export class Controller {
 
   private resetForNextRound(): void {
     this.statsView.toggleGameStatsVisibility(true);
-    this.view.toggleMoveButtons(true);
+    this.moveView.toggleMoveButtons(true);
     this.view.togglePlayAgain(false);
     this.view.toggleOutcome(false);
   }
@@ -135,7 +143,7 @@ export class Controller {
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
-    this.view.toggleMoveButtons(false);
+    this.moveView.toggleMoveButtons(false);
 
     this.model.resetMoves();
     this.model.registerPlayerMove(move);
@@ -146,6 +154,12 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
+
+    this.moveView.render({
+      moves: PLAYER_MOVES_DATA,
+      taraIsEnabled: this.model.taraIsEnabled(),
+    });
+
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
@@ -154,14 +168,14 @@ export class Controller {
 
     this.view.updateStartButton(isMatchActive);
     this.statsView.toggleGameStatsVisibility(false);
-    this.view.toggleMoveButtons(false);
+    this.moveView.toggleMoveButtons(false);
     this.view.togglePlayAgain(false);
     this.view.toggleControls(true);
 
     this.view.bindStartGame(() => this.startGame());
     this.view.bindPlayAgain(() => this.handleNextRound());
     this.view.bindResetGame(() => this.resetGameState());
-    this.view.bindPlayerMove((move) => this.handlePlayerMove(move));
+    this.moveView.bindPlayerMove((move) => this.handlePlayerMove(move));
     this.updateTaraButtonView();
   }
 }

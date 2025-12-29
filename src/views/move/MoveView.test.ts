@@ -20,7 +20,7 @@ describe("MoveView", () => {
     moveView.render({ moves: mockMoves, taraIsEnabled: true });
 
     const buttons = document.querySelectorAll(".card-container");
-    expect(buttons.length).toBe(4);
+    expect(buttons.length).toBe(mockMoves.length);
     expect(document.getElementById(MOVES.ROCK)).toBeTruthy();
     expect(document.getElementById(MOVES.TARA)).toBeTruthy();
   });
@@ -39,6 +39,19 @@ describe("MoveView", () => {
     // Verify Rock is still enabled
     const rockBtn = document.getElementById(MOVES.ROCK) as HTMLButtonElement;
     expect(rockBtn.disabled).toBe(false);
+  });
+
+  test("updateTaraButton(true) re-enables the Tara button after it was disabled", () => {
+    // 1. Start disabled
+    moveView.render({ moves: mockMoves, taraIsEnabled: false });
+    const taraBtn = document.getElementById(MOVES.TARA) as HTMLButtonElement;
+    expect(taraBtn.disabled).toBe(true);
+
+    // 2. Enable it
+    moveView.updateTaraButton(true);
+
+    // 3. Verify
+    expect(taraBtn.disabled).toBe(false);
   });
 
   test("bindPlayerMove() dispatches move id on click", () => {
