@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { ViewOld } from "./viewOld";
-import { PARTICIPANTS, PLAYER_MOVES_DATA, MOVES } from "../utils/dataUtils";
+import { PLAYER_MOVES_DATA, MOVES } from "../utils/dataUtils";
 
 // --- MOCKING SETUP ---
 // Define the mock data array inside the factory function to ensure it is initialized
@@ -107,12 +107,6 @@ describe("View", () => {
     expect(document.getElementById("message")?.textContent).toBe(
       "Hello world!"
     );
-  });
-
-  test("updateScores updates player and computer score", () => {
-    view.updateScores(3, 5);
-    expect(document.getElementById("player-score")?.textContent).toBe("3");
-    expect(document.getElementById("computer-score")?.textContent).toBe("5");
   });
 
   test("toggleOutcome shows result display when moves and result are provided", () => {

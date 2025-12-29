@@ -9,8 +9,6 @@ import { MOVES, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 export class ViewOld {
   private messageEl = this.getEl<HTMLElement>("message");
   private controls = this.getEl<HTMLElement>("initial-controls");
-  private playerScoreEl = this.getEl<HTMLElement>("player-score");
-  private computerScoreEl = this.getEl<HTMLElement>("computer-score");
   private matchEl = this.getEl<HTMLElement>("match");
   private roundEl = this.getEl<HTMLElement>("round");
   private outcomeEl = this.getEl<HTMLElement>("result-display");
@@ -126,13 +124,6 @@ export class ViewOld {
       computerMove,
       `${winner.toUpperCase()} WON THE MATCH!`
     );
-  }
-
-  // ===== Score Methods =====
-
-  updateScores(player: number, computer: number): void {
-    this.playerScoreEl.textContent = player.toString();
-    this.computerScoreEl.textContent = computer.toString();
   }
 
   // ===== Move Cards Methods =====
