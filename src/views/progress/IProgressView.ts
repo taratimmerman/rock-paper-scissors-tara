@@ -4,4 +4,7 @@ export interface ProgressData {
   isVisible: boolean;
 }
 
-export interface IProgressView {}
+export interface IProgressView {
+  render(data: ProgressData): void;
+  update(data: ProgressData): void;
+}

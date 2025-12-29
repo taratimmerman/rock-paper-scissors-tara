@@ -7,6 +7,7 @@ import { IView } from "../views/IView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
+import { IProgressView } from "../views/progress/IProgressView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
@@ -17,6 +18,7 @@ describe("Controller", () => {
   let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
   let mockOutcomeView: jest.Mocked<IOutcomeView>;
+  let mockProgressView: jest.Mocked<IProgressView>;
   let mockScoreView: jest.Mocked<IScoreView>;
   let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
@@ -91,6 +93,11 @@ describe("Controller", () => {
       bindPlayAgain: jest.fn(),
     };
 
+    mockProgressView = {
+      render: jest.fn(),
+      update: jest.fn(),
+    };
+
     mockScoreView = { updateScores: jest.fn() };
 
     mockStatsView = {
@@ -106,6 +113,7 @@ describe("Controller", () => {
       menuView: mockMenuView,
       moveView: mockMoveView,
       outcomeView: mockOutcomeView,
+      progressView: mockProgressView,
       scoreView: mockScoreView,
       statsView: mockStatsView,
     });
@@ -150,15 +158,18 @@ describe("Controller", () => {
 
   // ===== Game Flow Actions =====
 
-  test("startGame prepares model and updates monolithic headers", () => {
+  test("startGame prepares model and updates progress", () => {
     mockModel.getRoundNumber.mockReturnValue(1);
     mockModel.getMatchNumber.mockReturnValue(1);
 
     (controller as any).startGame();
 
     expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
-    expect(mockView.updateRound).toHaveBeenCalledWith(1);
-    expect(mockView.updateMatch).toHaveBeenCalledWith(1);
+    expect(mockProgressView.update).toHaveBeenCalledWith({
+      matchNumber: 1,
+      roundNumber: 1,
+      isVisible: true,
+    });
     expect(mockMenuView.toggleMenuVisibility).toHaveBeenCalledWith(false);
     expect(mockStatsView.toggleGameStatsVisibility).toHaveBeenCalledWith(true);
   });
@@ -240,11 +251,15 @@ describe("Controller", () => {
   // ===== Navigation & Resets =====
 
   describe("handleNextRound", () => {
-    test("syncs headers and hides outcome box for next round", () => {
+    test("syncs progress and hides outcome box for next round", () => {
       mockModel.getRoundNumber.mockReturnValue(2);
       (controller as any).handleNextRound();
 
-      expect(mockView.updateRound).toHaveBeenCalledWith(2);
+      expect(mockProgressView.update).toHaveBeenCalledWith({
+        matchNumber: 1, // Assuming match is still 1
+        roundNumber: 2,
+        isVisible: true,
+      });
       expect(mockOutcomeView.toggleOutcomeVisibility).toHaveBeenCalledWith(
         false
       );
