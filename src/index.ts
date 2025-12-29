@@ -1,5 +1,6 @@
 import { Model } from "./model/model";
 import { ViewOld } from "./views/viewOld";
+import MenuView from "./views/menu/MenuView";
 import moveView from "./views/move/MoveView";
 import OutcomeView from "./views/outcome/OutcomeView";
 import scoreView from "./views/score/ScoreView";
@@ -12,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const controller = new Controller(model, {
     mainView: viewOld,
+    menuView: MenuView,
     moveView: moveView,
     outcomeView: OutcomeView,
     scoreView: scoreView,
