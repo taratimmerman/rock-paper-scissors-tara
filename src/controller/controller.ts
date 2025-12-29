@@ -30,7 +30,7 @@ export class Controller {
   ) {
     this.model = model;
     this.view = views.mainView;
-    this.menuView = views.mainView;
+    this.menuView = views.menuView;
     this.moveView = views.moveView;
     this.outcomeView = views.outcomeView;
     this.scoreView = views.scoreView;
@@ -77,7 +77,7 @@ export class Controller {
     this.view.updateRound(this.model.getRoundNumber());
     this.view.updateMatch(this.model.getMatchNumber());
 
-    this.view.toggleControls(false);
+    this.menuView.toggleMenuVisibility(false);
     this.statsView.toggleGameStatsVisibility(true);
     this.moveView.toggleMoveButtons(true);
     this.updateHealthView();
@@ -137,6 +137,8 @@ export class Controller {
     this.model.resetMostCommonMoves();
     this.model.resetMatchData();
 
+    const isMatchActive = this.model.isMatchActive();
+
     this.updateScoreView();
     this.updateTaraView();
     this.updateHealthView();
@@ -144,7 +146,7 @@ export class Controller {
     this.updateTaraButtonView();
 
     this.outcomeView.toggleOutcomeVisibility(false);
-    this.view.updateStartButton(this.model.isMatchActive());
+    this.menuView.updateMenu({ isMatchActive });
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
@@ -157,6 +159,8 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
+
+    this.menuView.render({ isMatchActive });
 
     this.moveView.render({
       moves: PLAYER_MOVES_DATA,
@@ -176,16 +180,15 @@ export class Controller {
     this.updateTaraView();
     this.updateMostCommonMoveView();
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
-    this.view.updateStartButton(this.model.isMatchActive());
 
-    this.view.updateStartButton(isMatchActive);
+    this.menuView.updateMenu({ isMatchActive });
     this.statsView.toggleGameStatsVisibility(false);
     this.moveView.toggleMoveButtons(false);
-    this.view.toggleControls(true);
+    this.menuView.toggleMenuVisibility(true);
 
-    this.view.bindStartGame(() => this.startGame());
+    this.menuView.bindStartMatch(() => this.startGame());
     this.outcomeView.bindPlayAgain(() => this.handleNextRound());
-    this.view.bindResetGame(() => this.resetGameState());
+    this.menuView.bindResetGame(() => this.resetGameState());
     this.moveView.bindPlayerMove((move) => this.handlePlayerMove(move));
     this.updateTaraButtonView();
   }
