@@ -1,5 +1,4 @@
 import { IModel } from "../model/IModel";
-import { IView } from "../views/IView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
@@ -11,7 +10,6 @@ import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
-  private view: IView;
   private menuView: IMenuView;
   private moveView: IMoveView;
   private outcomeView: IOutcomeView;
@@ -23,7 +21,6 @@ export class Controller {
     model: IModel,
     views: {
       menuView: IMenuView;
-      mainView: IView;
       moveView: IMoveView;
       outcomeView: IOutcomeView;
       progressView: IProgressView;
@@ -32,7 +29,6 @@ export class Controller {
     }
   ) {
     this.model = model;
-    this.view = views.mainView;
     this.menuView = views.menuView;
     this.moveView = views.moveView;
     this.outcomeView = views.outcomeView;
@@ -193,7 +189,6 @@ export class Controller {
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
-    this.view.updateMessage("Rock, Paper, Scissors, Tara");
 
     this.menuView.updateMenu({ isMatchActive });
     this.statsView.toggleGameStatsVisibility(false);
