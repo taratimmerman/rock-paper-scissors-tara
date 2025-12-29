@@ -1,10 +1,4 @@
-import {
-  Move,
-  MoveCard,
-  Participant,
-  VoidHandler,
-} from "../utils/dataObjectUtils";
-import { MOVES, PLAYER_MOVES_DATA } from "../utils/dataUtils";
+import { Move, Participant, VoidHandler } from "../utils/dataObjectUtils";
 
 export class ViewOld {
   private messageEl = this.getEl<HTMLElement>("message");
@@ -18,7 +12,6 @@ export class ViewOld {
   private startBtn = this.getEl<HTMLButtonElement>("start");
   private playAgainBtn = this.getEl<HTMLButtonElement>("play-again");
   private resetBtn = this.getEl<HTMLButtonElement>("reset-game-state");
-  private moveButtons = new Map<Move, HTMLButtonElement>();
 
   // ===== Helper Methods =====
   private getEl<T extends HTMLElement>(id: string): T {
@@ -45,10 +38,6 @@ export class ViewOld {
 
   bindResetGame(handler: VoidHandler) {
     this.resetBtn?.addEventListener("click", handler);
-  }
-
-  bindPlayerMove(handler: (move: Move) => void) {
-    this.renderChoices(PLAYER_MOVES_DATA, handler);
   }
 
   // ===== General Methods =====
@@ -124,63 +113,5 @@ export class ViewOld {
       computerMove,
       `${winner.toUpperCase()} WON THE MATCH!`
     );
-  }
-
-  // ===== Move Cards Methods =====
-
-  updateTaraButton(isEnabled: boolean): void {
-    const taraId = MOVES.TARA as Move;
-    const taraBtn = this.moveButtons.get(taraId);
-
-    if (taraBtn) {
-      taraBtn.disabled = !isEnabled;
-    }
-  }
-
-  /**
-   * Creates a single interactive card element for a move.
-   * @param move - The data object containing id, text, icon, and isClickable status.
-   * @param handler - The callback function for when the card is clicked.
-   * @returns The HTMLButtonElement for the card.
-   */
-  private createChoiceCard(
-    move: MoveCard,
-    handler: (moveId: Move) => void
-  ): HTMLButtonElement {
-    const card = document.createElement("button");
-
-    // Set attributes and content based on data
-    card.id = move.id;
-    card.className = "card-container";
-
-    // Build inner HTML (matching the structure of the existing HTML)
-    card.innerHTML = `
-      <span class="icon" aria-hidden="true">${move.icon}</span>
-      <span class="label">${move.text}</span>
-    `;
-
-    // Add event listener
-    card.addEventListener("click", () => handler(move.id));
-
-    return card;
-  }
-
-  /**
-   * Renders all choice cards into the DOM.
-   */
-  renderChoices(
-    moves: readonly MoveCard[],
-    onCardSelect: (move: Move) => void
-  ): void {
-    // 1. Clear the container
-    this.moveChoicesEl.innerHTML = "";
-    this.moveButtons.clear(); // Clear map reference
-
-    // 2. Loop and Append
-    moves.forEach((move) => {
-      const card = this.createChoiceCard(move, onCardSelect);
-      this.moveChoicesEl.appendChild(card);
-      this.moveButtons.set(move.id, card); // Store reference for later
-    });
   }
 }

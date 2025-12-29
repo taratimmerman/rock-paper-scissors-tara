@@ -1,6 +1,7 @@
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IMoveView } from "../views/move/IMoveView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
@@ -21,6 +22,7 @@ interface ModelWithPrivates {
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockView: jest.Mocked<IView>;
+  let mockMoveView: jest.Mocked<IMoveView>;
   let mockScoreView: jest.Mocked<IScoreView>;
   let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
@@ -73,20 +75,23 @@ describe("Controller", () => {
       bindStartGame: jest.fn(),
       bindPlayAgain: jest.fn(),
       bindResetGame: jest.fn(),
-      bindPlayerMove: jest.fn(),
       updateMessage: jest.fn(),
       updateRound: jest.fn(),
       updateMatch: jest.fn(),
       showRoundOutcome: jest.fn(),
       showMatchOutcome: jest.fn(),
-      toggleMoveButtons: jest.fn(),
       togglePlayAgain: jest.fn(),
-      updateTaraButton: jest.fn(),
       updatePlayAgainButton: jest.fn(),
-      updateTaraButtonView: jest.fn(),
       toggleControls: jest.fn(),
       updateStartButton: jest.fn(),
       toggleOutcome: jest.fn(),
+    };
+
+    mockMoveView = {
+      render: jest.fn(),
+      bindPlayerMove: jest.fn(),
+      updateTaraButton: jest.fn(),
+      toggleMoveButtons: jest.fn(),
     };
 
     mockScoreView = {
@@ -103,6 +108,7 @@ describe("Controller", () => {
 
     controller = new Controller(mockModel, {
       mainView: mockView,
+      moveView: mockMoveView,
       scoreView: mockScoreView,
       statsView: mockStatsView,
     });
@@ -148,7 +154,7 @@ describe("Controller", () => {
 
     await controller.initialize();
     // call the registered player move handler directly
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
     playerMoveHandler(MOVES.PAPER);
 
     expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
@@ -165,13 +171,13 @@ describe("Controller", () => {
     await controller.initialize();
 
     // ASSERT 1: The correct state was passed (initially disabled)
-    expect(mockView.updateTaraButton).toHaveBeenCalledWith(false);
+    expect(mockMoveView.updateTaraButton).toHaveBeenCalledWith(false);
 
     // ASSERT 2: The order of calls is correct.
     const bindPlayerMoveCallOrder =
-      mockView.bindPlayerMove.mock.invocationCallOrder[0];
+      mockMoveView.bindPlayerMove.mock.invocationCallOrder[0];
     const updateTaraButtonCallOrder =
-      mockView.updateTaraButton.mock.invocationCallOrder[0];
+      mockMoveView.updateTaraButton.mock.invocationCallOrder[0];
 
     // bindPlayerMove (rendering) must happen before updateTaraButton (setting state)
     expect(updateTaraButtonCallOrder).toBeGreaterThan(bindPlayerMoveCallOrder);
@@ -181,61 +187,61 @@ describe("Controller", () => {
 
   test("clicking rock button calls registerPlayerMove with 'rock'", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
     await playerMoveHandler(MOVES.ROCK);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
   });
 
   test("clicking paper button calls registerPlayerMove with 'paper'", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
     await playerMoveHandler(MOVES.PAPER);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
   test("clicking scissors button calls registerPlayerMove with 'scissors'", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
     await playerMoveHandler(MOVES.SCISSORS);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
   });
 
   test("clicking tara button calls registerPlayerMove with 'tara'", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
     await playerMoveHandler(MOVES.TARA);
     expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
   });
 
   test("clicking a move button triggers computer to choose a move", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
     await playerMoveHandler(MOVES.ROCK);
     expect(mockModel.chooseComputerMove).toHaveBeenCalled();
   });
 
   test("clicking a move button displays outcome and toggles UI", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.ROCK);
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.ROCK);
 
     expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
       MOVES.ROCK,
       MOVES.SCISSORS,
       "You win!"
     );
-    expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
+    expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(false);
     expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
     expect(mockScoreView.updateScores).toHaveBeenCalledWith(0, 0);
     expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
-    expect(mockView.updateTaraButton).toHaveBeenCalled();
+    expect(mockMoveView.updateTaraButton).toHaveBeenCalled();
   });
 
   test("Clicking a move button makes move buttons disappear", async () => {
     await controller.initialize();
-    const playerMoveHandler = mockView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.SCISSORS);
-    expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(false);
+    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
+    playerMoveHandler(MOVES.SCISSORS);
+    expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(false);
   });
 
   test("should call resetMoves before registerPlayerMove", async () => {
@@ -299,7 +305,7 @@ describe("Controller", () => {
     mockView.updateMatch.mockImplementation(() => {});
     mockView.toggleControls.mockImplementation(() => {});
     mockStatsView.toggleGameStatsVisibility.mockImplementation(() => {});
-    mockView.toggleMoveButtons.mockImplementation(() => {});
+    mockMoveView.toggleMoveButtons.mockImplementation(() => {});
 
     controller["startGame"]();
 
@@ -309,7 +315,7 @@ describe("Controller", () => {
     expect(mockView.updateMatch).toHaveBeenCalledWith(initialMatchNumber);
     expect(mockView.toggleControls).toHaveBeenCalledWith(false);
     expect(mockStatsView.toggleGameStatsVisibility).toHaveBeenCalledWith(true);
-    expect(mockView.toggleMoveButtons).toHaveBeenCalledWith(true);
+    expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(true);
   });
 
   describe("endRound", () => {

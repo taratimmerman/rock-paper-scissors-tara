@@ -31,7 +31,6 @@ export default abstract class View<T = any> {
     const newMarkup = this._generateMarkup();
     const newDOM = document.createRange().createContextualFragment(newMarkup);
     const newElements = Array.from(newDOM.querySelectorAll("*"));
-
     const currentElements = Array.from(
       this._parentElement.querySelectorAll("*")
     );
@@ -39,7 +38,7 @@ export default abstract class View<T = any> {
     newElements.forEach((newElement, i) => {
       const currentElement = currentElements[i];
 
-      // Update changed TEXT
+      // 1. Update changed TEXT
       if (
         !newElement.isEqualNode(currentElement) &&
         newElement.firstChild?.nodeValue?.trim() !== "" &&
@@ -48,11 +47,19 @@ export default abstract class View<T = any> {
         currentElement.textContent = newElement.textContent;
       }
 
-      // Update changed ATTRIBUTES (classes, styles, data-attributes)
+      // 2. Update changed ATTRIBUTES
       if (!newElement.isEqualNode(currentElement)) {
+        // Add or update attributes from new to current
         Array.from(newElement.attributes).forEach((attr) =>
           currentElement.setAttribute(attr.name, attr.value)
         );
+
+        // Remove attributes from current that aren't in new
+        Array.from(currentElement.attributes).forEach((attr) => {
+          if (!newElement.hasAttribute(attr.name)) {
+            currentElement.removeAttribute(attr.name);
+          }
+        });
       }
     });
   }
