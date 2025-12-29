@@ -1,6 +1,7 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
 import { IMoveView } from "../views/move/IMoveView";
+import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { Move } from "../utils/dataObjectUtils";
@@ -10,6 +11,7 @@ export class Controller {
   private model: IModel;
   private view: IView;
   private moveView: IMoveView;
+  private outcomeView: IOutcomeView;
   private scoreView: IScoreView;
   private statsView: IStatsView;
 
@@ -18,6 +20,7 @@ export class Controller {
     views: {
       mainView: IView;
       moveView: IMoveView;
+      outcomeView: IOutcomeView;
       scoreView: IScoreView;
       statsView: IStatsView;
     }
@@ -25,6 +28,7 @@ export class Controller {
     this.model = model;
     this.view = views.mainView;
     this.moveView = views.moveView;
+    this.outcomeView = views.outcomeView;
     this.scoreView = views.scoreView;
     this.statsView = views.statsView;
   }
@@ -60,18 +64,15 @@ export class Controller {
   }
 
   private updateTaraButtonView(): void {
-    const isEnabled = this.model.taraIsEnabled();
-
-    this.moveView.updateTaraButton(isEnabled);
+    this.moveView.updateTaraButton(this.model.taraIsEnabled());
   }
 
   private startGame(): void {
-    const roundNumber = this.model.getRoundNumber();
-    const matchNumber = this.model.getMatchNumber();
-
     this.model.setDefaultMatchData();
-    this.view.updateRound(roundNumber);
-    this.view.updateMatch(matchNumber);
+
+    this.view.updateRound(this.model.getRoundNumber());
+    this.view.updateMatch(this.model.getMatchNumber());
+
     this.view.toggleControls(false);
     this.statsView.toggleGameStatsVisibility(true);
     this.moveView.toggleMoveButtons(true);
@@ -86,41 +87,41 @@ export class Controller {
 
     this.updateHealthView();
 
+    let resultMessage = result.toUpperCase();
     if (isMatchOver) {
       const winner = this.model.handleMatchWin();
-      this.view.showMatchOutcome(playerMove, computerMove, winner);
+      resultMessage = `${winner.toUpperCase()} WON THE MATCH!`;
       this.model.incrementMatchNumber();
       this.model.setMatch(null);
     } else {
-      this.view.showRoundOutcome(playerMove, computerMove, result);
       this.model.increaseRoundNumber();
     }
+
+    this.outcomeView.updateOutcome({
+      playerMove,
+      computerMove,
+      resultMessage,
+      isMatchOver,
+    });
+    this.outcomeView.toggleOutcomeVisibility(true);
 
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
-    this.view.updatePlayAgainButton(isMatchOver);
-    this.view.togglePlayAgain(true);
-  }
-
-  private resetForNextRound(): void {
-    this.statsView.toggleGameStatsVisibility(true);
-    this.moveView.toggleMoveButtons(true);
-    this.view.togglePlayAgain(false);
-    this.view.toggleOutcome(false);
   }
 
   private handleNextRound(): void {
     this.model.setDefaultMatchData();
-
-    const roundNumber = this.model.getRoundNumber();
-    const matchNumber = this.model.getMatchNumber();
-
     this.updateHealthView();
-    this.view.updateRound(roundNumber);
-    this.view.updateMatch(matchNumber);
-    this.resetForNextRound();
+
+    // Sync headers via monolith
+    this.view.updateRound(this.model.getRoundNumber());
+    this.view.updateMatch(this.model.getMatchNumber());
+
+    this.outcomeView.toggleOutcomeVisibility(false);
+    this.moveView.toggleMoveButtons(true);
+    this.statsView.toggleGameStatsVisibility(true);
   }
 
   async resetGameState(): Promise<void> {
@@ -138,17 +139,15 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
 
-    const isMatchActive = this.model.isMatchActive();
-    this.view.updateStartButton(isMatchActive);
+    this.outcomeView.toggleOutcomeVisibility(false);
+    this.view.updateStartButton(this.model.isMatchActive());
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
     this.moveView.toggleMoveButtons(false);
-
     this.model.resetMoves();
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
-
     this.endRound();
   }
 
@@ -160,20 +159,28 @@ export class Controller {
       taraIsEnabled: this.model.taraIsEnabled(),
     });
 
+    this.outcomeView.render({
+      playerMove: null,
+      computerMove: null,
+      resultMessage: "",
+      isMatchOver: false,
+      roundNumber: this.model.getRoundNumber(),
+      matchNumber: this.model.getMatchNumber(),
+    });
+
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
-
     this.view.updateMessage("Rock, Paper, Scissors, Tara");
+    this.view.updateStartButton(this.model.isMatchActive());
 
     this.view.updateStartButton(isMatchActive);
     this.statsView.toggleGameStatsVisibility(false);
     this.moveView.toggleMoveButtons(false);
-    this.view.togglePlayAgain(false);
     this.view.toggleControls(true);
 
     this.view.bindStartGame(() => this.startGame());
-    this.view.bindPlayAgain(() => this.handleNextRound());
+    this.outcomeView.bindPlayAgain(() => this.handleNextRound());
     this.view.bindResetGame(() => this.resetGameState());
     this.moveView.bindPlayerMove((move) => this.handlePlayerMove(move));
     this.updateTaraButtonView();

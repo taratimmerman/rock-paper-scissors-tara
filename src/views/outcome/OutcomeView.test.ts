@@ -22,7 +22,7 @@ describe("OutcomeView", () => {
     `;
   });
 
-  test("render() populates result display and external headers", () => {
+  test("render() populates result display", () => {
     outcomeView.render(mockData);
 
     // Check internal display
@@ -30,13 +30,18 @@ describe("OutcomeView", () => {
     expect(resultDisplay.innerHTML).toContain("You played rock");
     expect(resultDisplay.innerHTML).toContain("YOU WIN!");
     expect(resultDisplay.innerHTML).toContain("Next Round");
+  });
 
-    // Check external headers
-    const matchEl = document.getElementById("match")!;
-    const roundEl = document.getElementById("round")!;
-    expect(matchEl.textContent).toBe("Match 1");
-    expect(roundEl.textContent).toBe("Round 1");
-    expect(matchEl.classList.contains("hidden")).toBe(false);
+  test("render() correctly handles null moves initially", () => {
+    outcomeView.render({
+      ...mockData,
+      playerMove: null,
+      computerMove: null,
+    });
+
+    const movesEl = document.getElementById("round-moves")!;
+    // Verify it renders "null" or empty rather than crashing
+    expect(movesEl.textContent).toContain("You played null");
   });
 
   test("updateOutcome() toggles button text when match ends", () => {
@@ -54,6 +59,20 @@ describe("OutcomeView", () => {
     expect(document.getElementById("round-result")!.textContent).toBe(
       "PLAYER WON THE MATCH!"
     );
+  });
+
+  test("updateOutcome() preserves existing data when only partial data is provided", () => {
+    outcomeView.render(mockData);
+
+    // Update ONLY the result message
+    outcomeView.updateOutcome({ resultMessage: "SUDDEN DEATH!" });
+
+    const movesEl = document.getElementById("round-moves")!;
+    const resultEl = document.getElementById("round-result")!;
+
+    // Move data should still be there from the initial render
+    expect(movesEl.textContent).toContain("You played rock");
+    expect(resultEl.textContent).toBe("SUDDEN DEATH!");
   });
 
   test("bindPlayAgain() triggers handler on button click", () => {
