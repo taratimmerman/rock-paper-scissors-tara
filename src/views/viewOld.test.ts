@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 import { ViewOld } from "./viewOld";
-import { PLAYER_MOVES_DATA, MOVES } from "../utils/dataUtils";
 
 // --- MOCKING SETUP ---
 // Define the mock data array inside the factory function to ensure it is initialized
@@ -68,25 +67,5 @@ describe("View", () => {
     expect(document.getElementById("message")?.textContent).toBe(
       "Hello world!"
     );
-  });
-
-  test("toggleOutcome shows result display when moves and result are provided", () => {
-    view.showRoundOutcome("rock", "scissors", "win");
-    const outcomeEl = document.getElementById("result-display")!;
-    expect(outcomeEl.classList.contains("hidden")).toBe(false);
-    expect(outcomeEl.textContent).toContain("WIN");
-  });
-
-  test("showRoundOutcome sets move and result text", () => {
-    view.showRoundOutcome("rock", "scissors", "you win!");
-    expect(document.getElementById("round-moves")?.textContent).toContain(
-      "rock"
-    );
-    expect(document.getElementById("round-result")?.textContent).toBe(
-      "YOU WIN!"
-    );
-    expect(
-      document.getElementById("result-display")?.classList.contains("hidden")
-    ).toBe(false);
   });
 });

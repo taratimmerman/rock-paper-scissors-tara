@@ -1,4 +1,4 @@
-import { Move, Participant, VoidHandler } from "../utils/dataObjectUtils";
+import { VoidHandler } from "../utils/dataObjectUtils";
 
 export class ViewOld {
   private messageEl = this.getEl<HTMLElement>("message");
@@ -81,37 +81,5 @@ export class ViewOld {
     this.playAgainBtn.textContent = isMatchOver
       ? "Start New Match"
       : "Next Round";
-  }
-
-  // ===== Outcome Methods =====
-
-  private showOutcomeText(
-    playerMove: Move | null,
-    computerMove: Move | null,
-    resultText: string
-  ): void {
-    this.movesEl.textContent = `You played ${playerMove}. Computer played ${computerMove}.`;
-    this.resultEl.textContent = resultText;
-    this.toggleOutcome(true);
-  }
-
-  showRoundOutcome(
-    playerMove: Move | null,
-    computerMove: Move | null,
-    result: string
-  ): void {
-    this.showOutcomeText(playerMove, computerMove, result.toUpperCase());
-  }
-
-  showMatchOutcome(
-    playerMove: Move | null,
-    computerMove: Move | null,
-    winner: Participant
-  ): void {
-    this.showOutcomeText(
-      playerMove,
-      computerMove,
-      `${winner.toUpperCase()} WON THE MATCH!`
-    );
   }
 }

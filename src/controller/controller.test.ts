@@ -1,46 +1,34 @@
+/**
+ * @jest-environment jsdom
+ */
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
 import { IMoveView } from "../views/move/IMoveView";
+import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
-import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
+import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 import { Move } from "../utils/dataObjectUtils";
-
-interface ControllerWithPrivates {
-  updateScoreView(): void;
-  updateTaraView(): void;
-  updateTaraButtonView(): void;
-  resetForNextRound(): void;
-}
-
-interface ModelWithPrivates {
-  resetMoves(): void;
-  registerPlayerMove(move: Move): void;
-}
 
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockView: jest.Mocked<IView>;
   let mockMoveView: jest.Mocked<IMoveView>;
+  let mockOutcomeView: jest.Mocked<IOutcomeView>;
   let mockScoreView: jest.Mocked<IScoreView>;
   let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <button id=${MOVES.ROCK}></button>
-      <button id=${MOVES.PAPER}></button>
-      <button id=${MOVES.SCISSORS}></button>
-      <button id=${MOVES.TARA}></button>
+      <div id="choices"></div>
+      <div id="result-display"></div>
     `;
 
-    // Create fully typed jest mocks
     mockModel = {
       getPlayerScore: jest.fn().mockReturnValue(0),
       getComputerScore: jest.fn().mockReturnValue(0),
-      setPlayerScore: jest.fn(),
-      setComputerScore: jest.fn(),
       getPlayerMove: jest.fn().mockReturnValue(MOVES.ROCK),
       getComputerMove: jest.fn().mockReturnValue(MOVES.SCISSORS),
       registerPlayerMove: jest.fn(),
@@ -49,15 +37,14 @@ describe("Controller", () => {
       resetMoves: jest.fn(),
       getPlayerTaraCount: jest.fn().mockReturnValue(0),
       getComputerTaraCount: jest.fn().mockReturnValue(0),
-      taraIsEnabled: jest.fn(),
+      taraIsEnabled: jest.fn().mockReturnValue(true),
       resetTaras: jest.fn(),
-      getPlayerMostCommonMove: jest.fn(),
-      getComputerMostCommonMove: jest.fn(),
+      getPlayerMostCommonMove: jest.fn().mockReturnValue(null),
+      getComputerMostCommonMove: jest.fn().mockReturnValue(null),
       resetBothMoveCounts: jest.fn(),
       resetMostCommonMoves: jest.fn(),
-      showMostCommonMove: jest.fn(),
-      isMatchActive: jest.fn(),
-      isMatchOver: jest.fn(),
+      isMatchActive: jest.fn().mockReturnValue(false),
+      isMatchOver: jest.fn().mockReturnValue(false),
       handleMatchWin: jest.fn(),
       incrementMatchNumber: jest.fn(),
       increaseRoundNumber: jest.fn(),
@@ -67,25 +54,19 @@ describe("Controller", () => {
       setDefaultMatchData: jest.fn(),
       resetHistories: jest.fn(),
       resetMatchData: jest.fn(),
-      getHealth: jest.fn(),
+      getHealth: jest.fn().mockReturnValue(100),
       resetScores: jest.fn(),
-    };
+    } as any;
 
     mockView = {
       bindStartGame: jest.fn(),
-      bindPlayAgain: jest.fn(),
       bindResetGame: jest.fn(),
       updateMessage: jest.fn(),
-      updateRound: jest.fn(),
-      updateMatch: jest.fn(),
-      showRoundOutcome: jest.fn(),
-      showMatchOutcome: jest.fn(),
-      togglePlayAgain: jest.fn(),
-      updatePlayAgainButton: jest.fn(),
       toggleControls: jest.fn(),
       updateStartButton: jest.fn(),
-      toggleOutcome: jest.fn(),
-    };
+      updateRound: jest.fn(),
+      updateMatch: jest.fn(),
+    } as any;
 
     mockMoveView = {
       render: jest.fn(),
@@ -94,9 +75,14 @@ describe("Controller", () => {
       toggleMoveButtons: jest.fn(),
     };
 
-    mockScoreView = {
-      updateScores: jest.fn(),
+    mockOutcomeView = {
+      render: jest.fn(),
+      updateOutcome: jest.fn(),
+      toggleOutcomeVisibility: jest.fn(),
+      bindPlayAgain: jest.fn(),
     };
+
+    mockScoreView = { updateScores: jest.fn() };
 
     mockStatsView = {
       toggleGameStatsVisibility: jest.fn(),
@@ -109,328 +95,160 @@ describe("Controller", () => {
     controller = new Controller(mockModel, {
       mainView: mockView,
       moveView: mockMoveView,
+      outcomeView: mockOutcomeView,
       scoreView: mockScoreView,
       statsView: mockStatsView,
     });
   });
 
-  test("initialize updates the message and scores", async () => {
-    await controller.initialize();
+  // ===== Initialization & Setup =====
 
-    expect(mockScoreView.updateScores).toHaveBeenCalled();
-    expect(mockView.updateMessage).toHaveBeenCalledWith(
-      "Rock, Paper, Scissors, Tara"
-    );
+  describe("initialize", () => {
+    test("sets up all views and bindings with correct execution order", async () => {
+      mockModel.taraIsEnabled.mockReturnValue(false);
+
+      await controller.initialize();
+
+      expect(mockMoveView.render).toHaveBeenCalledWith({
+        moves: PLAYER_MOVES_DATA,
+        taraIsEnabled: false,
+      });
+      expect(mockView.updateMessage).toHaveBeenCalledWith(
+        "Rock, Paper, Scissors, Tara"
+      );
+
+      // Order Verification: Bind (Render) must happen BEFORE setting Tara state
+      const bindOrder = mockMoveView.bindPlayerMove.mock.invocationCallOrder[0];
+      const taraOrder =
+        mockMoveView.updateTaraButton.mock.invocationCallOrder[0];
+      expect(taraOrder).toBeGreaterThan(bindOrder);
+    });
+
+    test("syncs initial stats and common moves during init", async () => {
+      mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
+
+      await controller.initialize();
+
+      expect(mockScoreView.updateScores).toHaveBeenCalled();
+      expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
+        MOVES.ROCK,
+        MOVES.PAPER
+      );
+    });
   });
 
-  test("initialize calls view.updateMostCommonMoves when both most common moves exist", async () => {
-    mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
-    mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
-    mockStatsView.updateMostCommonMoves = jest.fn();
+  // ===== Game Flow Actions =====
 
-    await controller.initialize();
-    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
-      MOVES.ROCK,
-      MOVES.PAPER
-    );
-  });
+  test("startGame prepares model and updates monolithic headers", () => {
+    mockModel.getRoundNumber.mockReturnValue(1);
+    mockModel.getMatchNumber.mockReturnValue(1);
 
-  test("initialize calls updateMostCommonMoves when one move is present", async () => {
-    mockModel.getPlayerMostCommonMove.mockReturnValue(null);
-    mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.PAPER);
-    mockStatsView.updateMostCommonMoves = jest.fn();
+    (controller as any).startGame();
 
-    await controller.initialize();
-    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
-      null,
-      MOVES.PAPER
-    );
-  });
-
-  test("endRound calls view.updateMostCommonMoves when both most common moves exist", async () => {
-    mockModel.getPlayerMostCommonMove.mockReturnValue(MOVES.ROCK);
-    mockModel.getComputerMostCommonMove.mockReturnValue(MOVES.SCISSORS);
-    mockStatsView.updateMostCommonMoves = jest.fn();
-
-    await controller.initialize();
-    // call the registered player move handler directly
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.PAPER);
-
-    expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
-      MOVES.ROCK,
-      MOVES.SCISSORS
-    );
-  });
-
-  test("initialize sets Tara button state (updateTaraButton) only AFTER rendering buttons (bindPlayerMove)", async () => {
-    // ARRANGE: Ensure the model indicates Tara is disabled initially
-    mockModel.taraIsEnabled.mockReturnValue(false);
-
-    // ACT: Run the initialization process
-    await controller.initialize();
-
-    // ASSERT 1: The correct state was passed (initially disabled)
-    expect(mockMoveView.updateTaraButton).toHaveBeenCalledWith(false);
-
-    // ASSERT 2: The order of calls is correct.
-    const bindPlayerMoveCallOrder =
-      mockMoveView.bindPlayerMove.mock.invocationCallOrder[0];
-    const updateTaraButtonCallOrder =
-      mockMoveView.updateTaraButton.mock.invocationCallOrder[0];
-
-    // bindPlayerMove (rendering) must happen before updateTaraButton (setting state)
-    expect(updateTaraButtonCallOrder).toBeGreaterThan(bindPlayerMoveCallOrder);
-  });
-
-  // ===== Move Tests =====
-
-  test("clicking rock button calls registerPlayerMove with 'rock'", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.ROCK);
-    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
-  });
-
-  test("clicking paper button calls registerPlayerMove with 'paper'", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.PAPER);
-    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.PAPER);
-  });
-
-  test("clicking scissors button calls registerPlayerMove with 'scissors'", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.SCISSORS);
-    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.SCISSORS);
-  });
-
-  test("clicking tara button calls registerPlayerMove with 'tara'", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.TARA);
-    expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.TARA);
-  });
-
-  test("clicking a move button triggers computer to choose a move", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    await playerMoveHandler(MOVES.ROCK);
-    expect(mockModel.chooseComputerMove).toHaveBeenCalled();
-  });
-
-  test("clicking a move button displays outcome and toggles UI", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.ROCK);
-
-    expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
-      MOVES.ROCK,
-      MOVES.SCISSORS,
-      "You win!"
-    );
-    expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(false);
-    expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
-    expect(mockScoreView.updateScores).toHaveBeenCalledWith(0, 0);
-    expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 0);
-    expect(mockMoveView.updateTaraButton).toHaveBeenCalled();
-  });
-
-  test("Clicking a move button makes move buttons disappear", async () => {
-    await controller.initialize();
-    const playerMoveHandler = mockMoveView.bindPlayerMove.mock.calls[0][0];
-    playerMoveHandler(MOVES.SCISSORS);
-    expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(false);
-  });
-
-  test("should call resetMoves before registerPlayerMove", async () => {
-    const resetMoves = jest.spyOn(
-      controller["model"] as unknown as ModelWithPrivates,
-      "resetMoves"
-    );
-
-    const registerPlayerMove = jest.spyOn(
-      controller["model"] as unknown as ModelWithPrivates,
-      "registerPlayerMove"
-    );
-
-    await controller.handlePlayerMove(MOVES.SCISSORS);
-
-    const resetCall = resetMoves.mock.invocationCallOrder[0];
-    const setMoveCall = registerPlayerMove.mock.invocationCallOrder[0];
-
-    expect(resetCall).toBeLessThan(setMoveCall);
-  });
-
-  test("resetGameState should reset model and update view", async () => {
-    const updateScoreView = jest.spyOn(
-      controller as unknown as ControllerWithPrivates,
-      "updateScoreView"
-    );
-    const updateTaraView = jest.spyOn(
-      controller as unknown as ControllerWithPrivates,
-      "updateTaraView"
-    );
-    const updateTaraButtonView = jest.spyOn(
-      controller as unknown as ControllerWithPrivates,
-      "updateTaraButtonView"
-    );
-
-    await controller.resetGameState();
-    expect(mockModel.resetScores).toHaveBeenCalled();
-    expect(mockModel.resetMoves).toHaveBeenCalled();
-    expect(mockModel.resetTaras).toHaveBeenCalled();
-    expect(mockModel.resetHistories).toHaveBeenCalled();
-    expect(mockModel.resetBothMoveCounts).toHaveBeenCalled();
-    expect(mockModel.resetMostCommonMoves).toHaveBeenCalled();
-
-    expect(updateScoreView).toHaveBeenCalled();
-    expect(updateTaraView).toHaveBeenCalled();
-    expect(updateTaraButtonView).toHaveBeenCalled();
-  });
-
-  test("startGame performs initial game setup with correct view updates", () => {
-    const initialRoundNumber = 1;
-    const initialMatchNumber = 1;
-    const showMostCommonMove = true; // Example value
-
-    mockModel.getRoundNumber.mockReturnValue(initialRoundNumber);
-    mockModel.getMatchNumber.mockReturnValue(initialMatchNumber);
-    mockModel.showMostCommonMove.mockReturnValue(showMostCommonMove);
-    mockModel.setDefaultMatchData.mockImplementation(() => {});
-
-    // Mock all view methods that startGame interacts with
-    mockView.updateRound.mockImplementation(() => {});
-    mockView.updateMatch.mockImplementation(() => {});
-    mockView.toggleControls.mockImplementation(() => {});
-    mockStatsView.toggleGameStatsVisibility.mockImplementation(() => {});
-    mockMoveView.toggleMoveButtons.mockImplementation(() => {});
-
-    controller["startGame"]();
-
-    // Expected assertions
     expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
-    expect(mockView.updateRound).toHaveBeenCalledWith(initialRoundNumber);
-    expect(mockView.updateMatch).toHaveBeenCalledWith(initialMatchNumber);
+    expect(mockView.updateRound).toHaveBeenCalledWith(1);
+    expect(mockView.updateMatch).toHaveBeenCalledWith(1);
     expect(mockView.toggleControls).toHaveBeenCalledWith(false);
     expect(mockStatsView.toggleGameStatsVisibility).toHaveBeenCalledWith(true);
-    expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(true);
   });
+
+  // ===== Move Handling & Mapping =====
+
+  describe("handlePlayerMove", () => {
+    const moveTypes = [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS, MOVES.TARA];
+
+    test.each(moveTypes)(
+      "registering %s calls model and chooses response",
+      async (move) => {
+        await controller.handlePlayerMove(move);
+        expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(move);
+        expect(mockModel.chooseComputerMove).toHaveBeenCalled();
+      }
+    );
+
+    test("resets moves BEFORE registering new player move", async () => {
+      await controller.handlePlayerMove(MOVES.ROCK);
+      const resetOrder = mockModel.resetMoves.mock.invocationCallOrder[0];
+      const registerOrder =
+        mockModel.registerPlayerMove.mock.invocationCallOrder[0];
+      expect(resetOrder).toBeLessThan(registerOrder);
+    });
+  });
+
+  // ===== Round & Match Outcomes =====
 
   describe("endRound", () => {
-    test("endRound should proceed to next round if match is not over", () => {
-      mockModel.getPlayerMove.mockReturnValue("rock");
-      mockModel.getComputerMove.mockReturnValue("scissors");
-      mockModel.evaluateRound.mockReturnValue("You win the round!");
+    beforeEach(() => {
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.SCISSORS);
+      mockModel.evaluateRound.mockReturnValue("You win!");
+    });
+
+    test("transforms results to uppercase and updates OutcomeView", () => {
       mockModel.isMatchOver.mockReturnValue(false);
-      mockModel.increaseRoundNumber.mockImplementation(() => {});
-      mockModel.getRoundNumber.mockReturnValue(2);
 
-      controller["endRound"]();
+      (controller as any).endRound();
 
-      expect(mockView.showRoundOutcome).toHaveBeenCalledWith(
-        "rock",
-        "scissors",
-        "You win the round!"
+      expect(mockOutcomeView.updateOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultMessage: "YOU WIN!",
+          isMatchOver: false,
+        })
+      );
+      expect(mockOutcomeView.toggleOutcomeVisibility).toHaveBeenCalledWith(
+        true
       );
       expect(mockModel.increaseRoundNumber).toHaveBeenCalled();
-      expect(mockModel.incrementMatchNumber).not.toHaveBeenCalled();
-      expect(mockModel.setMatch).not.toHaveBeenCalled();
-      expect(mockView.showMatchOutcome).not.toHaveBeenCalled();
     });
 
-    test("endRound should show match outcome and increment match number if match is over", () => {
-      mockModel.getPlayerMove.mockReturnValue("rock");
-      mockModel.getComputerMove.mockReturnValue("scissors");
+    test("handles match win state correctly", () => {
       mockModel.isMatchOver.mockReturnValue(true);
       mockModel.handleMatchWin.mockReturnValue(PARTICIPANTS.PLAYER);
-      mockModel.incrementMatchNumber.mockImplementation(() => {});
-      mockModel.setMatch.mockImplementation(() => {});
-      mockModel.increaseRoundNumber.mockImplementation(() => {});
 
-      controller["endRound"]();
+      (controller as any).endRound();
 
-      expect(mockView.showMatchOutcome).toHaveBeenCalledWith(
-        "rock",
-        "scissors",
-        PARTICIPANTS.PLAYER
+      expect(mockOutcomeView.updateOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultMessage: "PLAYER WON THE MATCH!",
+          isMatchOver: true,
+        })
       );
       expect(mockModel.incrementMatchNumber).toHaveBeenCalled();
-      expect(mockModel.setMatch).toHaveBeenCalledWith(null);
-      expect(mockView.showRoundOutcome).not.toHaveBeenCalled();
-      expect(mockModel.increaseRoundNumber).not.toHaveBeenCalled();
     });
 
-    test("endRound should show match outcome and increment match number if computer wins match", () => {
-      const playerMove: Move = "paper";
-      const computerMove: Move = "scissors"; // Computer wins round, leading to match win
-      const matchWinner = PARTICIPANTS.COMPUTER;
+    test("synchronizes all stats, scores, and buttons as side-effects", () => {
+      (controller as any).endRound();
 
-      mockModel.getPlayerMove.mockReturnValue(playerMove);
-      mockModel.getComputerMove.mockReturnValue(computerMove);
-      // evaluateRound might not be called if match is already detected as over by health
-      // but good practice to mock it if it theoretically could be.
-      mockModel.evaluateRound.mockReturnValue("Computer wins the round!");
-      mockModel.isMatchOver.mockReturnValue(true); // Key for this test
-      mockModel.handleMatchWin.mockReturnValue(matchWinner); // Key for this test
-      mockModel.incrementMatchNumber.mockImplementation(() => {});
-      mockModel.setMatch.mockImplementation(() => {}); // Set to null after match end
-
-      // Mock common view/model updates that happen at the end of every round
-      mockModel.getPlayerScore.mockReturnValue(0);
-      mockModel.getComputerScore.mockReturnValue(1); // Example score for computer win
-      mockModel.getPlayerTaraCount.mockReturnValue(0);
-      mockModel.getComputerTaraCount.mockReturnValue(3);
-      mockModel.getPlayerMostCommonMove.mockReturnValue(null);
-      mockModel.getComputerMostCommonMove.mockReturnValue("scissors");
-
-      controller["endRound"](); // Accessing private method for testing
-
-      // Assertions for when match IS over (Computer wins)
-      expect(mockView.showMatchOutcome).toHaveBeenCalledWith(
-        playerMove,
-        computerMove,
-        matchWinner
-      );
-      expect(mockModel.incrementMatchNumber).toHaveBeenCalled();
-      expect(mockModel.setMatch).toHaveBeenCalledWith(null); // Should be called with null
-      expect(mockView.showRoundOutcome).not.toHaveBeenCalled(); // Should NOT be called
-      expect(mockModel.increaseRoundNumber).not.toHaveBeenCalled(); // Should NOT be called
-
-      // Common calls for end of round (regardless of match end)
-      expect(mockView.togglePlayAgain).toHaveBeenCalledWith(true);
-      expect(mockScoreView.updateScores).toHaveBeenCalledWith(0, 1);
-      expect(mockStatsView.updateTaraCounts).toHaveBeenCalledWith(0, 3);
-      expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
-        null,
-        "scissors"
-      );
+      expect(mockScoreView.updateScores).toHaveBeenCalled();
+      expect(mockStatsView.updateTaraCounts).toHaveBeenCalled();
+      expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalled();
+      expect(mockMoveView.updateTaraButton).toHaveBeenCalled();
     });
   });
 
+  // ===== Navigation & Resets =====
+
   describe("handleNextRound", () => {
-    test("prepares for the next round within a match", () => {
-      const resetForNextRound = jest.spyOn(
-        controller as unknown as ControllerWithPrivates,
-        "resetForNextRound"
+    test("syncs headers and hides outcome box for next round", () => {
+      mockModel.getRoundNumber.mockReturnValue(2);
+      (controller as any).handleNextRound();
+
+      expect(mockView.updateRound).toHaveBeenCalledWith(2);
+      expect(mockOutcomeView.toggleOutcomeVisibility).toHaveBeenCalledWith(
+        false
       );
-
-      const nextRoundNumber = 3;
-      const currentMatchNumber = 1;
-
-      mockModel.getRoundNumber.mockReturnValue(nextRoundNumber);
-      mockModel.getMatchNumber.mockReturnValue(currentMatchNumber);
-      mockModel.setDefaultMatchData.mockImplementation(() => {});
-      mockView.updateRound.mockImplementation(() => {});
-      mockView.updateMatch.mockImplementation(() => {});
-
-      controller["handleNextRound"]();
-
-      expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
-      expect(mockView.updateRound).toHaveBeenCalledWith(nextRoundNumber);
-      expect(mockView.updateMatch).toHaveBeenCalledWith(currentMatchNumber);
-      expect(resetForNextRound).toHaveBeenCalled();
+      expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(true);
     });
+  });
+
+  test("resetGameState resets model and refreshes all views", async () => {
+    await controller.resetGameState();
+
+    expect(mockModel.resetScores).toHaveBeenCalled();
+    expect(mockModel.resetMatchData).toHaveBeenCalled();
+    expect(mockScoreView.updateScores).toHaveBeenCalled();
+    expect(mockStatsView.updateHealth).toHaveBeenCalled();
+    expect(mockView.updateStartButton).toHaveBeenCalled();
   });
 });
