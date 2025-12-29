@@ -1,5 +1,6 @@
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
+import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IScoreView } from "../views/score/IScoreView";
@@ -10,6 +11,7 @@ import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 export class Controller {
   private model: IModel;
   private view: IView;
+  private menuView: IMenuView;
   private moveView: IMoveView;
   private outcomeView: IOutcomeView;
   private scoreView: IScoreView;
@@ -18,6 +20,7 @@ export class Controller {
   constructor(
     model: IModel,
     views: {
+      menuView: IMenuView;
       mainView: IView;
       moveView: IMoveView;
       outcomeView: IOutcomeView;
@@ -27,6 +30,7 @@ export class Controller {
   ) {
     this.model = model;
     this.view = views.mainView;
+    this.menuView = views.mainView;
     this.moveView = views.moveView;
     this.outcomeView = views.outcomeView;
     this.scoreView = views.scoreView;

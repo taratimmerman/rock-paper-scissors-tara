@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 import { Controller } from "./controller";
+import { IMenuView } from "../views/menu/IMenuView";
 import { IModel } from "../model/IModel";
 import { IView } from "../views/IView";
 import { IMoveView } from "../views/move/IMoveView";
@@ -9,11 +10,11 @@ import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
-import { Move } from "../utils/dataObjectUtils";
 
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockView: jest.Mocked<IView>;
+  let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
   let mockOutcomeView: jest.Mocked<IOutcomeView>;
   let mockScoreView: jest.Mocked<IScoreView>;
@@ -68,6 +69,8 @@ describe("Controller", () => {
       updateMatch: jest.fn(),
     } as any;
 
+    mockMenuView = {} as any;
+
     mockMoveView = {
       render: jest.fn(),
       bindPlayerMove: jest.fn(),
@@ -94,6 +97,7 @@ describe("Controller", () => {
 
     controller = new Controller(mockModel, {
       mainView: mockView,
+      menuView: mockMenuView,
       moveView: mockMoveView,
       outcomeView: mockOutcomeView,
       scoreView: mockScoreView,
