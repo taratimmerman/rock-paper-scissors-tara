@@ -5,6 +5,7 @@ import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
+import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IProgressView } from "../views/progress/IProgressView";
 import { IScoreView } from "../views/score/IScoreView";
@@ -15,6 +16,7 @@ describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
   let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
+  let mockMoveRevealView: jest.Mocked<IMoveRevealView>;
   let mockOutcomeView: jest.Mocked<IOutcomeView>;
   let mockProgressView: jest.Mocked<IProgressView>;
   let mockScoreView: jest.Mocked<IScoreView>;
@@ -74,6 +76,11 @@ describe("Controller", () => {
       toggleMoveButtons: jest.fn(),
     };
 
+    mockMoveRevealView = {
+      render: jest.fn(),
+      toggleVisibility: jest.fn(),
+    };
+
     mockOutcomeView = {
       render: jest.fn(),
       updateOutcome: jest.fn(),
@@ -99,6 +106,7 @@ describe("Controller", () => {
     controller = new Controller(mockModel, {
       menuView: mockMenuView,
       moveView: mockMoveView,
+      moveRevealView: mockMoveRevealView,
       outcomeView: mockOutcomeView,
       progressView: mockProgressView,
       scoreView: mockScoreView,
@@ -164,20 +172,32 @@ describe("Controller", () => {
     const moveTypes = [MOVES.ROCK, MOVES.PAPER, MOVES.SCISSORS, MOVES.TARA];
 
     test.each(moveTypes)(
-      "registering %s calls model and chooses response",
+      "registering %s renders and shows the move reveal",
       async (move) => {
+        // Setup mock returns for the moves
+        mockModel.getPlayerMove.mockReturnValue(move);
+        mockModel.getComputerMove.mockReturnValue(MOVES.ROCK);
+
         await controller.handlePlayerMove(move);
-        expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(move);
-        expect(mockModel.chooseComputerMove).toHaveBeenCalled();
+
+        // Verify reveal view interactions
+        expect(mockMoveRevealView.render).toHaveBeenCalledWith({
+          playerMoveId: move,
+          computerMoveId: MOVES.ROCK,
+        });
+        expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
       }
     );
 
-    test("resets moves BEFORE registering new player move", async () => {
+    test("hides move buttons BEFORE showing the reveal", async () => {
       await controller.handlePlayerMove(MOVES.ROCK);
-      const resetOrder = mockModel.resetMoves.mock.invocationCallOrder[0];
-      const registerOrder =
-        mockModel.registerPlayerMove.mock.invocationCallOrder[0];
-      expect(resetOrder).toBeLessThan(registerOrder);
+
+      const hideButtonsOrder =
+        mockMoveView.toggleMoveButtons.mock.invocationCallOrder[0];
+      const showRevealOrder =
+        mockMoveRevealView.toggleVisibility.mock.invocationCallOrder[0];
+
+      expect(hideButtonsOrder).toBeLessThan(showRevealOrder);
     });
   });
 
@@ -249,11 +269,22 @@ describe("Controller", () => {
       );
       expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(true);
     });
+
+    test("hides the move reveal and outcome box for next round", () => {
+      (controller as any).handleNextRound();
+
+      expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
+      expect(mockOutcomeView.toggleOutcomeVisibility).toHaveBeenCalledWith(
+        false
+      );
+      expect(mockMoveView.toggleMoveButtons).toHaveBeenCalledWith(true);
+    });
   });
 
   test("resetGameState resets model and refreshes all views", async () => {
     await controller.resetGameState();
 
+    expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
     expect(mockModel.resetScores).toHaveBeenCalled();
     expect(mockModel.resetMatchData).toHaveBeenCalled();
     expect(mockScoreView.updateScores).toHaveBeenCalled();
