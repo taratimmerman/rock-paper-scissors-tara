@@ -1,6 +1,7 @@
 import { IModel } from "../model/IModel";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
+import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IProgressView } from "../views/progress/IProgressView";
 import { IScoreView } from "../views/score/IScoreView";
@@ -12,6 +13,7 @@ export class Controller {
   private model: IModel;
   private menuView: IMenuView;
   private moveView: IMoveView;
+  private moveRevealView: IMoveRevealView;
   private outcomeView: IOutcomeView;
   private progressView: IProgressView;
   private scoreView: IScoreView;
@@ -22,6 +24,7 @@ export class Controller {
     views: {
       menuView: IMenuView;
       moveView: IMoveView;
+      moveRevealView: IMoveRevealView;
       outcomeView: IOutcomeView;
       progressView: IProgressView;
       scoreView: IScoreView;
@@ -31,6 +34,7 @@ export class Controller {
     this.model = model;
     this.menuView = views.menuView;
     this.moveView = views.moveView;
+    this.moveRevealView = views.moveRevealView;
     this.outcomeView = views.outcomeView;
     this.progressView = views.progressView;
     this.scoreView = views.scoreView;
@@ -127,6 +131,7 @@ export class Controller {
     this.updateHealthView();
     this.updateProgressView({ isVisible: true });
 
+    this.moveRevealView.toggleVisibility(false);
     this.outcomeView.toggleOutcomeVisibility(false);
     this.moveView.toggleMoveButtons(true);
     this.statsView.toggleGameStatsVisibility(true);
@@ -149,6 +154,7 @@ export class Controller {
     this.updateMostCommonMoveView();
     this.updateTaraButtonView();
 
+    this.moveRevealView.toggleVisibility(false);
     this.outcomeView.toggleOutcomeVisibility(false);
     this.menuView.updateMenu({ isMatchActive });
   }
@@ -158,6 +164,13 @@ export class Controller {
     this.model.resetMoves();
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
+
+    this.moveRevealView.render({
+      playerMoveId: this.model.getPlayerMove(),
+      computerMoveId: this.model.getComputerMove(),
+    });
+    this.moveRevealView.toggleVisibility(true);
+
     this.endRound();
   }
 
