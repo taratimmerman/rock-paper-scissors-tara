@@ -10,12 +10,11 @@ describe("StatsView", () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <section id="game-stats" class="hidden">
-        <!-- Player Stats -->
         <aside id="player-stats" class="stats">
-          <h3>Player</h3>
+          <div class="score-row">WINS <span id="player-score">00</span></div>
           <div class="bar-wrapper">
             <div class="bar" id="player-health">
-              <span class="bar-text" id="player-health-text"></span>
+              <span class="bar-text">PLAYER</span>
             </div>
           </div>
           <p>Tara x<span id="player-tara">0</span></p>
@@ -24,12 +23,11 @@ describe("StatsView", () => {
           </p>
         </aside>
 
-        <!-- Computer Stats -->
         <aside id="computer-stats" class="stats">
-          <h3>Computer</h3>
+          <div class="score-row"><span id="computer-score">00</span> WINS</div>
           <div class="bar-wrapper">
             <div class="bar" id="computer-health">
-              <span class="bar-text" id="computer-health-text"></span>
+              <span class="bar-text">COMPUTER</span>
             </div>
           </div>
           <p>Tara x<span id="computer-tara">0</span></p>
@@ -55,44 +53,22 @@ describe("StatsView", () => {
 
   // ===== Health Tests =====
 
-  test("updateHealth() updates health text", () => {
-    statsView.updateHealth(50, 100);
-    expect(document.getElementById("player-health-text")?.textContent).toBe(
-      "50"
-    );
-    expect(document.getElementById("computer-health-text")?.textContent).toBe(
-      "100"
-    );
-  });
-
-  test("updateHealth() handles null values by defaulting to 0", () => {
-    // @ts-ignore - testing runtime safety for null
-    statsView.updateHealth(null, null);
-    expect(document.getElementById("player-health-text")?.textContent).toBe(
-      "0"
-    );
-  });
-
-  test("updateHealthBar() applies correct class for full health", () => {
+  test("updateHealthBar() sets the correct width style for full health", () => {
     const bar = document.getElementById("player-health")!;
     statsView.updateHealthBar(PARTICIPANTS.PLAYER, 100);
-    expect(bar.classList.contains("full")).toBe(true);
+    expect(bar.style.width).toBe("100%");
   });
 
-  test("updateHealthBar() applies 'zero' class to computer", () => {
+  test("updateHealthBar() sets 0% width for computer at zero health", () => {
     const bar = document.getElementById("computer-health")!;
     statsView.updateHealthBar(PARTICIPANTS.COMPUTER, 0);
-    expect(bar.classList.contains("zero")).toBe(true);
+    expect(bar.style.width).toBe("0%");
   });
 
-  test("updateHealthBar() removes old status classes", () => {
+  test("updateHealthBar() handles mid-range health correctly", () => {
     const bar = document.getElementById("player-health")!;
-
-    statsView.updateHealthBar(PARTICIPANTS.PLAYER, 100); // adds 'full'
-    statsView.updateHealthBar(PARTICIPANTS.PLAYER, 50); // should remove 'full', add 'half'
-
-    expect(bar.classList.contains("full")).toBe(false);
-    expect(bar.classList.contains("half")).toBe(true);
+    statsView.updateHealthBar(PARTICIPANTS.PLAYER, 50);
+    expect(bar.style.width).toBe("50%");
   });
 
   // ===== History Tests =====
@@ -117,6 +93,14 @@ describe("StatsView", () => {
     expect(
       document.getElementById("computer-most-common-move")?.textContent
     ).toBe("N/A");
+  });
+
+  // ===== Score Tests =====
+
+  test("updateScores() updates player and computer score", () => {
+    statsView.updateScores(3, 5);
+    expect(document.getElementById("player-score")?.textContent).toBe("03");
+    expect(document.getElementById("computer-score")?.textContent).toBe("05");
   });
 
   // ===== Tara Count/Amount Tests =====

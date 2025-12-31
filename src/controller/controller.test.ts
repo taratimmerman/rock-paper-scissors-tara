@@ -19,7 +19,6 @@ describe("Controller", () => {
   let mockMoveRevealView: jest.Mocked<IMoveRevealView>;
   let mockOutcomeView: jest.Mocked<IOutcomeView>;
   let mockProgressView: jest.Mocked<IProgressView>;
-  let mockScoreView: jest.Mocked<IScoreView>;
   let mockStatsView: jest.Mocked<IStatsView>;
   let controller: Controller;
 
@@ -93,13 +92,11 @@ describe("Controller", () => {
       update: jest.fn(),
     };
 
-    mockScoreView = { updateScores: jest.fn() };
-
     mockStatsView = {
       toggleGameStatsVisibility: jest.fn(),
-      updateHealth: jest.fn(),
       updateHealthBar: jest.fn(),
       updateMostCommonMoves: jest.fn(),
+      updateScores: jest.fn(),
       updateTaraCounts: jest.fn(),
     };
 
@@ -109,7 +106,6 @@ describe("Controller", () => {
       moveRevealView: mockMoveRevealView,
       outcomeView: mockOutcomeView,
       progressView: mockProgressView,
-      scoreView: mockScoreView,
       statsView: mockStatsView,
     });
   });
@@ -140,7 +136,7 @@ describe("Controller", () => {
 
       await controller.initialize();
 
-      expect(mockScoreView.updateScores).toHaveBeenCalled();
+      expect(mockStatsView.updateScores).toHaveBeenCalled();
       expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalledWith(
         MOVES.ROCK,
         MOVES.PAPER
@@ -245,7 +241,7 @@ describe("Controller", () => {
     test("synchronizes all stats, scores, and buttons as side-effects", () => {
       (controller as any).endRound();
 
-      expect(mockScoreView.updateScores).toHaveBeenCalled();
+      expect(mockStatsView.updateScores).toHaveBeenCalled();
       expect(mockStatsView.updateTaraCounts).toHaveBeenCalled();
       expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalled();
       expect(mockMoveView.updateTaraButton).toHaveBeenCalled();
@@ -287,8 +283,7 @@ describe("Controller", () => {
     expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
     expect(mockModel.resetScores).toHaveBeenCalled();
     expect(mockModel.resetMatchData).toHaveBeenCalled();
-    expect(mockScoreView.updateScores).toHaveBeenCalled();
-    expect(mockStatsView.updateHealth).toHaveBeenCalled();
+    expect(mockStatsView.updateScores).toHaveBeenCalled();
     expect(mockMenuView.updateMenu).toHaveBeenCalled();
   });
 });

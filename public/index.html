@@ -7,38 +7,15 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
-      <!-- Scoreboard Table -->
-      <table id="scoreboard" border="1">
-        <caption>
-          Scoreboard (Match Wins)
-        </caption>
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Computer</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td id="player-score">0</td>
-            <td id="computer-score">0</td>
-          </tr>
-        </tbody>
-      </table>
-    </header>
-
-    <section id="main-menu" class="menu-view"></section>
-
     <main id="game-container">
+      <section id="main-menu" class="menu-view"></section>
+
       <section id="game-stats" class="hidden">
-        <!-- Player Stats -->
         <aside id="player-stats" class="stats">
-          <h3>Player</h3>
+          <div class="score-row"><span id="player-score">00</span> WINS</div>
           <div class="bar-wrapper">
-            <div class="bar" id="player-health">
-              <span class="bar-text" id="player-health-text"></span>
-            </div>
+            <div class="bar" id="player-health"></div>
+            <span class="bar-text">PLAYER</span>
           </div>
           <p>Tara x<span id="player-tara">0</span></p>
           <p>
@@ -46,24 +23,18 @@
           </p>
         </aside>
 
-        <section
-          id="game-progress-container"
-          class="hidden"
-          aria-live="polite"
-          aria-atomic="true"
-        >
+        <section id="game-progress-container">
           <h1 id="match"></h1>
           <h2 id="round"></h2>
         </section>
 
-        <!-- Computer Stats -->
         <aside id="computer-stats" class="stats">
-          <h3>Computer</h3>
+          <div class="score-row">WINS <span id="computer-score">00</span></div>
           <div class="bar-wrapper">
-            <div class="bar" id="computer-health">
-              <span class="bar-text" id="computer-health-text"></span>
-            </div>
+            <div class="bar" id="computer-health"></div>
+            <span class="bar-text">COMPUTER</span>
           </div>
+
           <p>Tara x<span id="computer-tara">0</span></p>
           <p>
             <small>Common: <span id="computer-most-common-move">–</span></small>
