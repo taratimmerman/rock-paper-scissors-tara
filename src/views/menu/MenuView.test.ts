@@ -10,12 +10,12 @@ describe("MenuView", () => {
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <section id="initial-controls"></section>
+      <section id="main-menu" class="menu-view"></section>
     `;
 
     menuView.render({ isMatchActive: false });
 
-    container = document.getElementById("initial-controls")!;
+    container = document.getElementById("main-menu")!;
     startButton = document.getElementById("start") as HTMLButtonElement;
     resetButton = document.getElementById(
       "reset-game-state"
