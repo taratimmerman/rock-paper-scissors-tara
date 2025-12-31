@@ -11,15 +11,21 @@ class MenuView extends View<MenuViewData> implements IMenuView {
     const startText = this._data.isMatchActive
       ? "Continue Match"
       : "Start Match";
+
     return `
-      <button id="start">${startText}</button>
-      <button id="reset-game-state">Reset Game State</button>
+      <div class="menu-content">
+        <h1 id="game-title" class="title-large">Rock Paper Scissors Tara</h1>
+        <div class="menu-controls">
+          <button id="start" class="btn-primary">${startText}</button>
+          <button id="reset-game-state" class="btn-secondary">Reset Game State</button>
+        </div>
+      </div>
     `;
   }
 
   private _ensureParentElement(): void {
     if (!this._parentElement || !document.body.contains(this._parentElement)) {
-      this._parentElement = this._getElement("initial-controls");
+      this._parentElement = this._getElement("main-menu");
     }
   }
 
