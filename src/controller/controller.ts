@@ -4,7 +4,6 @@ import { IMoveView } from "../views/move/IMoveView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IProgressView } from "../views/progress/IProgressView";
-import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { Move } from "../utils/dataObjectUtils";
 import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
@@ -16,7 +15,6 @@ export class Controller {
   private moveRevealView: IMoveRevealView;
   private outcomeView: IOutcomeView;
   private progressView: IProgressView;
-  private scoreView: IScoreView;
   private statsView: IStatsView;
 
   constructor(
@@ -27,7 +25,6 @@ export class Controller {
       moveRevealView: IMoveRevealView;
       outcomeView: IOutcomeView;
       progressView: IProgressView;
-      scoreView: IScoreView;
       statsView: IStatsView;
     }
   ) {
@@ -37,7 +34,6 @@ export class Controller {
     this.moveRevealView = views.moveRevealView;
     this.outcomeView = views.outcomeView;
     this.progressView = views.progressView;
-    this.scoreView = views.scoreView;
     this.statsView = views.statsView;
   }
 
@@ -50,7 +46,7 @@ export class Controller {
   }
 
   private updateScoreView(): void {
-    this.scoreView.updateScores(
+    this.statsView.updateScores(
       this.model.getPlayerScore(),
       this.model.getComputerScore()
     );
@@ -74,7 +70,6 @@ export class Controller {
     const playerHealth = this.model.getHealth(PARTICIPANTS.PLAYER);
     const computerHealth = this.model.getHealth(PARTICIPANTS.COMPUTER);
 
-    this.statsView.updateHealth(playerHealth, computerHealth);
     this.statsView.updateHealthBar(PARTICIPANTS.PLAYER, playerHealth);
     this.statsView.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
   }

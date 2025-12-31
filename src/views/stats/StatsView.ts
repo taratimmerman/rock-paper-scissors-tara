@@ -17,6 +17,10 @@ class StatsView extends View implements IStatsView {
     return this._getElement<HTMLElement>("computer-most-common-move");
   }
 
+  private get _computerScoreElement() {
+    return this._getElement<HTMLElement>("computer-score");
+  }
+
   private get _computerTaraCountElement() {
     return this._getElement<HTMLElement>("computer-tara");
   }
@@ -31,6 +35,10 @@ class StatsView extends View implements IStatsView {
 
   private get _playerMostCommonMoveElement() {
     return this._getElement<HTMLElement>("player-most-common-move");
+  }
+
+  private get _playerScoreElement() {
+    return this._getElement<HTMLElement>("player-score");
   }
 
   private get _playerTaraCountElement() {
@@ -51,29 +59,11 @@ class StatsView extends View implements IStatsView {
 
   // ===== Health Methods =====
 
-  public updateHealth(playerHealth: Health, computerHealth: Health): void {
-    this._playerHealthElement.textContent = (playerHealth ?? 0).toString();
-    this._computerHealthElement.textContent = (computerHealth ?? 0).toString();
-  }
-
   public updateHealthBar(participant: Participant, health: Health): void {
     const bar = this._getHealthBar(participant);
 
-    // Reset classes but keep the base 'bar'
-    bar.className = "bar";
-
-    switch (health) {
-      case 100:
-        bar.classList.add("full");
-        break;
-      case 50:
-        bar.classList.add("half");
-        break;
-      case 0:
-      case null:
-        bar.classList.add("zero");
-        break;
-    }
+    // Directly set width percentage
+    bar.style.width = `${health}%`;
   }
 
   private _getHealthBar(participant: Participant): HTMLElement {
@@ -90,6 +80,15 @@ class StatsView extends View implements IStatsView {
   ): void {
     this._playerMostCommonMoveElement.textContent = player ?? "N/A";
     this._computerMostCommonMoveElement.textContent = computer ?? "N/A";
+  }
+
+  // ===== Score Methods =====
+
+  public updateScores(player: number, computer: number): void {
+    this._playerScoreElement.textContent = player!.toString().padStart(2, "0");
+    this._computerScoreElement.textContent = computer!
+      .toString()
+      .padStart(2, "0");
   }
 
   // ===== Tara Methods =====

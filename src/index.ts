@@ -4,7 +4,6 @@ import moveView from "./views/move/MoveView";
 import MoveRevealView from "./views/moveReveal/MoveRevealView";
 import OutcomeView from "./views/outcome/OutcomeView";
 import ProgressView from "./views/progress/ProgressView";
-import scoreView from "./views/score/ScoreView";
 import statsView from "./views/stats/StatsView";
 import { Controller } from "./controller/controller";
 
@@ -17,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     moveRevealView: MoveRevealView,
     outcomeView: OutcomeView,
     progressView: ProgressView,
-    scoreView: scoreView,
     statsView: statsView,
   });
 
