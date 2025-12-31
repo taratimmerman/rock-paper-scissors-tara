@@ -43,7 +43,7 @@ body {
   line-height: 1.5;
   background-color: var(--color-bg);
   color: var(--color-text);
-  min-height: 100vh; /* Ensure body fills screen for vertical centering */
+  min-height: 100vh;
 }
 
 header,
@@ -56,37 +56,94 @@ header,
 }
 
 #game-container {
-  max-width: 600px;
+  max-width: 800px; /* Increased slightly for desktop grid comfort */
   min-height: 500px;
   gap: 2rem;
 }
 
 /* =============================================================================
-   2. GAME STATS & HEALTH BARS
+   2. GAME DASHBOARD (STATS & PROGRESS)
    ============================================================================= */
+
+/* Mobile First: Stacked Layout */
 #game-stats {
   display: flex;
-  flex-direction: row;
+  flex-wrap: wrap; /* Allows items to drop to next line */
   justify-content: space-between;
   width: 100%;
-}
-
-.stats {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
   gap: 0.5rem;
 }
 
+/* Match/Round Info */
+#game-progress-container {
+  order: -1; /* Keep at top on mobile */
+  flex: 0 0 100%;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+#game-progress-container h1 {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#game-progress-container h2 {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 400;
+}
+
+/* Stats Blocks */
+.stats {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: center; /* Center on mobile */
+}
+
 #computer-stats {
-  text-align: right;
-  align-items: flex-end;
+  text-align: center;
+}
+
+/* Desktop: The "Sandwich" Layout */
+@media (min-width: 768px) {
+  #game-stats {
+    display: grid;
+    /* 1fr (Player) | auto (Progress) | 1fr (Computer) */
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end; /* Align health bars to bottom */
+    gap: 0;
+  }
+
+  #game-progress-container {
+    order: 0; /* Move to center column */
+    padding: 0 2rem;
+    min-width: 180px;
+  }
+
+  .stats {
+    width: auto;
+  }
+
+  #player-stats {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  #computer-stats {
+    align-items: flex-end;
+    text-align: right;
+  }
 }
 
 /* Health Bar Component */
 .bar-wrapper {
   position: relative;
-  width: 120px;
+  width: 140px;
   height: 24px;
   overflow: hidden;
   border: 2px solid var(--color-text);
@@ -146,19 +203,19 @@ header,
   border-radius: var(--radius-lg);
   background-color: var(--color-surface);
   box-shadow: var(--shadow-sm);
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
   text-align: center;
-  cursor: default;
 }
 
 button.card-container {
   cursor: pointer;
   transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
 
 button.card-container:not(:disabled):hover {
@@ -172,13 +229,6 @@ button.card-container:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   filter: grayscale(1);
-  transform: none;
-  box-shadow: none;
-}
-
-div.card-container {
-  border-color: rgba(0, 0, 0, 0.15);
-  background-color: #ffffff;
 }
 
 .icon {
@@ -193,8 +243,8 @@ div.card-container {
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 0.25rem;
 }
+
 .vs-label {
   font-size: 1.5rem;
   font-weight: 900;
@@ -208,6 +258,7 @@ div.card-container {
 .hidden {
   display: none !important;
 }
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -223,10 +274,8 @@ div.card-container {
 /* =============================================================================
    5. MAIN MENU & UI CONTROLS
    ============================================================================= */
-
-/* The Menu "Page" */
 #main-menu {
-  flex: 1; /* Takes available vertical space */
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;

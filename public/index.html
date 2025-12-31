@@ -31,16 +31,6 @@
     <section id="main-menu" class="menu-view"></section>
 
     <main id="game-container">
-      <section
-        id="game-progress-container"
-        class="hidden"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <h1 id="match"></h1>
-        <h2 id="round"></h2>
-      </section>
-
       <section id="game-stats" class="hidden">
         <!-- Player Stats -->
         <aside id="player-stats" class="stats">
@@ -55,6 +45,16 @@
             <small>Common: <span id="player-most-common-move">–</span></small>
           </p>
         </aside>
+
+        <section
+          id="game-progress-container"
+          class="hidden"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <h1 id="match"></h1>
+          <h2 id="round"></h2>
+        </section>
 
         <!-- Computer Stats -->
         <aside id="computer-stats" class="stats">
