@@ -12,8 +12,8 @@ class ProgressView extends View<ProgressData> implements IProgressView {
 
   protected _generateMarkup(): string {
     return `
-      <h1 id="match">Match ${this._data.matchNumber}</h1>
-      <h2 id="round">Round ${this._data.roundNumber}</h2>
+      <h2 id="match">Match ${this._data.matchNumber}</h1>
+      <h1 id="round">Round ${this._data.roundNumber}</h2>
     `;
   }
 
