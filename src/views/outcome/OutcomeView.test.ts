@@ -2,12 +2,9 @@
  * @jest-environment jsdom
  */
 import outcomeView from "./OutcomeView";
-import { MOVES } from "../../utils/dataUtils";
 
 describe("OutcomeView", () => {
   const mockData = {
-    playerMove: MOVES.ROCK,
-    computerMove: MOVES.SCISSORS,
     resultMessage: "YOU WIN!",
     isMatchOver: false,
     roundNumber: 1,
@@ -27,21 +24,8 @@ describe("OutcomeView", () => {
 
     // Check internal display
     const resultDisplay = document.getElementById("result-display")!;
-    expect(resultDisplay.innerHTML).toContain("You played rock");
     expect(resultDisplay.innerHTML).toContain("YOU WIN!");
     expect(resultDisplay.innerHTML).toContain("Next Round");
-  });
-
-  test("render() correctly handles null moves initially", () => {
-    outcomeView.render({
-      ...mockData,
-      playerMove: null,
-      computerMove: null,
-    });
-
-    const movesEl = document.getElementById("round-moves")!;
-    // Verify it renders "null" or empty rather than crashing
-    expect(movesEl.textContent).toContain("You played null");
   });
 
   test("updateOutcome() toggles button text when match ends", () => {
@@ -66,12 +50,9 @@ describe("OutcomeView", () => {
 
     // Update ONLY the result message
     outcomeView.updateOutcome({ resultMessage: "SUDDEN DEATH!" });
-
-    const movesEl = document.getElementById("round-moves")!;
     const resultEl = document.getElementById("round-result")!;
 
     // Move data should still be there from the initial render
-    expect(movesEl.textContent).toContain("You played rock");
     expect(resultEl.textContent).toBe("SUDDEN DEATH!");
   });
 

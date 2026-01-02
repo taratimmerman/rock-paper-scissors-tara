@@ -3,17 +3,18 @@
  */
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
+import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IProgressView } from "../views/progress/IProgressView";
-import { IScoreView } from "../views/score/IScoreView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
+  let mockAnnouncementView: IAnnouncementView;
   let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
   let mockMoveRevealView: jest.Mocked<IMoveRevealView>;
@@ -25,6 +26,7 @@ describe("Controller", () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <div id="choices"></div>
+      <section id="announcement-container"></section>
       <div id="result-display"></div>
     `;
 
@@ -59,6 +61,11 @@ describe("Controller", () => {
       getHealth: jest.fn().mockReturnValue(100),
       resetScores: jest.fn(),
     } as any;
+
+    mockAnnouncementView = {
+      render: jest.fn(),
+      setMessage: jest.fn(),
+    };
 
     mockMenuView = {
       render: jest.fn(),
@@ -101,6 +108,7 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, {
+      announcementView: mockAnnouncementView,
       menuView: mockMenuView,
       moveView: mockMoveView,
       moveRevealView: mockMoveRevealView,
@@ -117,6 +125,8 @@ describe("Controller", () => {
       mockModel.taraIsEnabled.mockReturnValue(false);
 
       await controller.initialize();
+
+      expect(mockAnnouncementView.render).toHaveBeenCalledWith({ message: "" });
 
       expect(mockMoveView.render).toHaveBeenCalledWith({
         moves: PLAYER_MOVES_DATA,
@@ -246,6 +256,17 @@ describe("Controller", () => {
       expect(mockStatsView.updateMostCommonMoves).toHaveBeenCalled();
       expect(mockMoveView.updateTaraButton).toHaveBeenCalled();
     });
+
+    test("announces the final moves of the round", () => {
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.SCISSORS);
+
+      (controller as any).endRound();
+
+      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
+        "You played rock. Computer played scissors."
+      );
+    });
   });
 
   // ===== Navigation & Resets =====
@@ -268,6 +289,10 @@ describe("Controller", () => {
 
     test("hides the move reveal and outcome box for next round", () => {
       (controller as any).handleNextRound();
+
+      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
+        "Choose your attack!"
+      );
 
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
       expect(mockOutcomeView.toggleOutcomeVisibility).toHaveBeenCalledWith(
