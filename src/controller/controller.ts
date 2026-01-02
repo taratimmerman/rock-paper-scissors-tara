@@ -1,4 +1,5 @@
 import { IModel } from "../model/IModel";
+import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
@@ -10,6 +11,7 @@ import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
+  private announcementView: IAnnouncementView;
   private menuView: IMenuView;
   private moveView: IMoveView;
   private moveRevealView: IMoveRevealView;
@@ -20,6 +22,7 @@ export class Controller {
   constructor(
     model: IModel,
     views: {
+      announcementView: IAnnouncementView;
       menuView: IMenuView;
       moveView: IMoveView;
       moveRevealView: IMoveRevealView;
@@ -29,6 +32,7 @@ export class Controller {
     }
   ) {
     this.model = model;
+    this.announcementView = views.announcementView;
     this.menuView = views.menuView;
     this.moveView = views.moveView;
     this.moveRevealView = views.moveRevealView;
@@ -84,6 +88,7 @@ export class Controller {
     this.updateProgressView({ isVisible: true });
     this.menuView.toggleMenuVisibility(false);
     this.statsView.toggleGameStatsVisibility(true);
+    this.announcementView.setMessage("Choose your attack!");
     this.moveView.toggleMoveButtons(true);
     this.updateHealthView();
   }
@@ -106,9 +111,11 @@ export class Controller {
       this.model.increaseRoundNumber();
     }
 
+    this.announcementView.setMessage(
+      `You played ${playerMove}. Computer played ${computerMove}.`
+    );
+
     this.outcomeView.updateOutcome({
-      playerMove,
-      computerMove,
       resultMessage,
       isMatchOver,
     });
@@ -125,6 +132,8 @@ export class Controller {
 
     this.updateHealthView();
     this.updateProgressView({ isVisible: true });
+
+    this.announcementView.setMessage("Choose your attack!");
 
     this.moveRevealView.toggleVisibility(false);
     this.outcomeView.toggleOutcomeVisibility(false);
@@ -160,6 +169,8 @@ export class Controller {
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
 
+    this.announcementView.setMessage("Revealing moves...");
+
     this.moveRevealView.render({
       playerMoveId: this.model.getPlayerMove(),
       computerMoveId: this.model.getComputerMove(),
@@ -186,13 +197,13 @@ export class Controller {
     });
 
     this.outcomeView.render({
-      playerMove: null,
-      computerMove: null,
       resultMessage: "",
       isMatchOver: false,
       roundNumber: this.model.getRoundNumber(),
       matchNumber: this.model.getMatchNumber(),
     });
+
+    this.announcementView.render({ message: "" });
 
     this.updateScoreView();
     this.updateTaraView();

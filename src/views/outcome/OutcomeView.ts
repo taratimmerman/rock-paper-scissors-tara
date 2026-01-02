@@ -5,10 +5,9 @@ class OutcomeView extends View<OutcomeViewData> implements IOutcomeView {
   protected declare _parentElement: HTMLElement;
 
   protected _generateMarkup(): string {
-    const { playerMove, computerMove, resultMessage, isMatchOver } = this._data;
+    const { resultMessage, isMatchOver } = this._data;
 
     return `
-      <p id="round-moves">You played ${playerMove}. Computer played ${computerMove}.</p>
       <h2 id="round-result">${resultMessage}</h2>
       <button id="play-again">${
         isMatchOver ? "Start New Match" : "Next Round"

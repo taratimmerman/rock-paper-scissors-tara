@@ -1,8 +1,4 @@
-import { Move } from "../../utils/dataObjectUtils";
-
 export interface OutcomeViewData {
-  playerMove: Move | null;
-  computerMove: Move | null;
   resultMessage: string;
   isMatchOver: boolean;
   roundNumber: number;
