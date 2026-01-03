@@ -1,33 +1,33 @@
 /**
  * @jest-environment jsdom
  */
-import AnnouncementView from "./AnnouncementView";
+import StatusView from "./StatusView";
 
-describe("AnnouncementView", () => {
+describe("StatusView", () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <div id="announcement-container"></div>
+      <div id="status-container"></div>
     `;
   });
 
   it("should render the initial message correctly", () => {
     const initialData = { message: "Prepare for battle!" };
 
-    AnnouncementView.render(initialData);
+    StatusView.render(initialData);
 
-    const p = document.querySelector("#announcement");
+    const p = document.querySelector("#status");
     expect(p).not.toBeNull();
     expect(p?.textContent).toBe("Prepare for battle!");
   });
 
   it("should update only the textContent when setMessage is called", () => {
-    AnnouncementView.render({ message: "Initial" });
-    const pBefore = document.querySelector("#announcement");
+    StatusView.render({ message: "Initial" });
+    const pBefore = document.querySelector("#status");
 
-    AnnouncementView.setMessage("New Announcement");
+    StatusView.setMessage("New Status");
 
-    const pAfter = document.querySelector("#announcement");
-    expect(pAfter?.textContent).toBe("New Announcement");
+    const pAfter = document.querySelector("#status");
+    expect(pAfter?.textContent).toBe("New Status");
 
     // Check that we didn't destroy and recreate the element (DOM stability)
     expect(pBefore).toBe(pAfter);
@@ -35,8 +35,8 @@ describe("AnnouncementView", () => {
 
   it("should maintain the message in internal state", () => {
     const msg = "Testing state";
-    AnnouncementView.setMessage(msg);
+    StatusView.setMessage(msg);
 
-    expect((AnnouncementView as any)._data.message).toBe(msg);
+    expect((StatusView as any)._data.message).toBe(msg);
   });
 });
