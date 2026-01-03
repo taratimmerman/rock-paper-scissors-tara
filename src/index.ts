@@ -1,5 +1,5 @@
 import { Model } from "./model/model";
-import AnnouncementView from "./views/announcement/AnnouncementView";
+import StatusView from "./views/status/StatusView";
 import MenuView from "./views/menu/MenuView";
 import moveView from "./views/move/MoveView";
 import MoveRevealView from "./views/moveReveal/MoveRevealView";
@@ -12,13 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const model = new Model();
 
   const controller = new Controller(model, {
-    announcementView: AnnouncementView,
     menuView: MenuView,
     moveView: moveView,
     moveRevealView: MoveRevealView,
     outcomeView: OutcomeView,
     progressView: ProgressView,
     statsView: statsView,
+    statusView: StatusView,
   });
 
   controller.initialize();

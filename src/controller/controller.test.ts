@@ -3,7 +3,7 @@
  */
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
-import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
+import { IStatusView } from "../views/status/IStatusView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
@@ -14,7 +14,7 @@ import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
-  let mockAnnouncementView: IAnnouncementView;
+  let mockStatusView: IStatusView;
   let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
   let mockMoveRevealView: jest.Mocked<IMoveRevealView>;
@@ -26,7 +26,7 @@ describe("Controller", () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <div id="choices"></div>
-      <section id="announcement-container"></section>
+      <section id="status-container"></section>
       <div id="result-display"></div>
     `;
 
@@ -62,7 +62,7 @@ describe("Controller", () => {
       resetScores: jest.fn(),
     } as any;
 
-    mockAnnouncementView = {
+    mockStatusView = {
       render: jest.fn(),
       setMessage: jest.fn(),
     };
@@ -108,7 +108,7 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, {
-      announcementView: mockAnnouncementView,
+      statusView: mockStatusView,
       menuView: mockMenuView,
       moveView: mockMoveView,
       moveRevealView: mockMoveRevealView,
@@ -126,7 +126,7 @@ describe("Controller", () => {
 
       await controller.initialize();
 
-      expect(mockAnnouncementView.render).toHaveBeenCalledWith({ message: "" });
+      expect(mockStatusView.render).toHaveBeenCalledWith({ message: "" });
 
       expect(mockMoveView.render).toHaveBeenCalledWith({
         moves: PLAYER_MOVES_DATA,
@@ -263,7 +263,7 @@ describe("Controller", () => {
 
       (controller as any).endRound();
 
-      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
+      expect(mockStatusView.setMessage).toHaveBeenCalledWith(
         "You played rock. Computer played scissors."
       );
     });
@@ -290,7 +290,7 @@ describe("Controller", () => {
     test("hides the move reveal and outcome box for next round", () => {
       (controller as any).handleNextRound();
 
-      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
+      expect(mockStatusView.setMessage).toHaveBeenCalledWith(
         "Choose your attack!"
       );
 
