@@ -1,8 +1,8 @@
-<!DOCTYPE html><html lang=en><meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1.0"><title>Rock Paper Scissors Tara</title><link rel=stylesheet href=/rock-paper-scissors-tara/public.070537ec.css><body>
+<!DOCTYPE html><html lang=en><meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1.0"><title>Rock Paper Scissors Tara</title><link rel=stylesheet href=/rock-paper-scissors-tara/public.5330b4f5.css><body>
     <main id=game-container>
-      <section id=main-menu class=menu-view></section>
+      <section id=main-menu class=menu-view aria-hidden=false></section>
 
-      <section id=game-stats class=hidden>
+      <section id=game-stats class=hidden aria-hidden=true>
         <aside id=player-stats class=stats>
           <div class=score-row><span id=player-score>00</span> WINS</div>
           <div class=bar-wrapper>
@@ -34,17 +34,17 @@
         </aside>
       </section>
 
-      <div id=choices></div>
+      <div id=arena aria-hidden=false>
+        <div id=announcement-container role=alert aria-live=assertive aria-atomic=true></div>
 
-      <section id=move-reveal class=hidden></section>
-
-      <div id=result-display>
-        <p id=round-moves></p>
-        <h2 id=round-result></h2>
-        <button id=play-again>Play Again</button>
+        <div id=move-reveal class=hidden aria-hidden=true></div>
       </div>
+
+      <section id=status-container aria-hidden=false></section>
+
+      <section id=game-controls aria-label="Player Actions" class=hidden aria-hidden=true></section>
     </main>
 
-    <script type=module src=/rock-paper-scissors-tara/public.01f3aade.js></script>
+    <script type=module src=/rock-paper-scissors-tara/public.5746c0af.js></script>
   
 
