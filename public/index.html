@@ -42,11 +42,18 @@
         </aside>
       </section>
 
-      <section id="announcement-container"></section>
+      <div id="arena">
+        <div
+          id="announcement-container"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        ></div>
+
+        <div id="move-reveal" class="hidden" aria-hidden="true"></div>
+      </div>
 
       <div id="choices"></div>
-
-      <section id="move-reveal" class="hidden"></section>
 
       <section id="status-container"></section>
 
