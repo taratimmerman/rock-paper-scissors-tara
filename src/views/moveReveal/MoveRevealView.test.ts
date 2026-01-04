@@ -1,20 +1,17 @@
-import moveRevealView from "./MoveRevealView";
+import MoveRevealView from "./MoveRevealView";
 import { PLAYER_MOVES_DATA } from "../../utils/dataUtils";
 import { Move } from "../../utils/dataObjectUtils";
 
 describe("MoveRevealView", () => {
   let container: HTMLElement;
+  let view: MoveRevealView;
 
   beforeEach(() => {
-    // 1. Setup the DOM element the View expects to find
     document.body.innerHTML =
       '<section id="move-reveal" class="hidden"></section>';
     container = document.getElementById("move-reveal")!;
 
-    // 2. Since it's a singleton, manually re-assign the parent element
-    // to the fresh DOM node created for this specific test.
-    // @ts-ignore - accessing protected member for testing purposes
-    moveRevealView._parentElement = container;
+    view = new MoveRevealView();
   });
 
   afterEach(() => {
@@ -32,7 +29,7 @@ describe("MoveRevealView", () => {
       const playerData = PLAYER_MOVES_DATA.find((m) => m.id === "rock")!;
       const computerData = PLAYER_MOVES_DATA.find((m) => m.id === "scissors")!;
 
-      moveRevealView.render(mockData);
+      view.render(mockData);
 
       // Check for icons
       expect(container.innerHTML).toContain(playerData.icon);
@@ -44,7 +41,7 @@ describe("MoveRevealView", () => {
     });
 
     it("should render cards with the 'disabled' attribute to prevent hover/clicks", () => {
-      moveRevealView.render({
+      view.render({
         playerMoveId: "paper" as Move,
         computerMoveId: "paper" as Move,
       });
@@ -63,7 +60,7 @@ describe("MoveRevealView", () => {
         computerMoveId: "rock" as Move,
       };
 
-      moveRevealView.render(invalidData);
+      view.render(invalidData);
 
       expect(container.innerHTML).toBe("");
     });
@@ -73,7 +70,7 @@ describe("MoveRevealView", () => {
     it("should remove the 'hidden' class when show is true", () => {
       container.classList.add("hidden");
 
-      moveRevealView.toggleVisibility(true);
+      view.toggleVisibility(true);
 
       expect(container.classList.contains("hidden")).toBe(false);
     });
@@ -81,7 +78,7 @@ describe("MoveRevealView", () => {
     it("should add the 'hidden' class when show is false", () => {
       container.classList.remove("hidden");
 
-      moveRevealView.toggleVisibility(false);
+      view.toggleVisibility(false);
 
       expect(container.classList.contains("hidden")).toBe(true);
     });

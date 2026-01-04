@@ -1,20 +1,23 @@
 /**
  * @jest-environment jsdom
  */
-import progressView from "./ProgressView";
+import ProgressView from "./ProgressView";
 
 describe("ProgressView", () => {
   let container: HTMLElement;
   let matchText: HTMLElement;
   let roundText: HTMLElement;
+  let view: ProgressView;
 
   beforeEach(() => {
     document.body.innerHTML = `
       <section id="game-progress-container"></section>
     `;
 
+    view = new ProgressView();
+
     // 1. Initial Render to create the elements
-    progressView.render({
+    view.render({
       matchNumber: 1,
       roundNumber: 1,
       isVisible: true,
@@ -26,7 +29,7 @@ describe("ProgressView", () => {
     roundText = document.getElementById("round")!;
 
     // Force re-link parent for the singleton
-    (progressView as any)._parentElement = container;
+    (view as any)._parentElement = container;
   });
 
   describe("render()", () => {
@@ -41,7 +44,7 @@ describe("ProgressView", () => {
       // Store current references to check persistence
       const oldMatchRef = matchText;
 
-      progressView.update({ matchNumber: 2, roundNumber: 5, isVisible: true });
+      view.update({ matchNumber: 2, roundNumber: 5, isVisible: true });
 
       // Use the variables directly instead of document.getElementById
       expect(matchText.textContent).toBe("Match 2");
@@ -52,10 +55,10 @@ describe("ProgressView", () => {
     });
 
     test("toggles visibility via the update lifecycle", () => {
-      progressView.update({ matchNumber: 1, roundNumber: 1, isVisible: false });
+      view.update({ matchNumber: 1, roundNumber: 1, isVisible: false });
       expect(container.classList.contains("hidden")).toBe(true);
 
-      progressView.update({ matchNumber: 1, roundNumber: 1, isVisible: true });
+      view.update({ matchNumber: 1, roundNumber: 1, isVisible: true });
       expect(container.classList.contains("hidden")).toBe(false);
     });
   });

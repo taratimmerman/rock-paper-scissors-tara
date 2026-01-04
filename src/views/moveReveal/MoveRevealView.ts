@@ -2,7 +2,10 @@ import View from "../View";
 import { IMoveRevealView, MoveRevealData } from "./IMoveRevealView";
 import { PLAYER_MOVES_DATA } from "../../utils/dataUtils";
 
-class MoveRevealView extends View<MoveRevealData> implements IMoveRevealView {
+export default class MoveRevealView
+  extends View<MoveRevealData>
+  implements IMoveRevealView
+{
   protected _parentElement = document.getElementById(
     "move-reveal"
   ) as HTMLElement;
@@ -34,5 +37,3 @@ class MoveRevealView extends View<MoveRevealData> implements IMoveRevealView {
     this._toggleVisibility(this._parentElement, show);
   }
 }
-
-export default new MoveRevealView();

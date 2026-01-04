@@ -4,39 +4,48 @@
 import AnnouncementView from "./AnnouncementView";
 
 describe("AnnouncementView", () => {
+  let view: AnnouncementView;
+  let announcement: string;
+
   beforeEach(() => {
     document.body.innerHTML = `
       <h2 id="announcement-container"></h2>
     `;
+
+    view = new AnnouncementView();
+    announcement = "WIN!";
   });
 
   it("should render the initial message correctly", () => {
-    const initialData = { message: "Prepare for battle!" };
+    const initialData = { message: announcement };
 
-    AnnouncementView.render(initialData);
+    view.render(initialData);
 
-    const p = document.querySelector("#announcement");
-    expect(p).not.toBeNull();
-    expect(p?.textContent).toBe("Prepare for battle!");
+    const announcementElement = document.querySelector("#announcement");
+    expect(announcementElement).not.toBeNull();
+    expect(announcementElement?.textContent).toBe(announcement);
   });
 
   it("should update only the textContent when setMessage is called", () => {
-    AnnouncementView.render({ message: "Initial" });
-    const pBefore = document.querySelector("#announcement");
+    const newAnnouncement = "New Announcement!";
 
-    AnnouncementView.setMessage("New Announcement!");
+    view.render({ message: announcement });
 
-    const pAfter = document.querySelector("#announcement");
-    expect(pAfter?.textContent).toBe("New Announcement!");
+    const announcementBefore = document.querySelector("#announcement");
+    expect(announcementBefore?.textContent).toBe(announcement);
+
+    view.setMessage(newAnnouncement);
+
+    const announcementAfter = document.querySelector("#announcement");
+    expect(announcementAfter?.textContent).toBe(newAnnouncement);
 
     // Check that we didn't destroy and recreate the element (DOM stability)
-    expect(pBefore).toBe(pAfter);
+    expect(announcementBefore).toBe(announcementAfter);
   });
 
   it("should maintain the message in internal state", () => {
-    const msg = "Testing state";
-    AnnouncementView.setMessage(msg);
+    view.setMessage(announcement);
 
-    expect((AnnouncementView as any)._data.message).toBe(msg);
+    expect((view as any)._data.message).toBe(announcement);
   });
 });

@@ -2,7 +2,10 @@ import View from "../View";
 import { Move } from "../../utils/dataObjectUtils";
 import { ControlsViewData, IControlsView } from "./IControlsView";
 
-class ControlsView extends View<ControlsViewData> implements IControlsView {
+export default class ControlsView
+  extends View<ControlsViewData>
+  implements IControlsView
+{
   protected declare _parentElement: HTMLElement;
   private _moveHandler?: (move: Move) => void;
   private _nextRoundHandler?: () => void;
@@ -69,4 +72,3 @@ class ControlsView extends View<ControlsViewData> implements IControlsView {
     };
   }
 }
-export default new ControlsView();

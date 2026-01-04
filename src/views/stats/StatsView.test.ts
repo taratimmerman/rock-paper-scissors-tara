@@ -1,11 +1,12 @@
 /**
  * @jest-environment jsdom
  */
-import statsView from "./StatsView";
+import StatsView from "./StatsView";
 import { PARTICIPANTS, MOVES } from "../../utils/dataUtils";
 
 describe("StatsView", () => {
   let parentElement: HTMLElement;
+  let view: StatsView;
 
   beforeEach(() => {
     document.body.innerHTML = `
@@ -39,15 +40,16 @@ describe("StatsView", () => {
     `;
 
     parentElement = document.getElementById("game-stats")!;
+    view = new StatsView();
   });
 
   // ===== General Tests =====
 
   test("toggleGameStatsVisibility() hides and shows the game stats element", () => {
-    statsView.toggleGameStatsVisibility(false);
+    view.toggleGameStatsVisibility(false);
     expect(parentElement.classList.contains("hidden")).toBe(true);
 
-    statsView.toggleGameStatsVisibility(true);
+    view.toggleGameStatsVisibility(true);
     expect(parentElement.classList.contains("hidden")).toBe(false);
   });
 
@@ -55,26 +57,26 @@ describe("StatsView", () => {
 
   test("updateHealthBar() sets the correct width style for full health", () => {
     const bar = document.getElementById("player-health")!;
-    statsView.updateHealthBar(PARTICIPANTS.PLAYER, 100);
+    view.updateHealthBar(PARTICIPANTS.PLAYER, 100);
     expect(bar.style.width).toBe("100%");
   });
 
   test("updateHealthBar() sets 0% width for computer at zero health", () => {
     const bar = document.getElementById("computer-health")!;
-    statsView.updateHealthBar(PARTICIPANTS.COMPUTER, 0);
+    view.updateHealthBar(PARTICIPANTS.COMPUTER, 0);
     expect(bar.style.width).toBe("0%");
   });
 
   test("updateHealthBar() handles mid-range health correctly", () => {
     const bar = document.getElementById("player-health")!;
-    statsView.updateHealthBar(PARTICIPANTS.PLAYER, 50);
+    view.updateHealthBar(PARTICIPANTS.PLAYER, 50);
     expect(bar.style.width).toBe("50%");
   });
 
   // ===== History Tests =====
 
   test("updateMostCommonMoves() updates move text correctly", () => {
-    statsView.updateMostCommonMoves(MOVES.ROCK, MOVES.PAPER);
+    view.updateMostCommonMoves(MOVES.ROCK, MOVES.PAPER);
 
     expect(
       document.getElementById("player-most-common-move")?.textContent
@@ -85,7 +87,7 @@ describe("StatsView", () => {
   });
 
   test("updateMostCommonMoves() defaults to 'N/A' when moves are null", () => {
-    statsView.updateMostCommonMoves(null, null);
+    view.updateMostCommonMoves(null, null);
 
     expect(
       document.getElementById("player-most-common-move")?.textContent
@@ -98,7 +100,7 @@ describe("StatsView", () => {
   // ===== Score Tests =====
 
   test("updateScores() updates player and computer score", () => {
-    statsView.updateScores(3, 5);
+    view.updateScores(3, 5);
     expect(document.getElementById("player-score")?.textContent).toBe("03");
     expect(document.getElementById("computer-score")?.textContent).toBe("05");
   });
@@ -106,7 +108,7 @@ describe("StatsView", () => {
   // ===== Tara Count/Amount Tests =====
 
   test("updateTaraCounts() updates tara count text", () => {
-    statsView.updateTaraCounts(2, 1);
+    view.updateTaraCounts(2, 1);
     expect(document.getElementById("player-tara")?.textContent).toBe("2");
     expect(document.getElementById("computer-tara")?.textContent).toBe("1");
   });

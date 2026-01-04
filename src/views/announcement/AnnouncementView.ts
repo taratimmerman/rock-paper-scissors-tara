@@ -1,7 +1,7 @@
 import View from "../View";
 import { IAnnouncementView, AnnouncementViewData } from "./IAnnouncementView";
 
-class AnnouncementView
+export default class AnnouncementView
   extends View<AnnouncementViewData>
   implements IAnnouncementView
 {
@@ -32,5 +32,3 @@ class AnnouncementView
     }
   }
 }
-
-export default new AnnouncementView();

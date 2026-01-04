@@ -2,15 +2,11 @@ import View from "../View";
 import { IStatsView } from "./IStatsView";
 import { Health, Participant, StandardMove } from "../../utils/dataObjectUtils";
 
-class StatsView extends View implements IStatsView {
+export default class StatsView extends View implements IStatsView {
   protected declare _parentElement: HTMLElement;
 
   private get _computerHealthBarElement() {
     return this._getElement<HTMLElement>("computer-health");
-  }
-
-  private get _computerHealthElement() {
-    return this._getElement<HTMLElement>("computer-health-text");
   }
 
   private get _computerMostCommonMoveElement() {
@@ -29,10 +25,6 @@ class StatsView extends View implements IStatsView {
     return this._getElement<HTMLElement>("player-health");
   }
 
-  private get _playerHealthElement() {
-    return this._getElement<HTMLElement>("player-health-text");
-  }
-
   private get _playerMostCommonMoveElement() {
     return this._getElement<HTMLElement>("player-most-common-move");
   }
@@ -47,9 +39,16 @@ class StatsView extends View implements IStatsView {
 
   // ===== General Methods =====
 
+  // Satisfy the abstract requirement without doing anything
   protected _generateMarkup(): string {
-    // Intentional: Returning empty because HTML exists in index.html
-    return ``;
+    return "";
+  }
+
+  public render(): void {
+    this._parentElement = this._getElement<HTMLElement>("game-stats");
+
+    // DO NOT call super.render().
+    // Calling super.render() triggers _clear()
   }
 
   public toggleGameStatsVisibility(show: boolean) {
@@ -98,5 +97,3 @@ class StatsView extends View implements IStatsView {
     this._computerTaraCountElement.textContent = computerCount.toString();
   }
 }
-
-export default new StatsView();

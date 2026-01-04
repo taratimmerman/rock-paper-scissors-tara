@@ -1,7 +1,10 @@
 import View from "../View";
 import { IProgressView, ProgressData } from "./IProgressView";
 
-class ProgressView extends View<ProgressData> implements IProgressView {
+export default class ProgressView
+  extends View<ProgressData>
+  implements IProgressView
+{
   protected declare _parentElement: HTMLElement;
 
   private _ensureParentElement(): void {
@@ -35,5 +38,3 @@ class ProgressView extends View<ProgressData> implements IProgressView {
     this._toggleVisibility(this._parentElement, data.isVisible);
   }
 }
-
-export default new ProgressView();

@@ -111,12 +111,4 @@ export default abstract class View<T = any> {
       element.removeAttribute("tabindex");
     }
   }
-
-  /**
-   * Clears the internal parent element reference.
-   * Useful for testing environments to prevent stale DOM references.
-   */
-  public test_clearElement(): void {
-    this._parentElement = undefined as any;
-  }
 }
