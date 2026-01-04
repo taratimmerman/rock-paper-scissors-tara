@@ -415,3 +415,21 @@ button {
   font-size: 1.5rem;
   margin: 0;
 }
+
+/* =============================================================================
+   7. GAME CONTROLS
+   ============================================================================= */
+
+#game-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#choices,
+#progression-zone {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

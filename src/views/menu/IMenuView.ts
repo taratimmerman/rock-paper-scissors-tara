@@ -4,8 +4,9 @@ export interface MenuViewData {
 
 export interface IMenuView {
   render(data: MenuViewData): void;
-  updateMenu(data: Partial<MenuViewData>): void;
   bindStartMatch(handler: () => void): void;
   bindResetGame(handler: () => void): void;
+  focus(): void;
   toggleMenuVisibility(show: boolean): void;
+  updateMenu(data: Partial<MenuViewData>): void;
 }

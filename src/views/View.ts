@@ -82,7 +82,41 @@ export default abstract class View<T = any> {
     return element as T;
   }
 
+  /**
+   * Automatically shifts keyboard focus to the first interactive element
+   * within this view's parent container.
+   */
+  public focus(): void {
+    if (!this._parentElement) return;
+
+    // Search for common focusable elements
+    const focusable = this._parentElement.querySelector(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    ) as HTMLElement;
+
+    if (focusable) {
+      focusable.focus();
+    }
+  }
+
   protected _toggleVisibility(element: HTMLElement, show: boolean): void {
     element.classList.toggle("hidden", !show);
+    // Accessibility: Sync ARIA state
+    element.setAttribute("aria-hidden", (!show).toString());
+
+    // Accessibility: Ensure the element is removed from tab order when hidden
+    if (!show) {
+      element.setAttribute("tabindex", "-1");
+    } else {
+      element.removeAttribute("tabindex");
+    }
+  }
+
+  /**
+   * Clears the internal parent element reference.
+   * Useful for testing environments to prevent stale DOM references.
+   */
+  public test_clearElement(): void {
+    this._parentElement = undefined as any;
   }
 }

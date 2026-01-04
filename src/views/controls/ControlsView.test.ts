@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import controlsView from "./ControlsView";
-import { MOVES } from "../../utils/dataUtils";
+import { MOVES, PLAYER_MOVES_DATA } from "../../utils/dataUtils";
 
 describe("ControlsView", () => {
   const mockMoves = [
@@ -13,7 +13,9 @@ describe("ControlsView", () => {
   ];
 
   beforeEach(() => {
-    document.body.innerHTML = `<div id="game-controls" class="hidden"></div>`;
+    controlsView.test_clearElement();
+
+    document.body.innerHTML = `<div id="game-controls" class="hidden" aria-hidden="true"></div>`;
   });
 
   test("toggleVisibility() adds/removes the hidden class from the container", () => {
@@ -138,5 +140,65 @@ describe("ControlsView", () => {
 
     expect(document.getElementById("choices")).toBeFalsy();
     expect(document.getElementById("play-again")).toBeTruthy();
+  });
+
+  // ===== ACCESSABILITY =====
+
+  test("toggleVisibility(false) syncs aria-hidden attribute", () => {
+    const container = document.getElementById("game-controls")!;
+
+    controlsView.toggleVisibility(false);
+
+    expect(container.classList.contains("hidden")).toBe(true);
+    expect(container.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  test("focus() shifts focus to the first button in the markup", () => {
+    controlsView.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: PLAYER_MOVES_DATA,
+    });
+
+    controlsView.focus();
+
+    // Now testing real browser-like behavior
+    const firstButton = document.querySelector(
+      ".card-container"
+    ) as HTMLElement;
+    expect(document.activeElement).toBe(firstButton);
+  });
+
+  test("toggleVisibility(false) removes element from tab order", () => {
+    const container = document.getElementById("game-controls")!;
+
+    controlsView.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    controlsView.toggleVisibility(false);
+
+    expect(container.getAttribute("tabindex")).toBe("-1");
+  });
+
+  test("toggleVisibility(true) restores element to tab order", () => {
+    const container = document.getElementById("game-controls")!;
+
+    controlsView.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    container.setAttribute("tabindex", "-1");
+    expect(container.hasAttribute("tabindex")).toBe(true);
+
+    controlsView.toggleVisibility(true);
+    expect(container.hasAttribute("tabindex")).toBe(false);
   });
 });

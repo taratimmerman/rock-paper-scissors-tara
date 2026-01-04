@@ -9,6 +9,8 @@ describe("MenuView", () => {
   let resetButton: HTMLButtonElement;
 
   beforeEach(() => {
+    menuView.test_clearElement();
+
     document.body.innerHTML = `
       <section id="main-menu" class="menu-view"></section>
     `;
@@ -62,6 +64,40 @@ describe("MenuView", () => {
 
       resetButton.click();
       expect(handler).toHaveBeenCalled();
+    });
+  });
+
+  describe("Accessibility Logic", () => {
+    test("toggleMenuVisibility(false) sets aria-hidden, hidden class, and tabindex", () => {
+      menuView.toggleMenuVisibility(false);
+
+      expect(container.classList.contains("hidden")).toBe(true);
+      expect(container.getAttribute("aria-hidden")).toBe("true");
+      expect(container.getAttribute("tabindex")).toBe("-1");
+    });
+
+    test("toggleMenuVisibility(true) restores visibility and removes tabindex", () => {
+      // SETUP: Start in a 'hidden' state with tabindex
+      container.setAttribute("tabindex", "-1");
+      container.classList.add("hidden");
+
+      menuView.toggleMenuVisibility(true);
+
+      expect(container.classList.contains("hidden")).toBe(false);
+      expect(container.getAttribute("aria-hidden")).toBe("false");
+      // PROOF: Verify it was actually removed
+      expect(container.hasAttribute("tabindex")).toBe(false);
+    });
+
+    test("focus() shifts keyboard focus to the first button", () => {
+      // Ensure the element is attached to document for focus tracking
+      document.body.appendChild(container);
+
+      menuView.render({ isMatchActive: false });
+      menuView.focus();
+
+      const startBtn = document.getElementById("start");
+      expect(document.activeElement).toBe(startBtn);
     });
   });
 });
