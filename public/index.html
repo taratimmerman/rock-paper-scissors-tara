@@ -8,9 +8,9 @@
   </head>
   <body>
     <main id="game-container">
-      <section id="main-menu" class="menu-view"></section>
+      <section id="main-menu" class="menu-view" aria-hidden="false"></section>
 
-      <section id="game-stats" class="hidden">
+      <section id="game-stats" class="hidden" aria-hidden="true">
         <aside id="player-stats" class="stats">
           <div class="score-row"><span id="player-score">00</span> WINS</div>
           <div class="bar-wrapper">
@@ -42,7 +42,7 @@
         </aside>
       </section>
 
-      <div id="arena">
+      <div id="arena" aria-hidden="false">
         <div
           id="announcement-container"
           role="alert"
@@ -53,13 +53,14 @@
         <div id="move-reveal" class="hidden" aria-hidden="true"></div>
       </div>
 
-      <div id="choices"></div>
+      <section id="status-container" aria-hidden="false"></section>
 
-      <section id="status-container"></section>
-
-      <div id="result-display">
-        <button id="play-again">Play Again</button>
-      </div>
+      <section
+        id="game-controls"
+        aria-label="Player Actions"
+        class="hidden"
+        aria-hidden="true"
+      ></section>
     </main>
 
     <script type="module" src="../src/index.ts"></script>

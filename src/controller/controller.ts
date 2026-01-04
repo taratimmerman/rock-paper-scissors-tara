@@ -1,9 +1,8 @@
 import { IModel } from "../model/IModel";
 import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
+import { IControlsView } from "../views/controls/IControlsView";
 import { IMenuView } from "../views/menu/IMenuView";
-import { IMoveView } from "../views/move/IMoveView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
-import { IOutcomeView } from "../views/outcome/IOutcomeView";
 import { IProgressView } from "../views/progress/IProgressView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
@@ -13,10 +12,9 @@ import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 export class Controller {
   private model: IModel;
   private announcementView: IAnnouncementView;
+  private controlsView: IControlsView;
   private menuView: IMenuView;
-  private moveView: IMoveView;
   private moveRevealView: IMoveRevealView;
-  private outcomeView: IOutcomeView;
   private progressView: IProgressView;
   private statsView: IStatsView;
   private statusView: IStatusView;
@@ -25,10 +23,9 @@ export class Controller {
     model: IModel,
     views: {
       announcementView: IAnnouncementView;
+      controlsView: IControlsView;
       menuView: IMenuView;
-      moveView: IMoveView;
       moveRevealView: IMoveRevealView;
-      outcomeView: IOutcomeView;
       progressView: IProgressView;
       statsView: IStatsView;
       statusView: IStatusView;
@@ -36,13 +33,21 @@ export class Controller {
   ) {
     this.model = model;
     this.announcementView = views.announcementView;
+    this.controlsView = views.controlsView;
     this.menuView = views.menuView;
-    this.moveView = views.moveView;
     this.moveRevealView = views.moveRevealView;
-    this.outcomeView = views.outcomeView;
     this.progressView = views.progressView;
     this.statsView = views.statsView;
     this.statusView = views.statusView;
+  }
+
+  private updateControlsView(): void {
+    this.controlsView.render({
+      playerMove: this.model.getPlayerMove(),
+      isMatchOver: this.model.isMatchOver(),
+      taraIsEnabled: this.model.taraIsEnabled(),
+      moves: PLAYER_MOVES_DATA,
+    });
   }
 
   private updateProgressView(options: { isVisible: boolean }): void {
@@ -82,10 +87,6 @@ export class Controller {
     this.statsView.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
   }
 
-  private updateTaraButtonView(): void {
-    this.moveView.updateTaraButton(this.model.taraIsEnabled());
-  }
-
   private startGame(): void {
     this.model.setDefaultMatchData();
 
@@ -93,20 +94,23 @@ export class Controller {
     this.menuView.toggleMenuVisibility(false);
     this.statsView.toggleGameStatsVisibility(true);
     this.statusView.setMessage("Choose your attack!");
-    this.moveView.toggleMoveButtons(true);
+    this.updateControlsView();
     this.updateHealthView();
+
+    this.controlsView.toggleVisibility(true);
+    this.controlsView.focus();
   }
 
   private endRound(): void {
     const playerMove = this.model.getPlayerMove();
     const computerMove = this.model.getComputerMove();
     const result = this.model.evaluateRound();
-    const isMatchOver = this.model.isMatchOver();
+    const matchActuallyEnded = this.model.isMatchOver();
 
     this.updateHealthView();
 
     let resultMessage = result.toUpperCase();
-    if (isMatchOver) {
+    if (matchActuallyEnded) {
       const winner = this.model.handleMatchWin();
       resultMessage = `${winner.toUpperCase()} WON THE MATCH!`;
       this.model.incrementMatchNumber();
@@ -120,16 +124,23 @@ export class Controller {
     );
 
     this.announcementView.setMessage(resultMessage);
-    this.outcomeView.updateOutcome({ isMatchOver });
-    this.outcomeView.toggleOutcomeVisibility(true);
+
+    this.controlsView.render({
+      playerMove: this.model.getPlayerMove(),
+      isMatchOver: matchActuallyEnded,
+      taraIsEnabled: this.model.taraIsEnabled(),
+      moves: PLAYER_MOVES_DATA,
+    });
+    this.controlsView.focus();
 
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
-    this.updateTaraButtonView();
   }
 
   private handleNextRound(): void {
+    this.model.resetMoves();
+
     this.model.setDefaultMatchData();
 
     this.updateHealthView();
@@ -139,9 +150,10 @@ export class Controller {
     this.statusView.setMessage("Choose your attack!");
 
     this.moveRevealView.toggleVisibility(false);
-    this.outcomeView.toggleOutcomeVisibility(false);
-    this.moveView.toggleMoveButtons(true);
     this.statsView.toggleGameStatsVisibility(true);
+
+    this.updateControlsView();
+    this.controlsView.focus();
   }
 
   async resetGameState(): Promise<void> {
@@ -159,17 +171,16 @@ export class Controller {
     this.updateTaraView();
     this.updateHealthView();
     this.updateMostCommonMoveView();
-    this.updateTaraButtonView();
+    this.updateControlsView();
 
     this.moveRevealView.toggleVisibility(false);
-    this.outcomeView.toggleOutcomeVisibility(false);
+    this.controlsView.toggleVisibility(false);
     this.menuView.updateMenu({ isMatchActive });
+    this.menuView.focus();
     this.announcementView.setMessage("");
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
-    this.moveView.toggleMoveButtons(false);
-    this.model.resetMoves();
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
 
@@ -195,32 +206,23 @@ export class Controller {
       isVisible: false,
     });
 
-    this.moveView.render({
-      moves: PLAYER_MOVES_DATA,
-      taraIsEnabled: this.model.taraIsEnabled(),
-    });
-
     this.announcementView.render({ message: "" });
-
-    this.outcomeView.render({
-      isMatchOver: false,
-    });
-
     this.statusView.render({ message: "" });
 
+    this.updateControlsView();
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
 
     this.menuView.updateMenu({ isMatchActive });
     this.statsView.toggleGameStatsVisibility(false);
-    this.moveView.toggleMoveButtons(false);
+    this.controlsView.toggleVisibility(false);
     this.menuView.toggleMenuVisibility(true);
+    this.menuView.focus();
 
     this.menuView.bindStartMatch(() => this.startGame());
-    this.outcomeView.bindPlayAgain(() => this.handleNextRound());
     this.menuView.bindResetGame(() => this.resetGameState());
-    this.moveView.bindPlayerMove((move) => this.handlePlayerMove(move));
-    this.updateTaraButtonView();
+    this.controlsView.bindPlayerMove((move) => this.handlePlayerMove(move));
+    this.controlsView.bindNextRound(() => this.handleNextRound());
   }
 }

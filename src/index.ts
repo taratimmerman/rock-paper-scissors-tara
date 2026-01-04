@@ -1,9 +1,8 @@
 import { Model } from "./model/model";
 import AnnouncementView from "./views/announcement/AnnouncementView";
+import ControlsView from "./views/controls/ControlsView";
 import MenuView from "./views/menu/MenuView";
-import moveView from "./views/move/MoveView";
 import MoveRevealView from "./views/moveReveal/MoveRevealView";
-import OutcomeView from "./views/outcome/OutcomeView";
 import ProgressView from "./views/progress/ProgressView";
 import statsView from "./views/stats/StatsView";
 import StatusView from "./views/status/StatusView";
@@ -14,10 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const controller = new Controller(model, {
     announcementView: AnnouncementView,
+    controlsView: ControlsView,
     menuView: MenuView,
-    moveView: moveView,
     moveRevealView: MoveRevealView,
-    outcomeView: OutcomeView,
     progressView: ProgressView,
     statsView: statsView,
     statusView: StatusView,
