@@ -391,3 +391,27 @@ button {
   border-color: var(--color-primary);
   background-color: #fff;
 }
+
+/* =============================================================================
+   6. ARENA
+   ============================================================================= */
+
+#arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+  gap: 1rem;
+}
+
+#announcement-container {
+  text-align: center;
+  min-height: 2.5rem;
+}
+
+#announcement-container h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
