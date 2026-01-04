@@ -1,7 +1,7 @@
 import View from "../View";
 import { IMenuView, MenuViewData } from "./IMenuView";
 
-class MenuView extends View<MenuViewData> implements IMenuView {
+export default class MenuView extends View<MenuViewData> implements IMenuView {
   protected declare _parentElement: HTMLElement;
   // Cache the specific buttons
   private _startBtn?: HTMLButtonElement;
@@ -68,5 +68,3 @@ class MenuView extends View<MenuViewData> implements IMenuView {
     this._resetBtn = this._getElement<HTMLButtonElement>("reset-game-state");
   }
 }
-
-export default new MenuView();

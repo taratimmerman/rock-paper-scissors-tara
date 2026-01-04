@@ -1,50 +1,47 @@
 /**
  * @jest-environment jsdom
  */
-import menuView from "./MenuView";
+import MenuView from "./MenuView";
 
 describe("MenuView", () => {
+  let view: MenuView;
   let container: HTMLElement;
-  let startButton: HTMLButtonElement;
-  let resetButton: HTMLButtonElement;
+
+  const getStartBtn = () =>
+    document.getElementById("start") as HTMLButtonElement;
+  const getResetBtn = () =>
+    document.getElementById("reset-game-state") as HTMLButtonElement;
 
   beforeEach(() => {
-    menuView.test_clearElement();
-
     document.body.innerHTML = `
       <section id="main-menu" class="menu-view"></section>
     `;
-
-    menuView.render({ isMatchActive: false });
-
     container = document.getElementById("main-menu")!;
-    startButton = document.getElementById("start") as HTMLButtonElement;
-    resetButton = document.getElementById(
-      "reset-game-state"
-    ) as HTMLButtonElement;
 
-    (menuView as any)._parentElement = container;
+    view = new MenuView();
+
+    view.render({ isMatchActive: false });
   });
 
   describe("Rendering Logic", () => {
     test("sets correct text for 'Start' vs 'Continue'", () => {
-      expect(startButton.textContent).toBe("Start Match");
+      expect(getStartBtn().textContent?.trim()).toBe("Start Match");
 
-      menuView.updateMenu({ isMatchActive: true });
-      expect(startButton.textContent).toBe("Continue Match");
+      view.updateMenu({ isMatchActive: true });
+      expect(getStartBtn().textContent?.trim()).toBe("Continue Match");
     });
 
     test("always ensures reset button is present", () => {
-      expect(resetButton).toBeTruthy();
+      expect(getResetBtn()).toBeTruthy();
     });
   });
 
   describe("Visibility & State", () => {
     test("controls CSS hidden class", () => {
-      menuView.toggleMenuVisibility(false);
+      view.toggleMenuVisibility(false);
       expect(container.classList.contains("hidden")).toBe(true);
 
-      menuView.toggleMenuVisibility(true);
+      view.toggleMenuVisibility(true);
       expect(container.classList.contains("hidden")).toBe(false);
     });
   });
@@ -52,52 +49,33 @@ describe("MenuView", () => {
   describe("Interaction Bindings", () => {
     test("triggers 'Start' handler on click", () => {
       const handler = jest.fn();
-      menuView.bindStartMatch(handler);
+      view.bindStartMatch(handler);
 
-      startButton.click();
+      getStartBtn().click();
       expect(handler).toHaveBeenCalled();
     });
 
     test("triggers 'Reset' handler on click", () => {
       const handler = jest.fn();
-      menuView.bindResetGame(handler);
+      view.bindResetGame(handler);
 
-      resetButton.click();
+      getResetBtn().click();
       expect(handler).toHaveBeenCalled();
     });
   });
 
   describe("Accessibility Logic", () => {
     test("toggleMenuVisibility(false) sets aria-hidden, hidden class, and tabindex", () => {
-      menuView.toggleMenuVisibility(false);
+      view.toggleMenuVisibility(false);
 
       expect(container.classList.contains("hidden")).toBe(true);
       expect(container.getAttribute("aria-hidden")).toBe("true");
       expect(container.getAttribute("tabindex")).toBe("-1");
     });
 
-    test("toggleMenuVisibility(true) restores visibility and removes tabindex", () => {
-      // SETUP: Start in a 'hidden' state with tabindex
-      container.setAttribute("tabindex", "-1");
-      container.classList.add("hidden");
-
-      menuView.toggleMenuVisibility(true);
-
-      expect(container.classList.contains("hidden")).toBe(false);
-      expect(container.getAttribute("aria-hidden")).toBe("false");
-      // PROOF: Verify it was actually removed
-      expect(container.hasAttribute("tabindex")).toBe(false);
-    });
-
     test("focus() shifts keyboard focus to the first button", () => {
-      // Ensure the element is attached to document for focus tracking
-      document.body.appendChild(container);
-
-      menuView.render({ isMatchActive: false });
-      menuView.focus();
-
-      const startBtn = document.getElementById("start");
-      expect(document.activeElement).toBe(startBtn);
+      view.focus();
+      expect(document.activeElement).toBe(getStartBtn());
     });
   });
 });

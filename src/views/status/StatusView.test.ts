@@ -4,39 +4,46 @@
 import StatusView from "./StatusView";
 
 describe("StatusView", () => {
+  let status: string;
+  let view: StatusView;
+
   beforeEach(() => {
     document.body.innerHTML = `
       <div id="status-container"></div>
     `;
+
+    status = "Choose your attack!";
+    view = new StatusView();
   });
 
   it("should render the initial message correctly", () => {
-    const initialData = { message: "Prepare for battle!" };
+    view.render({ message: status });
 
-    StatusView.render(initialData);
-
-    const p = document.querySelector("#status");
-    expect(p).not.toBeNull();
-    expect(p?.textContent).toBe("Prepare for battle!");
+    const statusElement = document.querySelector("#status");
+    expect(statusElement).not.toBeNull();
+    expect(statusElement?.textContent).toBe(status);
   });
 
   it("should update only the textContent when setMessage is called", () => {
-    StatusView.render({ message: "Initial" });
-    const pBefore = document.querySelector("#status");
+    const newStatus = "New Status";
 
-    StatusView.setMessage("New Status");
+    view.render({ message: status });
 
-    const pAfter = document.querySelector("#status");
-    expect(pAfter?.textContent).toBe("New Status");
+    const elementBefore = document.querySelector("#status");
+    expect(elementBefore?.textContent).toBe(status);
+
+    view.setMessage(newStatus);
+
+    const elementAfter = document.querySelector("#status");
+    expect(elementAfter?.textContent).toBe(newStatus);
 
     // Check that we didn't destroy and recreate the element (DOM stability)
-    expect(pBefore).toBe(pAfter);
+    expect(elementBefore).toBe(elementAfter);
   });
 
   it("should maintain the message in internal state", () => {
-    const msg = "Testing state";
-    StatusView.setMessage(msg);
+    view.setMessage(status);
 
-    expect((StatusView as any)._data.message).toBe(msg);
+    expect((view as any)._data.message).toBe(status);
   });
 });

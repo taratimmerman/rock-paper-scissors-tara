@@ -1,7 +1,10 @@
 import View from "../View";
 import { IStatusView, StatusViewData } from "./IStatusView";
 
-class StatusView extends View<StatusViewData> implements IStatusView {
+export default class StatusView
+  extends View<StatusViewData>
+  implements IStatusView
+{
   protected declare _parentElement: HTMLElement;
   private _messageElement: HTMLElement | null = null;
 
@@ -27,5 +30,3 @@ class StatusView extends View<StatusViewData> implements IStatusView {
     }
   }
 }
-
-export default new StatusView();
