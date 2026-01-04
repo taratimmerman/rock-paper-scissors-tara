@@ -3,6 +3,7 @@
  */
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
+import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
 import { IStatusView } from "../views/status/IStatusView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveView } from "../views/move/IMoveView";
@@ -14,6 +15,7 @@ import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
 
 describe("Controller", () => {
   let mockModel: jest.Mocked<IModel>;
+  let mockAnnouncementView: jest.Mocked<IAnnouncementView>;
   let mockStatusView: IStatusView;
   let mockMenuView: jest.Mocked<IMenuView>;
   let mockMoveView: jest.Mocked<IMoveView>;
@@ -62,6 +64,11 @@ describe("Controller", () => {
       resetScores: jest.fn(),
     } as any;
 
+    mockAnnouncementView = {
+      render: jest.fn(),
+      setMessage: jest.fn(),
+    };
+
     mockStatusView = {
       render: jest.fn(),
       setMessage: jest.fn(),
@@ -108,6 +115,7 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, {
+      announcementView: mockAnnouncementView,
       statusView: mockStatusView,
       menuView: mockMenuView,
       moveView: mockMoveView,
@@ -132,6 +140,8 @@ describe("Controller", () => {
         moves: PLAYER_MOVES_DATA,
         taraIsEnabled: false,
       });
+
+      expect(mockAnnouncementView.render).toHaveBeenCalledWith({ message: "" });
 
       // Order Verification: Bind (Render) must happen BEFORE setting Tara state
       const bindOrder = mockMoveView.bindPlayerMove.mock.invocationCallOrder[0];
@@ -223,7 +233,6 @@ describe("Controller", () => {
 
       expect(mockOutcomeView.updateOutcome).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultMessage: "YOU WIN!",
           isMatchOver: false,
         })
       );
@@ -231,6 +240,7 @@ describe("Controller", () => {
         true
       );
       expect(mockModel.increaseRoundNumber).toHaveBeenCalled();
+      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith("YOU WIN!");
     });
 
     test("handles match win state correctly", () => {
@@ -241,11 +251,13 @@ describe("Controller", () => {
 
       expect(mockOutcomeView.updateOutcome).toHaveBeenCalledWith(
         expect.objectContaining({
-          resultMessage: "PLAYER WON THE MATCH!",
           isMatchOver: true,
         })
       );
       expect(mockModel.incrementMatchNumber).toHaveBeenCalled();
+      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
+        "PLAYER WON THE MATCH!"
+      );
     });
 
     test("synchronizes all stats, scores, and buttons as side-effects", () => {
