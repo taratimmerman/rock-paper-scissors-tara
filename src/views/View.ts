@@ -111,4 +111,26 @@ export default abstract class View<T = any> {
       element.removeAttribute("tabindex");
     }
   }
+
+  protected _waitForAnimation(element: HTMLElement): Promise<void> {
+    return new Promise((resolve) => {
+      const duration = parseFloat(getComputedStyle(element).transitionDuration);
+
+      // If no duration (tests) or already hidden, resolve immediately
+      if (!duration || duration === 0) {
+        resolve();
+        return;
+      }
+
+      const handler = (e: TransitionEvent) => {
+        // Only resolve for the main transform/opacity, not every sub-property
+        if (e.target === element) {
+          element.removeEventListener("transitionend", handler);
+          resolve();
+        }
+      };
+
+      element.addEventListener("transitionend", handler);
+    });
+  }
 }

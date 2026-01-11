@@ -74,7 +74,11 @@ describe("Controller", () => {
       toggleMenuVisibility: jest.fn(),
       updateMenu: jest.fn(),
     };
-    mockMoveRevealView = { render: jest.fn(), toggleVisibility: jest.fn() };
+    mockMoveRevealView = {
+      flipCards: jest.fn().mockResolvedValue(undefined),
+      render: jest.fn(),
+      toggleVisibility: jest.fn(),
+    };
 
     mockProgressView = { render: jest.fn(), update: jest.fn() };
 
@@ -136,6 +140,28 @@ describe("Controller", () => {
       // Logic Check: updateControlsView should run to hide cards immediately
       expect(mockControlsView.render).toHaveBeenCalled();
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
+    });
+
+    test("registers move and waits for the card flip before ending round", async () => {
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.PAPER);
+
+      // Act
+      await controller.handlePlayerMove(MOVES.ROCK);
+
+      // 1. Verify moves were registered
+      expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
+
+      // 2. Verify Reveal was shown
+      expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
+
+      // 3. CRITICAL: Verify flipCards was called
+      expect(mockMoveRevealView.flipCards).toHaveBeenCalled();
+
+      // 4. Verify endRound logic (status message)
+      expect(mockStatusView.setMessage).toHaveBeenCalledWith(
+        expect.stringContaining("rock")
+      );
     });
   });
 

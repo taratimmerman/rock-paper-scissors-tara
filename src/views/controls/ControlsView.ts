@@ -16,35 +16,39 @@ export default class ControlsView
     this._setupListeners();
   }
 
+  // ControlsView.ts
   protected _generateMarkup(): string {
     const { playerMove, isMatchOver, moves, taraIsEnabled } = this._data;
 
-    // STATE A: Waiting for Player Selection
     if (!playerMove) {
       return `
-        <div id="choices" role="group" aria-label="Select your move">
-          ${moves
-            .map((move) => {
-              const disabled = move.id === "tara" && !taraIsEnabled;
-              return `
-              <button id="${move.id}" class="card-container" ${
-                disabled ? "disabled" : ""
-              }>
-                <span class="icon" aria-hidden="true">${move.icon}</span>
-                <span class="label">${move.text}</span>
-              </button>`;
-            })
-            .join("")}
-        </div>`;
+      <div id="choices" role="group" aria-label="Select your move">
+        ${moves
+          .map((move) => {
+            const disabled = move.id === "tara" && !taraIsEnabled;
+            return `
+            <button id="${move.id}" class="card-button" ${
+              disabled ? "disabled" : ""
+            }>
+              <div class="card-inner">
+                <div class="card-back">BACK</div>
+                <div class="card-front">
+                  <span class="icon" aria-hidden="true">${move.icon}</span>
+                  <span class="label">${move.text}</span>
+                </div>
+              </div>
+            </button>`;
+          })
+          .join("")}
+      </div>`;
     }
 
-    // STATE B: Round/Match Over - Progression
     return `
-      <div id="progression-zone" aria-live="polite">
-        <button id="play-again" class="btn-primary">
-          ${isMatchOver ? "Start New Match" : "Next Round"}
-        </button>
-      </div>`;
+    <div id="progression-zone" aria-live="polite">
+      <button id="play-again" class="btn-primary">
+        ${isMatchOver ? "Start New Match" : "Next Round"}
+      </button>
+    </div>`;
   }
 
   public toggleVisibility(show: boolean): void {
@@ -64,7 +68,7 @@ export default class ControlsView
   private _setupListeners(): void {
     this._parentElement.onclick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const moveBtn = target.closest(".card-container");
+      const moveBtn = target.closest(".card-button");
       const nextBtn = target.closest("#play-again");
 
       if (moveBtn && this._moveHandler) this._moveHandler(moveBtn.id as Move);

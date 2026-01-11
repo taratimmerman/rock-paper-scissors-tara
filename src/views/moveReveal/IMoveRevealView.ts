@@ -6,6 +6,7 @@ export interface MoveRevealData {
 }
 
 export interface IMoveRevealView {
+  flipCards(): Promise<void>;
   render(data: MoveRevealData): void;
   toggleVisibility(show: boolean): void;
 }
