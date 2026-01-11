@@ -40,19 +40,6 @@ describe("MoveRevealView", () => {
       expect(container.innerHTML).toContain(computerData.text);
     });
 
-    it("should render cards with the 'disabled' attribute to prevent hover/clicks", () => {
-      view.render({
-        playerMoveId: "paper" as Move,
-        computerMoveId: "paper" as Move,
-      });
-
-      const cards = container.querySelectorAll(".card-container");
-      expect(cards.length).toBe(2);
-      cards.forEach((card) => {
-        expect(card.hasAttribute("disabled")).toBe(true);
-      });
-    });
-
     it("should return an empty string if move IDs are not found", () => {
       // Cast as any to force a runtime check of safety logic
       const invalidData = {
@@ -63,6 +50,17 @@ describe("MoveRevealView", () => {
       view.render(invalidData);
 
       expect(container.innerHTML).toBe("");
+    });
+
+    it("should render the flippable structure", () => {
+      view.render({
+        playerMoveId: "paper" as Move,
+        computerMoveId: "paper" as Move,
+      });
+
+      // Check that we have the inner container which handles the rotation
+      const inner = container.querySelector(".card-inner");
+      expect(inner).toBeTruthy();
     });
   });
 

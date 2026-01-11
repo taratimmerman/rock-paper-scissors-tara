@@ -40,7 +40,7 @@ describe("ControlsView", () => {
       moves: mockMoves,
     });
 
-    const buttons = document.querySelectorAll(".card-container");
+    const buttons = document.querySelectorAll(".card-button");
     expect(buttons.length).toBe(mockMoves.length);
     expect(document.getElementById(MOVES.ROCK)).toBeTruthy();
     expect(document.getElementById("play-again")).toBeFalsy();
@@ -89,7 +89,7 @@ describe("ControlsView", () => {
     expect(btn).toBeTruthy();
     expect(btn?.textContent?.trim()).toBe("Next Round");
     // Ensure cards are gone
-    expect(document.querySelector(".card-container")).toBeFalsy();
+    expect(document.querySelector(".card-button")).toBeFalsy();
   });
 
   test("renders 'Start New Match' button when match is over", () => {
@@ -166,9 +166,7 @@ describe("ControlsView", () => {
     view.focus();
 
     // Now testing real browser-like behavior
-    const firstButton = document.querySelector(
-      ".card-container"
-    ) as HTMLElement;
+    const firstButton = document.querySelector(".card-button") as HTMLElement;
     expect(document.activeElement).toBe(firstButton);
   });
 

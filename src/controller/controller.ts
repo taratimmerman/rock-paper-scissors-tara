@@ -184,13 +184,29 @@ export class Controller {
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
 
-    this.statusView.setMessage("Revealing moves...");
+    // Triggers "STATE B" in your ControlsView markup,
+    // replacing the 4 choice cards with the "Next Round" button (or hiding them).
+    this.controlsView.render({
+      playerMove: move,
+      isMatchOver: this.model.isMatchOver(),
+      moves: [], // Not needed for State B
+      taraIsEnabled: false,
+    });
 
+    // 2. Prepare MoveReveal (Face-down by default)
     this.moveRevealView.render({
       playerMoveId: this.model.getPlayerMove(),
       computerMoveId: this.model.getComputerMove(),
     });
+
+    this.statusView.setMessage("Revealing moves...");
     this.moveRevealView.toggleVisibility(true);
+
+    // Add a microscopic delay to allow the browser to paint the face-down cards
+    // before the flip animation starts.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    await this.moveRevealView.flipCards();
 
     this.endRound();
   }
