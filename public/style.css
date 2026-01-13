@@ -205,6 +205,7 @@ header,
 /* =============================================================================
    3. CARD SYSTEM (CHOICES & REVEAL)
    ============================================================================= */
+
 #choices,
 #move-reveal {
   display: flex;
@@ -221,12 +222,12 @@ header,
   flex: 0 1 120px;
   width: 100%;
   aspect-ratio: 2/3;
-  perspective: 1000px; /* Essential for 3D depth */
+  perspective: 1000px;
   background: transparent;
   border: none;
   padding: 0;
   position: relative;
-  transition: transform 0.2s ease; /* Restore original hover speed */
+  transition: transform 0.2s ease;
 }
 
 /* 3B. THE ROTATOR */
@@ -234,22 +235,21 @@ header,
   position: relative;
   width: 100%;
   height: 100%;
+  /* 1s duration matches your requirement for a deliberate, elegant flip */
   transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
-  pointer-events: none; /* Let the parent handle the hover/clicks */
+  pointer-events: none;
+  /* DEFAULT STATE: Face-down (0deg) */
+  transform: rotateY(0deg);
 }
 
-/* State: Choice cards are always flipped to show front */
-#choices .card-inner {
-  transform: rotateY(180deg);
-}
-
-/* State: Reveal cards flip only when is-flipped is added */
+/* 3C. THE UNIVERSAL FLIP TRIGGER */
+/* This now handles both Choices and Reveal dynamically */
 .card-inner.is-flipped {
   transform: rotateY(180deg);
 }
 
-/* 3C. THE FACES */
+/* 3D. THE FACES */
 .card-front,
 .card-back {
   position: absolute;
@@ -279,17 +279,19 @@ header,
   );
   color: #bbb;
   font-weight: 800;
-  transform: rotateY(0deg);
   z-index: 2;
+  /* Static position for the back */
+  transform: rotateY(0deg);
 }
 
 .card-front {
   background-color: var(--color-surface);
-  transform: rotateY(180deg);
   z-index: 1;
+  /* Inverted position so it shows when parent hits 180deg */
+  transform: rotateY(180deg);
 }
 
-/* 3D. HOVER LOGIC */
+/* 3E. HOVER & INTERACTION LOGIC */
 .card-button {
   cursor: pointer;
 }
@@ -298,9 +300,9 @@ header,
   transform: translateY(-5px);
 }
 
+/* Subtle feedback on the front face during hover */
 .card-button:not(:disabled):hover .card-front {
   border-color: rgba(0, 0, 0, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
 
@@ -310,7 +312,7 @@ header,
   filter: grayscale(1);
 }
 
-/* 3E. CONTENT STYLES */
+/* 3F. CONTENT STYLES */
 .icon {
   font-size: 2.5rem;
   line-height: 1;

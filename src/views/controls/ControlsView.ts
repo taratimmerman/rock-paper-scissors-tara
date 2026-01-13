@@ -9,6 +9,8 @@ export default class ControlsView
   protected declare _parentElement: HTMLElement;
   private _moveHandler?: (move: Move) => void;
   private _nextRoundHandler?: () => void;
+  // Track visual state to prevent markup-regressions during render
+  private _isFaceUp: boolean = false;
 
   public render(data: ControlsViewData): void {
     this._parentElement = this._getElement<HTMLElement>("game-controls");
@@ -16,7 +18,31 @@ export default class ControlsView
     this._setupListeners();
   }
 
-  // ControlsView.ts
+  /**
+   * Orchestrates the 3D flip for all choice cards.
+   * @param faceUp - True to show icons, False to show "BACK"
+   */
+  public async flipAll(faceUp: boolean): Promise<void> {
+    this._isFaceUp = faceUp;
+    const cards = this._parentElement.querySelectorAll(".card-inner");
+
+    if (cards.length === 0) return;
+
+    // Read 'offsetHeight' to force the browser to paint the cards
+    // in their current state (visible but 0deg) BEFORE we add the class.
+    // This ensures the transition actually runs.
+    const _forceReflow = (cards[0] as HTMLElement).offsetHeight;
+
+    cards.forEach((card) => {
+      faceUp
+        ? card.classList.add("is-flipped")
+        : card.classList.remove("is-flipped");
+    });
+
+    // Wait for the transition
+    await this._waitForAnimation(cards[0] as HTMLElement);
+  }
+
   protected _generateMarkup(): string {
     const { playerMove, isMatchOver, moves, taraIsEnabled } = this._data;
 
@@ -26,11 +52,14 @@ export default class ControlsView
         ${moves
           .map((move) => {
             const disabled = move.id === "tara" && !taraIsEnabled;
+            // Maintain current flip state during re-renders
+            const flipClass = this._isFaceUp ? "is-flipped" : "";
+
             return `
             <button id="${move.id}" class="card-button" ${
               disabled ? "disabled" : ""
             }>
-              <div class="card-inner">
+              <div class="card-inner ${flipClass}">
                 <div class="card-back">BACK</div>
                 <div class="card-front">
                   <span class="icon" aria-hidden="true">${move.icon}</span>

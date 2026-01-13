@@ -87,17 +87,21 @@ export class Controller {
     this.statsView.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
   }
 
-  private startGame(): void {
+  private async startGame(): Promise<void> {
     this.model.setDefaultMatchData();
 
     this.updateProgressView({ isVisible: true });
     this.menuView.toggleMenuVisibility(false);
     this.statsView.toggleGameStatsVisibility(true);
-    this.statusView.setMessage("Choose your attack!");
+    this.statusView.setMessage("Get ready...");
+
     this.updateControlsView();
     this.updateHealthView();
-
     this.controlsView.toggleVisibility(true);
+
+    await this.controlsView.flipAll(true);
+
+    this.statusView.setMessage("Choose your attack!");
     this.controlsView.focus();
   }
 
@@ -138,21 +142,22 @@ export class Controller {
     this.updateMostCommonMoveView();
   }
 
-  private handleNextRound(): void {
+  private async handleNextRound(): Promise<void> {
     this.model.resetMoves();
-
     this.model.setDefaultMatchData();
 
     this.updateHealthView();
     this.updateProgressView({ isVisible: true });
 
     this.announcementView.setMessage("");
-    this.statusView.setMessage("Choose your attack!");
-
     this.moveRevealView.toggleVisibility(false);
-    this.statsView.toggleGameStatsVisibility(true);
 
     this.updateControlsView();
+
+    this.statusView.setMessage("Prepare your next move...");
+    await this.controlsView.flipAll(true);
+
+    this.statusView.setMessage("Choose your attack!");
     this.controlsView.focus();
   }
 
@@ -184,16 +189,16 @@ export class Controller {
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
 
-    // Triggers "STATE B" in your ControlsView markup,
-    // replacing the 4 choice cards with the "Next Round" button (or hiding them).
+    this.statusView.setMessage("Locking in move...");
+    await this.controlsView.flipAll(false);
+
     this.controlsView.render({
       playerMove: move,
       isMatchOver: this.model.isMatchOver(),
-      moves: [], // Not needed for State B
+      moves: [],
       taraIsEnabled: false,
     });
 
-    // 2. Prepare MoveReveal (Face-down by default)
     this.moveRevealView.render({
       playerMoveId: this.model.getPlayerMove(),
       computerMoveId: this.model.getComputerMove(),
@@ -202,10 +207,7 @@ export class Controller {
     this.statusView.setMessage("Revealing moves...");
     this.moveRevealView.toggleVisibility(true);
 
-    // Add a microscopic delay to allow the browser to paint the face-down cards
-    // before the flip animation starts.
     await new Promise((resolve) => requestAnimationFrame(resolve));
-
     await this.moveRevealView.flipCards();
 
     this.endRound();

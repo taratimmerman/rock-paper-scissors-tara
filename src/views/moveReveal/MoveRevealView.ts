@@ -45,14 +45,14 @@ export default class MoveRevealView
   }
 
   public async flipCards(): Promise<void> {
-    const cards =
-      this._parentElement.querySelectorAll<HTMLElement>(".card-inner");
+    const cards = this._parentElement.querySelectorAll(".card-inner");
+    if (cards.length === 0) return;
+
+    // Force Reflow
+    const _forceReflow = (cards[0] as HTMLElement).offsetHeight;
 
     cards.forEach((card) => card.classList.add("is-flipped"));
 
-    // Wait for the first card's animation to finish before resolving
-    if (cards.length > 0) {
-      await this._waitForAnimation(cards[0]);
-    }
+    await this._waitForAnimation(cards[0] as HTMLElement);
   }
 }
