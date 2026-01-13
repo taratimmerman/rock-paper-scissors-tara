@@ -144,6 +144,47 @@ describe("ControlsView", () => {
     expect(document.getElementById("play-again")).toBeTruthy();
   });
 
+  test("maintains flipped state in markup across multiple renders", async () => {
+    const data = {
+      playerMove: null,
+      isMatchOver: false,
+      moves: PLAYER_MOVES_DATA,
+      taraIsEnabled: true,
+    };
+
+    view.render(data);
+
+    // Trigger face-up state
+    await view.flipAll(true);
+
+    // Re-render (simulating a state update from the model)
+    view.render(data);
+
+    const cards = document.querySelectorAll(".card-inner");
+    cards.forEach((card) => {
+      expect(card.classList.contains("is-flipped")).toBe(true);
+    });
+  });
+
+  test("flipAll waits for the animation to complete", async () => {
+    const data = {
+      playerMove: null,
+      isMatchOver: false,
+      moves: PLAYER_MOVES_DATA,
+      taraIsEnabled: true,
+    };
+    view.render(data);
+
+    const flipPromise = view.flipAll(true);
+
+    // In JSDOM, _waitForAnimation helper resolves immediately if in 'test' env.
+    // Ensure it's returning a Promise that can be awaited.
+    await expect(flipPromise).resolves.toBeUndefined();
+
+    const card = document.querySelector(".card-inner");
+    expect(card?.classList.contains("is-flipped")).toBe(true);
+  });
+
   // ===== ACCESSABILITY =====
 
   test("toggleVisibility(false) syncs aria-hidden attribute", () => {

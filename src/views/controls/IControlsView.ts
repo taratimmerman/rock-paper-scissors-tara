@@ -12,6 +12,7 @@ export interface IControlsView {
   render(data: ControlsViewData): void;
   bindPlayerMove(handler: (move: Move) => void): void;
   bindNextRound(handler: () => void): void;
+  flipAll(faceUp: boolean): Promise<void>;
   focus(): void;
   toggleVisibility(show: boolean): void;
 }

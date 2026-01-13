@@ -22,6 +22,9 @@ describe("Controller", () => {
       </div>
     `;
 
+    // Mock requestAnimationFrame for the handlePlayerMove delay
+    (window as any).requestAnimationFrame = (cb: any) => setTimeout(cb, 0);
+
     mockModel = {
       getPlayerScore: jest.fn().mockReturnValue(0),
       getComputerScore: jest.fn().mockReturnValue(0),
@@ -56,10 +59,12 @@ describe("Controller", () => {
 
     mockAnnouncementView = { render: jest.fn(), setMessage: jest.fn() };
 
+    // NOTE: mockResolvedValue(undefined) simulates the "intelligent" wait resolving instantly
     mockControlsView = {
       render: jest.fn(),
       bindPlayerMove: jest.fn(),
       bindNextRound: jest.fn(),
+      flipAll: jest.fn().mockResolvedValue(undefined),
       focus: jest.fn(),
       toggleVisibility: jest.fn(),
     };
@@ -117,13 +122,42 @@ describe("Controller", () => {
 
   // ===== GAME ACTIONS =====
   describe("startGame", () => {
-    test("prepares match data and shows controls", () => {
-      (controller as any).startGame();
+    test("prepares match data and shows controls", async () => {
+      await (controller as any).startGame();
 
       expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
       expect(mockMenuView.toggleMenuVisibility).toHaveBeenCalledWith(false);
       expect(mockControlsView.toggleVisibility).toHaveBeenCalledWith(true);
       expect(mockControlsView.render).toHaveBeenCalled();
+
+      // This will now pass because we waited for the flipAll to resolve
+      expect(mockStatusView.setMessage).toHaveBeenCalledWith(
+        "Choose your attack!"
+      );
+    });
+
+    test("strictly follows the narrative timing (Ready -> Flip -> Choose)", async () => {
+      // 1. Setup a manual resolver for flipAll so we can control when the animation 'finishes'
+      let resolveFlip: (value: void | PromiseLike<void>) => void;
+      const flipPromise = new Promise<void>((resolve) => {
+        resolveFlip = resolve;
+      });
+      mockControlsView.flipAll.mockReturnValue(flipPromise);
+
+      // 2. Start the game (don't await yet, or the test will hang)
+      const gamePromise = (controller as any).startGame();
+
+      // 3. Verify 'Phase 1' state (Before flip completes)
+      expect(mockStatusView.setMessage).toHaveBeenCalledWith("Get ready...");
+      expect(mockStatusView.setMessage).not.toHaveBeenCalledWith(
+        "Choose your attack!"
+      );
+
+      // 4. Resolve the flip
+      resolveFlip!();
+      await gamePromise;
+
+      // 5. Verify 'Phase 2' state (After flip completes)
       expect(mockStatusView.setMessage).toHaveBeenCalledWith(
         "Choose your attack!"
       );
@@ -137,7 +171,8 @@ describe("Controller", () => {
       await controller.handlePlayerMove(MOVES.ROCK);
 
       expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
-      // Logic Check: updateControlsView should run to hide cards immediately
+      // Verify the lock-in flip happened
+      expect(mockControlsView.flipAll).toHaveBeenCalledWith(false);
       expect(mockControlsView.render).toHaveBeenCalled();
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
     });
@@ -146,26 +181,18 @@ describe("Controller", () => {
       mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
       mockModel.getComputerMove.mockReturnValue(MOVES.PAPER);
 
-      // Act
       await controller.handlePlayerMove(MOVES.ROCK);
 
-      // 1. Verify moves were registered
       expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
-
-      // 2. Verify Reveal was shown
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
-
-      // 3. CRITICAL: Verify flipCards was called
       expect(mockMoveRevealView.flipCards).toHaveBeenCalled();
-
-      // 4. Verify endRound logic (status message)
       expect(mockStatusView.setMessage).toHaveBeenCalledWith(
         expect.stringContaining("rock")
       );
     });
   });
 
-  // ===== ROUND OUTCOMES (The Edge Cases) =====
+  // ===== ROUND OUTCOMES =====
   describe("endRound", () => {
     test("renders 'Next Round' button when match continues", () => {
       mockModel.isMatchOver.mockReturnValue(false);
@@ -176,9 +203,7 @@ describe("Controller", () => {
 
       expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith("YOU WIN!");
       expect(mockControlsView.render).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isMatchOver: false,
-        })
+        expect.objectContaining({ isMatchOver: false })
       );
     });
 
@@ -193,24 +218,22 @@ describe("Controller", () => {
       );
       // CRITICAL EDGE CASE: Verify the View receives isMatchOver: true
       expect(mockControlsView.render).toHaveBeenCalledWith(
-        expect.objectContaining({
-          isMatchOver: true,
-        })
+        expect.objectContaining({ isMatchOver: true })
       );
     });
   });
 
   describe("handleNextRound", () => {
-    test("resets moves in model to bring back choice cards", () => {
-      // Simulate state where a move was previously made
+    test("resets moves in model to bring back choice cards", async () => {
       mockModel.getPlayerMove.mockReturnValue(null);
 
-      (controller as any).handleNextRound();
+      await (controller as any).handleNextRound();
 
       // CRITICAL EDGE CASE: Must call resetMoves for the cards to reappear
       expect(mockModel.resetMoves).toHaveBeenCalled();
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
       expect(mockControlsView.render).toHaveBeenCalled();
+      expect(mockControlsView.flipAll).toHaveBeenCalledWith(true);
     });
   });
 
@@ -228,17 +251,15 @@ describe("Controller", () => {
   });
 
   describe("Accessibility Orchestration", () => {
-    test("startGame shifts focus to game controls", () => {
-      (controller as any).startGame();
+    test("startGame shifts focus to game controls", async () => {
+      await (controller as any).startGame();
 
-      // We only check if the Controller CALLED the focus method
       expect(mockControlsView.focus).toHaveBeenCalled();
     });
 
     test("handlePlayerMove shifts focus back to controls for progression", async () => {
       await controller.handlePlayerMove(MOVES.ROCK);
 
-      // Verify focus is called after a move is made
       expect(mockControlsView.focus).toHaveBeenCalled();
     });
 

@@ -81,4 +81,38 @@ describe("MoveRevealView", () => {
       expect(container.classList.contains("hidden")).toBe(true);
     });
   });
+
+  describe("flipCards", () => {
+    it("should apply 'is-flipped' class to all move cards and resolve", async () => {
+      view.render({
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+      });
+
+      // Initially, cards should not have the flipped class
+      const cards = container.querySelectorAll(".card-inner");
+      cards.forEach((card) => {
+        expect(card.classList.contains("is-flipped")).toBe(false);
+      });
+
+      // Act: Trigger the flip
+      const flipPromise = view.flipCards();
+
+      // In JSDOM with our _waitForAnimation fix, this resolves immediately
+      await expect(flipPromise).resolves.toBeUndefined();
+
+      // Assert: Both cards now have the flipped class
+      cards.forEach((card) => {
+        expect(card.classList.contains("is-flipped")).toBe(true);
+      });
+    });
+
+    it("should resolve immediately if no cards are rendered", async () => {
+      // Don't call render, or render invalid data
+      view.render({ playerMoveId: "" as any, computerMoveId: "" as any });
+
+      const flipPromise = view.flipCards();
+      await expect(flipPromise).resolves.toBeUndefined();
+    });
+  });
 });
