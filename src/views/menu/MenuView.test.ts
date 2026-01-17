@@ -63,19 +63,4 @@ describe("MenuView", () => {
       expect(handler).toHaveBeenCalled();
     });
   });
-
-  describe("Accessibility Logic", () => {
-    test("toggleMenuVisibility(false) sets aria-hidden, hidden class, and tabindex", () => {
-      view.toggleMenuVisibility(false);
-
-      expect(container.classList.contains("hidden")).toBe(true);
-      expect(container.getAttribute("aria-hidden")).toBe("true");
-      expect(container.getAttribute("tabindex")).toBe("-1");
-    });
-
-    test("focus() shifts keyboard focus to the first button", () => {
-      view.focus();
-      expect(document.activeElement).toBe(getStartBtn());
-    });
-  });
 });

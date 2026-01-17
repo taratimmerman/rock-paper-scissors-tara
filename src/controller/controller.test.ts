@@ -2,12 +2,13 @@
  * @jest-environment jsdom
  */
 import { Controller } from "./controller";
-import { MOVES, PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
+import { MOVES, PARTICIPANTS } from "../utils/dataUtils";
 
 describe("Controller", () => {
   let mockModel: any;
   let mockAnnouncementView: any;
   let mockControlsView: any;
+  let mockGameView: any;
   let mockStatusView: any;
   let mockMenuView: any;
   let mockMoveRevealView: any;
@@ -65,9 +66,10 @@ describe("Controller", () => {
       bindPlayerMove: jest.fn(),
       bindNextRound: jest.fn(),
       flipAll: jest.fn().mockResolvedValue(undefined),
-      focus: jest.fn(),
       toggleVisibility: jest.fn(),
     };
+
+    mockGameView = { toggleVisibility: jest.fn() };
 
     mockStatusView = { render: jest.fn(), setMessage: jest.fn() };
 
@@ -75,7 +77,6 @@ describe("Controller", () => {
       render: jest.fn(),
       bindStartMatch: jest.fn(),
       bindResetGame: jest.fn(),
-      focus: jest.fn(),
       toggleMenuVisibility: jest.fn(),
       updateMenu: jest.fn(),
     };
@@ -98,6 +99,7 @@ describe("Controller", () => {
     controller = new Controller(mockModel, {
       announcementView: mockAnnouncementView,
       controlsView: mockControlsView,
+      gameView: mockGameView,
       statusView: mockStatusView,
       menuView: mockMenuView,
       moveRevealView: mockMoveRevealView,
@@ -247,26 +249,6 @@ describe("Controller", () => {
       expect(mockControlsView.toggleVisibility).toHaveBeenCalledWith(false);
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
       expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith("");
-    });
-  });
-
-  describe("Accessibility Orchestration", () => {
-    test("startGame shifts focus to game controls", async () => {
-      await (controller as any).startGame();
-
-      expect(mockControlsView.focus).toHaveBeenCalled();
-    });
-
-    test("handlePlayerMove shifts focus back to controls for progression", async () => {
-      await controller.handlePlayerMove(MOVES.ROCK);
-
-      expect(mockControlsView.focus).toHaveBeenCalled();
-    });
-
-    test("resetGameState shifts focus back to the main menu", async () => {
-      await controller.resetGameState();
-
-      expect(mockMenuView.focus).toHaveBeenCalled();
     });
   });
 });

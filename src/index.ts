@@ -3,6 +3,7 @@ import { Controller } from "./controller/controller";
 
 import AnnouncementView from "./views/announcement/AnnouncementView";
 import ControlsView from "./views/controls/ControlsView";
+import GameView from "./views/game/GameView";
 import MenuView from "./views/menu/MenuView";
 import MoveRevealView from "./views/moveReveal/MoveRevealView";
 import ProgressView from "./views/progress/ProgressView";
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const controller = new Controller(model, {
     announcementView: new AnnouncementView(),
     controlsView: new ControlsView(),
+    gameView: new GameView(),
     menuView: new MenuView(),
     moveRevealView: new MoveRevealView(),
     progressView: new ProgressView(),
