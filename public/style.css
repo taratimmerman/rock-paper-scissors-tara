@@ -155,6 +155,11 @@ main {
   text-align: right;
 }
 
+#computer-stats .bar {
+  right: 0;
+  left: auto;
+}
+
 #computer-stats .bar-text {
   right: 10px;
 }
