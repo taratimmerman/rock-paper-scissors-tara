@@ -15,19 +15,51 @@ describe("ControlsView", () => {
   ];
 
   beforeEach(() => {
-    document.body.innerHTML = `<div id="game-controls" class="hidden" aria-hidden="true"></div>`;
-
+    document.body.innerHTML = `<div id="game-controls"></div>`;
     view = new ControlsView();
   });
 
-  test("toggleVisibility() adds/removes the hidden class from the container", () => {
+  // ===== TRANSITION & VISIBILITY =====
+
+  test("toggleVisibility(false) makes element inert and hidden", () => {
     const container = document.getElementById("game-controls")!;
 
-    view.toggleVisibility(true);
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    // INITIAL STATE CHECK: Should be visible and active after a standard render
+    expect(container.hasAttribute("inert")).toBe(false);
     expect(container.classList.contains("hidden")).toBe(false);
 
+    // ACT
     view.toggleVisibility(false);
+
+    // ASSERT
+    expect(container.hasAttribute("inert")).toBe(true);
     expect(container.classList.contains("hidden")).toBe(true);
+  });
+
+  test("toggleVisibility(true) removes inert and hidden states", () => {
+    const container = document.getElementById("game-controls")!;
+
+    // ARRANGE: Set the state to "hidden"
+    container.setAttribute("inert", "");
+    container.classList.add("hidden");
+
+    // INITIAL STATE CHECK
+    expect(container.hasAttribute("inert")).toBe(true);
+    expect(container.classList.contains("hidden")).toBe(true);
+
+    // ACT
+    view.toggleVisibility(true);
+
+    // ASSERT
+    expect(container.hasAttribute("inert")).toBe(false);
+    expect(container.classList.contains("hidden")).toBe(false);
   });
 
   // ===== STATE A: PLAYER MOVE SELECTION =====
@@ -88,7 +120,6 @@ describe("ControlsView", () => {
     const btn = document.getElementById("play-again");
     expect(btn).toBeTruthy();
     expect(btn?.textContent?.trim()).toBe("Next Round");
-    // Ensure cards are gone
     expect(document.querySelector(".card-button")).toBeFalsy();
   });
 
@@ -108,7 +139,6 @@ describe("ControlsView", () => {
     const handler = jest.fn();
     view.bindNextRound(handler);
 
-    // Set view to Progression state
     view.render({
       playerMove: MOVES.SCISSORS,
       isMatchOver: false,
@@ -123,7 +153,6 @@ describe("ControlsView", () => {
   // ===== RE-RENDERING / DOM DIFFING =====
 
   test("switching from Selection to Progression clears the container", () => {
-    // 1. Initial State: Moves
     view.render({
       playerMove: null,
       isMatchOver: false,
@@ -132,7 +161,6 @@ describe("ControlsView", () => {
     });
     expect(document.getElementById("choices")).toBeTruthy();
 
-    // 2. State Change: Move made
     view.render({
       playerMove: MOVES.ROCK,
       isMatchOver: false,
@@ -153,11 +181,7 @@ describe("ControlsView", () => {
     };
 
     view.render(data);
-
-    // Trigger face-up state
     await view.flipAll(true);
-
-    // Re-render (simulating a state update from the model)
     view.render(data);
 
     const cards = document.querySelectorAll(".card-inner");
@@ -176,70 +200,9 @@ describe("ControlsView", () => {
     view.render(data);
 
     const flipPromise = view.flipAll(true);
-
-    // In JSDOM, _waitForAnimation helper resolves immediately if in 'test' env.
-    // Ensure it's returning a Promise that can be awaited.
     await expect(flipPromise).resolves.toBeUndefined();
 
     const card = document.querySelector(".card-inner");
     expect(card?.classList.contains("is-flipped")).toBe(true);
-  });
-
-  // ===== ACCESSABILITY =====
-
-  test("toggleVisibility(false) syncs aria-hidden attribute", () => {
-    const container = document.getElementById("game-controls")!;
-
-    view.toggleVisibility(false);
-
-    expect(container.classList.contains("hidden")).toBe(true);
-    expect(container.getAttribute("aria-hidden")).toBe("true");
-  });
-
-  test("focus() shifts focus to the first button in the markup", () => {
-    view.render({
-      playerMove: null,
-      isMatchOver: false,
-      taraIsEnabled: true,
-      moves: PLAYER_MOVES_DATA,
-    });
-
-    view.focus();
-
-    // Now testing real browser-like behavior
-    const firstButton = document.querySelector(".card-button") as HTMLElement;
-    expect(document.activeElement).toBe(firstButton);
-  });
-
-  test("toggleVisibility(false) removes element from tab order", () => {
-    const container = document.getElementById("game-controls")!;
-
-    view.render({
-      playerMove: null,
-      isMatchOver: false,
-      taraIsEnabled: true,
-      moves: mockMoves,
-    });
-
-    view.toggleVisibility(false);
-
-    expect(container.getAttribute("tabindex")).toBe("-1");
-  });
-
-  test("toggleVisibility(true) restores element to tab order", () => {
-    const container = document.getElementById("game-controls")!;
-
-    view.render({
-      playerMove: null,
-      isMatchOver: false,
-      taraIsEnabled: true,
-      moves: mockMoves,
-    });
-
-    container.setAttribute("tabindex", "-1");
-    expect(container.hasAttribute("tabindex")).toBe(true);
-
-    view.toggleVisibility(true);
-    expect(container.hasAttribute("tabindex")).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import { IModel } from "../model/IModel";
 import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
 import { IControlsView } from "../views/controls/IControlsView";
+import { IGameView } from "../views/game/IGameView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IProgressView } from "../views/progress/IProgressView";
@@ -13,6 +14,7 @@ export class Controller {
   private model: IModel;
   private announcementView: IAnnouncementView;
   private controlsView: IControlsView;
+  private gameView: IGameView;
   private menuView: IMenuView;
   private moveRevealView: IMoveRevealView;
   private progressView: IProgressView;
@@ -24,6 +26,7 @@ export class Controller {
     views: {
       announcementView: IAnnouncementView;
       controlsView: IControlsView;
+      gameView: IGameView;
       menuView: IMenuView;
       moveRevealView: IMoveRevealView;
       progressView: IProgressView;
@@ -34,6 +37,7 @@ export class Controller {
     this.model = model;
     this.announcementView = views.announcementView;
     this.controlsView = views.controlsView;
+    this.gameView = views.gameView;
     this.menuView = views.menuView;
     this.moveRevealView = views.moveRevealView;
     this.progressView = views.progressView;
@@ -90,6 +94,7 @@ export class Controller {
   private async startGame(): Promise<void> {
     this.model.setDefaultMatchData();
 
+    this.gameView.toggleVisibility(true);
     this.updateProgressView({ isVisible: true });
     this.menuView.toggleMenuVisibility(false);
     this.statsView.toggleGameStatsVisibility(true);
@@ -102,7 +107,6 @@ export class Controller {
     await this.controlsView.flipAll(true);
 
     this.statusView.setMessage("Choose your attack!");
-    this.controlsView.focus();
   }
 
   private endRound(): void {
@@ -135,7 +139,6 @@ export class Controller {
       taraIsEnabled: this.model.taraIsEnabled(),
       moves: PLAYER_MOVES_DATA,
     });
-    this.controlsView.focus();
 
     this.updateScoreView();
     this.updateTaraView();
@@ -158,7 +161,6 @@ export class Controller {
     await this.controlsView.flipAll(true);
 
     this.statusView.setMessage("Choose your attack!");
-    this.controlsView.focus();
   }
 
   async resetGameState(): Promise<void> {
@@ -181,7 +183,6 @@ export class Controller {
     this.moveRevealView.toggleVisibility(false);
     this.controlsView.toggleVisibility(false);
     this.menuView.updateMenu({ isMatchActive });
-    this.menuView.focus();
     this.announcementView.setMessage("");
   }
 
@@ -236,7 +237,6 @@ export class Controller {
     this.statsView.toggleGameStatsVisibility(false);
     this.controlsView.toggleVisibility(false);
     this.menuView.toggleMenuVisibility(true);
-    this.menuView.focus();
 
     this.menuView.bindStartMatch(() => this.startGame());
     this.menuView.bindResetGame(() => this.resetGameState());

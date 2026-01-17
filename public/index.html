@@ -7,60 +7,54 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main id="game-container">
-      <section id="main-menu" class="menu-view" aria-hidden="false"></section>
+    <main>
+      <section id="main-menu"></section>
 
-      <section id="game-stats" class="hidden" aria-hidden="true">
-        <aside id="player-stats" class="stats">
-          <div class="score-row"><span id="player-score">00</span> WINS</div>
-          <div class="bar-wrapper">
-            <div class="bar" id="player-health"></div>
-            <span class="bar-text">PLAYER</span>
-          </div>
-          <p>Tara x<span id="player-tara">0</span></p>
-          <p>
-            <small>Common: <span id="player-most-common-move">–</span></small>
-          </p>
-        </aside>
+      <div id="game-container" class="hidden" inert>
+        <section id="game-stats">
+          <aside id="player-stats" class="stats">
+            <div class="score-row"><span id="player-score">00</span> WINS</div>
+            <div class="bar-wrapper">
+              <div class="bar" id="player-health"></div>
+              <span class="bar-text">PLAYER</span>
+            </div>
+            <p>Tara x<span id="player-tara">0</span></p>
+            <p>
+              <small>Common: <span id="player-most-common-move">–</span></small>
+            </p>
+          </aside>
 
-        <section id="game-progress-container">
-          <h1 id="match"></h1>
-          <h2 id="round"></h2>
+          <section id="game-progress-container">
+            <h2 id="match"></h2>
+            <h3 id="round"></h3>
+          </section>
+
+          <aside id="computer-stats" class="stats">
+            <div class="score-row">
+              WINS <span id="computer-score">00</span>
+            </div>
+            <div class="bar-wrapper">
+              <div class="bar" id="computer-health"></div>
+              <span class="bar-text">COMPUTER</span>
+            </div>
+            <p>Tara x<span id="computer-tara">0</span></p>
+            <p>
+              <small
+                >Common: <span id="computer-most-common-move">–</span></small
+              >
+            </p>
+          </aside>
         </section>
 
-        <aside id="computer-stats" class="stats">
-          <div class="score-row">WINS <span id="computer-score">00</span></div>
-          <div class="bar-wrapper">
-            <div class="bar" id="computer-health"></div>
-            <span class="bar-text">COMPUTER</span>
-          </div>
+        <div id="arena">
+          <div id="announcement-container" aria-live="polite"></div>
+          <div id="move-reveal"></div>
+        </div>
 
-          <p>Tara x<span id="computer-tara">0</span></p>
-          <p>
-            <small>Common: <span id="computer-most-common-move">–</span></small>
-          </p>
-        </aside>
-      </section>
+        <section id="status-container" aria-live="polite"></section>
 
-      <div id="arena" aria-hidden="false">
-        <div
-          id="announcement-container"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        ></div>
-
-        <div id="move-reveal" class="hidden" aria-hidden="true"></div>
+        <section id="game-controls" aria-label="Game Actions"></section>
       </div>
-
-      <section id="status-container" aria-hidden="false"></section>
-
-      <section
-        id="game-controls"
-        aria-label="Player Actions"
-        class="hidden"
-        aria-hidden="true"
-      ></section>
     </main>
 
     <script type="module" src="../src/index.ts"></script>
