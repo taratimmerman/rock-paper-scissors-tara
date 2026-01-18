@@ -21,23 +21,25 @@ export default class MoveRevealView
 
     if (!playerMove || !computerMove) return "";
 
-    const renderCard = (move: any) => `
-    <div class="card" data-id="${move.id}">
-      <div class="card-inner">
-        <div class="card-back"></div>
-        <div class="card-front">
-          <span class="icon">${move.icon}</span>
-          <span class="label">${move.text}</span>
+    const renderCard = (
+      move: any,
+      theme: "player-theme" | "computer-theme"
+    ) => `
+      <div class="card" data-id="${move.id}">
+        <div class="card-inner">
+          <div class="card-back ${theme}"></div> <div class="card-front">
+            <span class="icon">${move.icon}</span>
+            <span class="label">${move.text}</span>
+          </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
 
     return `
-    ${renderCard(playerMove)}
-    <span class="vs-label">VS</span>
-    ${renderCard(computerMove)}
-  `;
+      ${renderCard(playerMove, "player-theme")}
+      <span class="vs-label">VS</span>
+      ${renderCard(computerMove, "computer-theme")}
+    `;
   }
 
   public toggleVisibility(show: boolean): void {

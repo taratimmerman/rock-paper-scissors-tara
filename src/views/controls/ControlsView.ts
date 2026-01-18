@@ -60,7 +60,7 @@ export default class ControlsView
               disabled ? "disabled" : ""
             }>
               <div class="card-inner ${flipClass}">
-                <div class="card-back"></div>
+                <div class="card-back player-theme"></div>
                 <div class="card-front">
                   <span class="icon" aria-hidden="true">${move.icon}</span>
                   <span class="label">${move.text}</span>
