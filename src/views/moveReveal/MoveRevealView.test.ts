@@ -115,4 +115,78 @@ describe("MoveRevealView", () => {
       await expect(flipPromise).resolves.toBeUndefined();
     });
   });
+
+  describe("highlightWinner", () => {
+    it("should apply 'winner-highlight' class to the player card when player wins", () => {
+      view.render({
+        playerMoveId: "rock" as Move,
+        computerMoveId: "scissors" as Move,
+      });
+
+      // Act
+      view.highlightWinner("player");
+
+      const playerCard = container.querySelector(".card:first-child");
+      const computerCard = container.querySelector(".card:last-child");
+
+      expect(playerCard?.classList.contains("winner-highlight")).toBe(true);
+      expect(computerCard?.classList.contains("winner-highlight")).toBe(false);
+    });
+
+    it("should apply 'winner-highlight' class to the computer card when computer wins", () => {
+      view.render({
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+      });
+
+      // Act
+      view.highlightWinner("computer");
+
+      const computerCard = container.querySelector(".card:last-child");
+      expect(computerCard?.classList.contains("winner-highlight")).toBe(true);
+    });
+
+    it("should remove existing winner highlights if the next result is a draw", () => {
+      // 1. Setup: Player wins first
+      view.render({
+        playerMoveId: "rock" as Move,
+        computerMoveId: "scissors" as Move,
+      });
+      view.highlightWinner("player");
+      expect(container.querySelectorAll(".winner-highlight").length).toBe(1);
+
+      // 2. Act: A draw occurs (rendering new moves)
+      // Assuming your render() or a specific reset() method clears classes
+      view.render({
+        playerMoveId: "paper" as Move,
+        computerMoveId: "paper" as Move,
+      });
+
+      // 3. Assert: The glow is gone
+      const highlights = container.querySelectorAll(".winner-highlight");
+      expect(highlights.length).toBe(0);
+    });
+
+    describe("toggleVisibility - State Cleanup", () => {
+      it("should strip 'winner-highlight' from all cards when visibility is set to false", () => {
+        // 1. Setup: Render cards and apply a winner highlight
+        view.render({
+          playerMoveId: "rock" as Move,
+          computerMoveId: "scissors" as Move,
+        });
+        const playerCard = container.querySelector(
+          ".card:first-child"
+        ) as HTMLElement;
+        playerCard.classList.add("winner-highlight");
+
+        expect(playerCard.classList.contains("winner-highlight")).toBe(true);
+
+        // 2. Act: Hide the view (The "Reset")
+        view.toggleVisibility(false);
+
+        // 3. Assert: The highlight is gone
+        expect(playerCard.classList.contains("winner-highlight")).toBe(false);
+      });
+    });
+  });
 });

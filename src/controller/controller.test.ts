@@ -27,6 +27,12 @@ describe("Controller", () => {
     (window as any).requestAnimationFrame = (cb: any) => setTimeout(cb, 0);
 
     mockModel = {
+      doesMoveBeat: jest.fn().mockImplementation((a: string, b: string) => {
+        if (a === MOVES.ROCK && b === MOVES.SCISSORS) return true;
+        if (a === MOVES.SCISSORS && b === MOVES.PAPER) return true;
+        if (a === MOVES.PAPER && b === MOVES.ROCK) return true;
+        return false;
+      }),
       getPlayerScore: jest.fn().mockReturnValue(0),
       getComputerScore: jest.fn().mockReturnValue(0),
       getPlayerMove: jest.fn().mockReturnValue(null),
@@ -82,6 +88,7 @@ describe("Controller", () => {
     };
     mockMoveRevealView = {
       flipCards: jest.fn().mockResolvedValue(undefined),
+      highlightWinner: jest.fn().mockResolvedValue(undefined),
       render: jest.fn(),
       toggleVisibility: jest.fn(),
     };
@@ -249,6 +256,76 @@ describe("Controller", () => {
       expect(mockControlsView.toggleVisibility).toHaveBeenCalledWith(false);
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(false);
       expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith("");
+    });
+  });
+
+  // ===== WINNING CARD =====
+  describe("handlePlayerMove - Winner Polish", () => {
+    test("calls highlightWinner with 'player' when player wins the round", async () => {
+      // Setup: Rock beats Scissors
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.SCISSORS);
+      mockModel.doesMoveBeat.mockReturnValue(true);
+
+      await controller.handlePlayerMove(MOVES.ROCK);
+
+      // Assert: The controller told the view to highlight the player
+      expect(mockMoveRevealView.highlightWinner).toHaveBeenCalledWith("player");
+      expect(mockMoveRevealView.highlightWinner).not.toHaveBeenCalledWith(
+        "computer"
+      );
+    });
+
+    test("calls highlightWinner with 'computer' when computer wins the round", async () => {
+      // Setup: Rock loses to Paper
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.PAPER);
+      mockModel.doesMoveBeat.mockReturnValue(false);
+
+      await controller.handlePlayerMove(MOVES.ROCK);
+
+      // Assert: The controller told the view to highlight the computer
+      expect(mockMoveRevealView.highlightWinner).toHaveBeenCalledWith(
+        "computer"
+      );
+    });
+
+    test("does not call highlightWinner and proceeds on a draw", async () => {
+      // Setup: Mirror match (Rock vs Rock)
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.ROCK);
+
+      await controller.handlePlayerMove(MOVES.ROCK);
+
+      // Assert: No winner highlight should occur on a draw
+      expect(mockMoveRevealView.highlightWinner).not.toHaveBeenCalled();
+      // Ensure the round still ends properly
+      expect(mockModel.evaluateRound).toHaveBeenCalled();
+    });
+
+    test("strictly follows reveal sequence: Flip -> Highlight -> End Round", async () => {
+      const executionOrder: string[] = [];
+
+      // Track the order of calls
+      mockMoveRevealView.flipCards.mockImplementation(() => {
+        executionOrder.push("flip");
+        return Promise.resolve();
+      });
+      mockMoveRevealView.highlightWinner.mockImplementation(() => {
+        executionOrder.push("highlight");
+        return Promise.resolve();
+      });
+      mockModel.evaluateRound.mockImplementation(() => {
+        executionOrder.push("evaluate");
+        return "win";
+      });
+
+      mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
+      mockModel.getComputerMove.mockReturnValue(MOVES.SCISSORS);
+
+      await controller.handlePlayerMove(MOVES.ROCK);
+
+      expect(executionOrder).toEqual(["flip", "highlight", "evaluate"]);
     });
   });
 });

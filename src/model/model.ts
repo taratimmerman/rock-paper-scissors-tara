@@ -80,7 +80,7 @@ export class Model {
 
   // ===== General Methods =====
 
-  private doesMoveBeat(a: Move, b: Move): boolean {
+  doesMoveBeat(a: Move, b: Move): boolean {
     return MOVE_DATA_MAP.get(a)?.beats.includes(b) ?? false;
   }
 

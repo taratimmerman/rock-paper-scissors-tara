@@ -1,6 +1,7 @@
 import View from "../View";
 import { IMoveRevealView, MoveRevealData } from "./IMoveRevealView";
-import { PLAYER_MOVES_DATA } from "../../utils/dataUtils";
+import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
+import { Participant } from "../../utils/dataObjectUtils";
 
 export default class MoveRevealView
   extends View<MoveRevealData>
@@ -43,6 +44,11 @@ export default class MoveRevealView
   }
 
   public toggleVisibility(show: boolean): void {
+    if (!show) {
+      this._parentElement.querySelectorAll(".card").forEach((el) => {
+        el.classList.remove("winner-highlight");
+      });
+    }
     this._toggleVisibility(this._parentElement, show);
   }
 
@@ -56,5 +62,18 @@ export default class MoveRevealView
     cards.forEach((card) => card.classList.add("is-flipped"));
 
     await this._waitForAnimation(cards[0] as HTMLElement);
+  }
+
+  public async highlightWinner(participant: Participant): Promise<void> {
+    const selector =
+      participant === PARTICIPANTS.PLAYER ? ".player-theme" : ".computer-theme";
+    const winningCard = this._parentElement
+      .querySelector(selector)
+      ?.closest(".card") as HTMLElement;
+
+    if (winningCard) {
+      winningCard.classList.add("winner-highlight");
+      await this._waitForAnimation(winningCard);
+    }
   }
 }
