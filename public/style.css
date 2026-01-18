@@ -20,6 +20,16 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  /* Card Colors */
+  --color-player-card: #2e5a88;
+  --color-computer-card: #a64452;
+  --card-gradient-overlay: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
 }
 
 /* =============================================================================
@@ -244,17 +254,39 @@ main {
 }
 
 .card-back {
-  background-color: #eee;
-  background-image: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 5px,
-    rgba(0, 0, 0, 0.03) 5px,
-    rgba(0, 0, 0, 0.03) 10px
-  );
-  color: #bbb;
-  font-weight: 800;
   z-index: 2;
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1),
+    inset 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+/* Player Theme */
+.card-back.player-theme {
+  background-color: var(--color-player-card);
+  background-image: var(--card-gradient-overlay),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+
+/* Computer Theme */
+.card-back.computer-theme {
+  background-color: var(--color-computer-card);
+  background-image: var(--card-gradient-overlay),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    );
 }
 
 .card-front {
@@ -277,9 +309,20 @@ main {
 }
 
 .card-button:disabled {
-  opacity: 0.4;
+  opacity: 1;
+  filter: none;
   cursor: not-allowed;
-  filter: grayscale(1);
+}
+
+.card-button:disabled .card-front {
+  filter: grayscale(0.9) contrast(0.9);
+  opacity: 0.7;
+  background-color: #eee;
+}
+
+.card-button:disabled .icon,
+.card-button:disabled .label {
+  opacity: 0.5;
 }
 
 .icon {
