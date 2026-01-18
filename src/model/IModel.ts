@@ -8,6 +8,7 @@ export interface IModel {
   setComputerScore(score: number): void;
 
   // Moves
+  doesMoveBeat(a: Move, b: Move): boolean;
   getPlayerMove(): Move;
   getComputerMove(): Move;
   registerPlayerMove(move: Move): void;

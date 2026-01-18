@@ -1,4 +1,5 @@
 import { Move } from "../../utils/dataUtils";
+import { Participant } from "../../utils/dataObjectUtils";
 
 export interface MoveRevealData {
   playerMoveId: Move;
@@ -7,6 +8,7 @@ export interface MoveRevealData {
 
 export interface IMoveRevealView {
   flipCards(): Promise<void>;
+  highlightWinner(participant: Participant): Promise<void>;
   render(data: MoveRevealData): void;
   toggleVisibility(show: boolean): void;
 }

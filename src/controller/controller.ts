@@ -193,13 +193,6 @@ export class Controller {
     this.statusView.setMessage("Locking in move...");
     await this.controlsView.flipAll(false);
 
-    this.controlsView.render({
-      playerMove: move,
-      isMatchOver: this.model.isMatchOver(),
-      moves: [],
-      taraIsEnabled: false,
-    });
-
     this.moveRevealView.render({
       playerMoveId: this.model.getPlayerMove(),
       computerMoveId: this.model.getComputerMove(),
@@ -208,8 +201,25 @@ export class Controller {
     this.statusView.setMessage("Revealing moves...");
     this.moveRevealView.toggleVisibility(true);
 
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    // 1. Wait for the initial flip
     await this.moveRevealView.flipCards();
+
+    // 2. Determine if we need to highlight
+    const pMove = this.model.getPlayerMove();
+    const cMove = this.model.getComputerMove();
+
+    // Note: Ensure doesMoveBeat is public in your Model!
+    if (pMove && cMove && pMove !== cMove) {
+      const playerWins = this.model.doesMoveBeat(pMove, cMove);
+      // 3. This now returns a Promise that waits for the CSS transition
+      await this.moveRevealView.highlightWinner(
+        playerWins ? "player" : "computer"
+      );
+    } else {
+      // 4. If it's a tie, add a tiny organic pause so it doesn't feel "instant"
+      // This is optional, but helps UX when there is no animation to wait for.
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
 
     this.endRound();
   }

@@ -360,6 +360,60 @@ main {
   }
 }
 
+.winner-highlight {
+  transform: scale(1.1) rotate(-1deg);
+  /* Replace the "blinding" glow with a deep, layered gold shadow */
+  box-shadow: 0 0 0 3px #b8860b,
+    /* Darker Gold/Bronze rim */ 0 0 20px rgba(184, 134, 11, 0.6),
+    /* Muted outer glow */ inset 0 0 20px rgba(255, 215, 0, 0.3); /* Soft inner warmth */
+
+  border-radius: 12px;
+  border: none !important;
+  z-index: 100;
+
+  /* Focus on opacity and shadow rather than brightness */
+  animation: pulse-prestige 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  position: relative;
+  overflow: hidden; /* Clips the inner sheen */
+}
+
+@keyframes pulse-prestige {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px #b8860b, 0 0 15px rgba(184, 134, 11, 0.4);
+  }
+  50% {
+    /* Instead of brightness, we expand the shadow "aura" slightly */
+    box-shadow: 0 0 0 4px #ffd700, 0 0 30px rgba(212, 175, 55, 0.8);
+  }
+}
+
+/* The "Casino Sheen" effect */
+.winner-highlight::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 55%
+  );
+  animation: sweep 3s infinite;
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
 /* =============================================================================
    4. UTILITIES
    ============================================================================= */
