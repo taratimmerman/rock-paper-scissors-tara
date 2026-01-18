@@ -196,7 +196,7 @@ describe("Controller", () => {
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
       expect(mockMoveRevealView.flipCards).toHaveBeenCalled();
       expect(mockStatusView.setMessage).toHaveBeenCalledWith(
-        expect.stringContaining("rock")
+        expect.stringContaining("Rock")
       );
     });
   });

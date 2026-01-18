@@ -129,6 +129,14 @@ export const PLAYER_MOVES_DATA = DB_VALUES.map((entry) => ({
   icon: entry.icon,
 }));
 
+/**
+ * MOVE_DISPLAY_NAMES: A simple lookup for UI labels.
+ * Result: { rock: "Rock", paper: "Paper", scissors: "Scissors", tara: "Tara" }
+ */
+export const MOVE_DISPLAY_NAMES: Record<Move, string> = Object.fromEntries(
+  DB_VALUES.map((entry) => [entry.id, entry.text])
+) as Record<Move, string>;
+
 // -----------------------------------------------------------------------------
 // SECTION 4: BASIC GAME CONSTANTS
 // -----------------------------------------------------------------------------

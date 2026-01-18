@@ -8,7 +8,11 @@ import { IProgressView } from "../views/progress/IProgressView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { Move } from "../utils/dataObjectUtils";
-import { PARTICIPANTS, PLAYER_MOVES_DATA } from "../utils/dataUtils";
+import {
+  MOVE_DISPLAY_NAMES,
+  PARTICIPANTS,
+  PLAYER_MOVES_DATA,
+} from "../utils/dataUtils";
 
 export class Controller {
   private model: IModel;
@@ -128,7 +132,7 @@ export class Controller {
     }
 
     this.statusView.setMessage(
-      `You played ${playerMove}. Computer played ${computerMove}.`
+      `You played ${MOVE_DISPLAY_NAMES[playerMove]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`
     );
 
     this.announcementView.setMessage(resultMessage);
