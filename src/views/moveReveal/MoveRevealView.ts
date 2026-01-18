@@ -24,7 +24,7 @@ export default class MoveRevealView
     const renderCard = (move: any) => `
     <div class="card" data-id="${move.id}">
       <div class="card-inner">
-        <div class="card-back">BACK</div>
+        <div class="card-back"></div>
         <div class="card-front">
           <span class="icon">${move.icon}</span>
           <span class="label">${move.text}</span>

@@ -252,9 +252,8 @@ main {
     rgba(0, 0, 0, 0.03) 5px,
     rgba(0, 0, 0, 0.03) 10px
   );
-  color: #bbb;
-  font-weight: 800;
   z-index: 2;
+  border: 1px solid var(--color-border);
 }
 
 .card-front {
