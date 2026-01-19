@@ -8,39 +8,56 @@ export default class MoveRevealView
   implements IMoveRevealView
 {
   protected _parentElement = document.getElementById(
-    "move-reveal"
+    "move-reveal",
   ) as HTMLElement;
 
   protected _generateMarkup(): string {
     const { playerMoveId, computerMoveId } = this._data;
-    const playerMove = PLAYER_MOVES_DATA.find(
-      (move) => move.id === playerMoveId
-    );
-    const computerMove = PLAYER_MOVES_DATA.find(
-      (move) => move.id === computerMoveId
-    );
+    const pMove = PLAYER_MOVES_DATA.find((m) => m.id === playerMoveId);
+    const cMove = PLAYER_MOVES_DATA.find((m) => m.id === computerMoveId);
 
-    if (!playerMove || !computerMove) return "";
+    if (!pMove || !cMove) return "";
 
-    const renderCard = (
-      move: any,
-      theme: "player-theme" | "computer-theme"
-    ) => `
-      <div class="card" data-id="${move.id}">
+    return `
+      <div class="card entering-player" id="reveal-player">
         <div class="card-inner">
-          <div class="card-back ${theme}"></div> <div class="card-front">
-            <span class="icon">${move.icon}</span>
-            <span class="label">${move.text}</span>
+          <div class="card-back player-theme"></div>
+          <div class="card-front">
+            <span class="icon">${pMove.icon}</span>
+            <span class="label">${pMove.text}</span>
+          </div>
+        </div>
+      </div>
+      <span class="vs-label">VS</span>
+      <div class="card entering-computer" id="reveal-computer">
+        <div class="card-inner">
+          <div class="card-back computer-theme"></div>
+          <div class="card-front">
+            <span class="icon">${cMove.icon}</span>
+            <span class="label">${cMove.text}</span>
           </div>
         </div>
       </div>
     `;
+  }
 
-    return `
-      ${renderCard(playerMove, "player-theme")}
-      <span class="vs-label">VS</span>
-      ${renderCard(computerMove, "computer-theme")}
-    `;
+  public async animateEntrance(): Promise<void> {
+    const pCard = this._getElement("reveal-player");
+    const cCard = this._getElement("reveal-computer");
+
+    pCard.classList.remove("slide-in");
+    cCard.classList.remove("slide-in");
+
+    // 2. Double-frame wait to ensure the browser has painted
+    // the 'off-screen' position before triggering the slide
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve)),
+    );
+
+    pCard.classList.add("slide-in");
+    cCard.classList.add("slide-in");
+
+    await this._waitForAnimation(pCard);
   }
 
   public toggleVisibility(show: boolean): void {
@@ -56,11 +73,13 @@ export default class MoveRevealView
     const cards = this._parentElement.querySelectorAll(".card-inner");
     if (cards.length === 0) return;
 
-    // Force Reflow
-    const _forceReflow = (cards[0] as HTMLElement).offsetHeight;
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
-    cards.forEach((card) => card.classList.add("is-flipped"));
+    cards.forEach((card) => {
+      (card as HTMLElement).classList.add("is-flipped");
+    });
 
+    // Wait for the rotation animation to finish
     await this._waitForAnimation(cards[0] as HTMLElement);
   }
 

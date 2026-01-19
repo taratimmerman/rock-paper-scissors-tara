@@ -36,7 +36,7 @@ export class Controller {
       progressView: IProgressView;
       statsView: IStatsView;
       statusView: IStatusView;
-    }
+    },
   ) {
     this.model = model;
     this.announcementView = views.announcementView;
@@ -69,21 +69,21 @@ export class Controller {
   private updateScoreView(): void {
     this.statsView.updateScores(
       this.model.getPlayerScore(),
-      this.model.getComputerScore()
+      this.model.getComputerScore(),
     );
   }
 
   private updateTaraView(): void {
     this.statsView.updateTaraCounts(
       this.model.getPlayerTaraCount(),
-      this.model.getComputerTaraCount()
+      this.model.getComputerTaraCount(),
     );
   }
 
   private updateMostCommonMoveView(): void {
     this.statsView.updateMostCommonMoves(
       this.model.getPlayerMostCommonMove(),
-      this.model.getComputerMostCommonMove()
+      this.model.getComputerMostCommonMove(),
     );
   }
 
@@ -132,7 +132,7 @@ export class Controller {
     }
 
     this.statusView.setMessage(
-      `You played ${MOVE_DISPLAY_NAMES[playerMove]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`
+      `You played ${MOVE_DISPLAY_NAMES[playerMove]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`,
     );
 
     this.announcementView.setMessage(resultMessage);
@@ -194,35 +194,36 @@ export class Controller {
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
 
+    // 1. Lockdown
     this.statusView.setMessage("Locking in move...");
     await this.controlsView.flipAll(false);
 
+    // 2. Prepare the Stage
     this.moveRevealView.render({
       playerMoveId: this.model.getPlayerMove(),
       computerMoveId: this.model.getComputerMove(),
     });
 
-    this.statusView.setMessage("Revealing moves...");
+    // 3. Entrance: Slide them in!
     this.moveRevealView.toggleVisibility(true);
+    await this.moveRevealView.animateEntrance();
 
-    // 1. Wait for the initial flip
+    // 4. The Reveal
+    this.statusView.setMessage("REVEAL!");
     await this.moveRevealView.flipCards();
 
-    // 2. Determine if we need to highlight
+    // 5. The Verdict
     const pMove = this.model.getPlayerMove();
     const cMove = this.model.getComputerMove();
 
-    // Note: Ensure doesMoveBeat is public in your Model!
     if (pMove && cMove && pMove !== cMove) {
       const playerWins = this.model.doesMoveBeat(pMove, cMove);
-      // 3. This now returns a Promise that waits for the CSS transition
       await this.moveRevealView.highlightWinner(
-        playerWins ? "player" : "computer"
+        playerWins ? "player" : "computer",
       );
     } else {
-      // 4. If it's a tie, add a tiny organic pause so it doesn't feel "instant"
-      // This is optional, but helps UX when there is no animation to wait for.
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      // TIE: Maybe add a small shake here later?
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     this.endRound();

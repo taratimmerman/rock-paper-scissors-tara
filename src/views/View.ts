@@ -32,7 +32,7 @@ export default abstract class View<T = any> {
     const newDOM = document.createRange().createContextualFragment(newMarkup);
     const newElements = Array.from(newDOM.querySelectorAll("*"));
     const currentElements = Array.from(
-      this._parentElement.querySelectorAll("*")
+      this._parentElement.querySelectorAll("*"),
     );
 
     newElements.forEach((newElement, i) => {
@@ -51,7 +51,7 @@ export default abstract class View<T = any> {
       if (!newElement.isEqualNode(currentElement)) {
         // Add or update attributes from new to current
         Array.from(newElement.attributes).forEach((attr) =>
-          currentElement.setAttribute(attr.name, attr.value)
+          currentElement.setAttribute(attr.name, attr.value),
         );
 
         // Remove attributes from current that aren't in new
@@ -94,23 +94,30 @@ export default abstract class View<T = any> {
 
   protected _waitForAnimation(element: HTMLElement): Promise<void> {
     return new Promise((resolve) => {
-      const duration = parseFloat(getComputedStyle(element).transitionDuration);
+      const style = getComputedStyle(element);
+      const duration =
+        parseFloat(style.transitionDuration) ||
+        parseFloat(style.animationDuration);
 
-      // If no duration (tests) or already hidden, resolve immediately
       if (!duration || duration === 0) {
         resolve();
         return;
       }
 
-      const handler = (e: TransitionEvent) => {
-        // Only resolve for the main transform/opacity, not every sub-property
+      // Safety fallback: if the event doesn't fire, resolve anyway after duration + 50ms
+      const timer = setTimeout(resolve, duration * 1000 + 50);
+
+      const handler = (e: TransitionEvent | AnimationEvent) => {
         if (e.target === element) {
           element.removeEventListener("transitionend", handler);
+          element.removeEventListener("animationend", handler);
+          clearTimeout(timer);
           resolve();
         }
       };
 
       element.addEventListener("transitionend", handler);
+      element.addEventListener("animationend", handler);
     });
   }
 }
