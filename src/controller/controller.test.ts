@@ -51,7 +51,7 @@ describe("Controller", () => {
       resetMostCommonMoves: jest.fn(),
       isMatchActive: jest.fn().mockReturnValue(false),
       isMatchOver: jest.fn().mockReturnValue(false),
-      handleMatchWin: jest.fn(),
+      handleMatchWin: jest.fn().mockReturnValue(PARTICIPANTS.PLAYER),
       incrementMatchNumber: jest.fn(),
       increaseRoundNumber: jest.fn(),
       getRoundNumber: jest.fn().mockReturnValue(1),
@@ -87,6 +87,7 @@ describe("Controller", () => {
       updateMenu: jest.fn(),
     };
     mockMoveRevealView = {
+      animateEntrance: jest.fn().mockResolvedValue(undefined),
       flipCards: jest.fn().mockResolvedValue(undefined),
       highlightWinner: jest.fn().mockResolvedValue(undefined),
       render: jest.fn(),
@@ -141,7 +142,7 @@ describe("Controller", () => {
 
       // This will now pass because we waited for the flipAll to resolve
       expect(mockStatusView.setMessage).toHaveBeenCalledWith(
-        "Choose your attack!"
+        "Choose your attack!",
       );
     });
 
@@ -159,7 +160,7 @@ describe("Controller", () => {
       // 3. Verify 'Phase 1' state (Before flip completes)
       expect(mockStatusView.setMessage).toHaveBeenCalledWith("Get ready...");
       expect(mockStatusView.setMessage).not.toHaveBeenCalledWith(
-        "Choose your attack!"
+        "Choose your attack!",
       );
 
       // 4. Resolve the flip
@@ -168,7 +169,7 @@ describe("Controller", () => {
 
       // 5. Verify 'Phase 2' state (After flip completes)
       expect(mockStatusView.setMessage).toHaveBeenCalledWith(
-        "Choose your attack!"
+        "Choose your attack!",
       );
     });
   });
@@ -196,7 +197,7 @@ describe("Controller", () => {
       expect(mockMoveRevealView.toggleVisibility).toHaveBeenCalledWith(true);
       expect(mockMoveRevealView.flipCards).toHaveBeenCalled();
       expect(mockStatusView.setMessage).toHaveBeenCalledWith(
-        expect.stringContaining("Rock")
+        expect.stringContaining("Rock"),
       );
     });
   });
@@ -212,7 +213,7 @@ describe("Controller", () => {
 
       expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith("YOU WIN!");
       expect(mockControlsView.render).toHaveBeenCalledWith(
-        expect.objectContaining({ isMatchOver: false })
+        expect.objectContaining({ isMatchOver: false }),
       );
     });
 
@@ -223,11 +224,11 @@ describe("Controller", () => {
       (controller as any).endRound();
 
       expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
-        "PLAYER WON THE MATCH!"
+        "PLAYER WON THE MATCH!",
       );
       // CRITICAL EDGE CASE: Verify the View receives isMatchOver: true
       expect(mockControlsView.render).toHaveBeenCalledWith(
-        expect.objectContaining({ isMatchOver: true })
+        expect.objectContaining({ isMatchOver: true }),
       );
     });
   });
@@ -272,7 +273,7 @@ describe("Controller", () => {
       // Assert: The controller told the view to highlight the player
       expect(mockMoveRevealView.highlightWinner).toHaveBeenCalledWith("player");
       expect(mockMoveRevealView.highlightWinner).not.toHaveBeenCalledWith(
-        "computer"
+        "computer",
       );
     });
 
@@ -286,7 +287,7 @@ describe("Controller", () => {
 
       // Assert: The controller told the view to highlight the computer
       expect(mockMoveRevealView.highlightWinner).toHaveBeenCalledWith(
-        "computer"
+        "computer",
       );
     });
 

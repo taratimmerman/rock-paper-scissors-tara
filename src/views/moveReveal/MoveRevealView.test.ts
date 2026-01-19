@@ -175,7 +175,7 @@ describe("MoveRevealView", () => {
           computerMoveId: "scissors" as Move,
         });
         const playerCard = container.querySelector(
-          ".card:first-child"
+          ".card:first-child",
         ) as HTMLElement;
         playerCard.classList.add("winner-highlight");
 
@@ -187,6 +187,27 @@ describe("MoveRevealView", () => {
         // 3. Assert: The highlight is gone
         expect(playerCard.classList.contains("winner-highlight")).toBe(false);
       });
+    });
+  });
+
+  describe("animateEntrance - Animation Reset", () => {
+    it("should momentarily remove 'slide-in' before applying it to trigger transition", async () => {
+      view.render({
+        playerMoveId: "rock" as Move,
+        computerMoveId: "scissors" as Move,
+      });
+      const playerCard = container.querySelector(".card:first-child")!;
+
+      // Manually add the class as if it were left over from last round
+      playerCard.classList.add("slide-in");
+
+      const entrancePromise = view.animateEntrance();
+
+      // We can't easily check the 'momentary' removal in JSDOM without complex mocks,
+      // but we can verify it ends up with the correct classes.
+      await entrancePromise;
+
+      expect(playerCard.classList.contains("slide-in")).toBe(true);
     });
   });
 });

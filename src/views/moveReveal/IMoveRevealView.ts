@@ -7,6 +7,7 @@ export interface MoveRevealData {
 }
 
 export interface IMoveRevealView {
+  animateEntrance(): Promise<void>;
   flipCards(): Promise<void>;
   highlightWinner(participant: Participant): Promise<void>;
   render(data: MoveRevealData): void;
