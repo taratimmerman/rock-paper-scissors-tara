@@ -64,16 +64,9 @@ export default class MoveRevealView
     if (!show) {
       this._parentElement.querySelectorAll(".card").forEach((el) => {
         const card = el as HTMLElement;
-        card.classList.remove(
-          "winner-highlight",
-          "stance-rock",
-          "stance-paper",
-          "stance-scissors",
-          "stance-tara",
-        );
-        card.style.opacity = "1";
-        card.style.filter = "none";
-        card.style.transform = ""; // Resets !important overrides
+        // Simply removing classes now handles the reset because we removed !important
+        card.className = "card";
+        card.style.cssText = ""; // Final safety wipe
       });
     }
     this._toggleVisibility(this._parentElement, show);
@@ -106,8 +99,6 @@ export default class MoveRevealView
     }
   }
 
-  // Inside MoveRevealView.ts
-
   public async playFightAnimations(
     playerMove: Move,
     computerMove: Move,
@@ -115,23 +106,22 @@ export default class MoveRevealView
     const pCard = this._getElement("reveal-player");
     const cCard = this._getElement("reveal-computer");
 
-    // 1. Assign the stance classes
     pCard.classList.add(`stance-${playerMove}`);
     cCard.classList.add(`stance-${computerMove}`);
 
-    // 2. Add impact flavor: If anyone played 'rock', shake the whole arena
     if (playerMove === "rock" || computerMove === "rock") {
       this._parentElement.classList.add("arena-shake");
-      // Remove shake class after it finishes so it can be re-triggered
-      setTimeout(
-        () => this._parentElement.classList.remove("arena-shake"),
-        200,
-      );
+      // Wait for the shake to finish naturally
+      await this._waitForAnimation(this._parentElement);
+      this._parentElement.classList.remove("arena-shake");
     }
 
-    // 3. Wait for the "Impact" moment.
-    // We use a fixed duration or wait for the longest animation.
-    // Since 'tara' and 'paper' are infinite, we wait a fixed 'beat' for the drama.
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    // Wait for the cards to reach their "Stance" positions
+    // For infinite animations (paper/tara), _waitForAnimation will resolve
+    // after the first cycle or the safety timeout.
+    await Promise.all([
+      this._waitForAnimation(pCard),
+      this._waitForAnimation(cCard),
+    ]);
   }
 }

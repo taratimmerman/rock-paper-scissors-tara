@@ -223,12 +223,10 @@ export class Controller {
     // 5. The Verdict
     if (pMove && cMove && pMove !== cMove) {
       const playerWins = this.model.doesMoveBeat(pMove, cMove);
+      await new Promise((r) => setTimeout(r, 200));
       await this.moveRevealView.highlightWinner(
         playerWins ? "player" : "computer",
       );
-    } else {
-      // TIE: Maybe add a small shake here later?
-      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     this.endRound();
