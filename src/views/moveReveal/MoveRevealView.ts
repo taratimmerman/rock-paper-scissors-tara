@@ -1,7 +1,7 @@
 import View from "../View";
 import { IMoveRevealView, MoveRevealData } from "./IMoveRevealView";
 import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
-import { Participant } from "../../utils/dataObjectUtils";
+import { Move, Participant } from "../../utils/dataObjectUtils";
 
 export default class MoveRevealView
   extends View<MoveRevealData>
@@ -63,7 +63,17 @@ export default class MoveRevealView
   public toggleVisibility(show: boolean): void {
     if (!show) {
       this._parentElement.querySelectorAll(".card").forEach((el) => {
-        el.classList.remove("winner-highlight");
+        const card = el as HTMLElement;
+        card.classList.remove(
+          "winner-highlight",
+          "stance-rock",
+          "stance-paper",
+          "stance-scissors",
+          "stance-tara",
+        );
+        card.style.opacity = "1";
+        card.style.filter = "none";
+        card.style.transform = ""; // Resets !important overrides
       });
     }
     this._toggleVisibility(this._parentElement, show);
@@ -94,5 +104,34 @@ export default class MoveRevealView
       winningCard.classList.add("winner-highlight");
       await this._waitForAnimation(winningCard);
     }
+  }
+
+  // Inside MoveRevealView.ts
+
+  public async playFightAnimations(
+    playerMove: Move,
+    computerMove: Move,
+  ): Promise<void> {
+    const pCard = this._getElement("reveal-player");
+    const cCard = this._getElement("reveal-computer");
+
+    // 1. Assign the stance classes
+    pCard.classList.add(`stance-${playerMove}`);
+    cCard.classList.add(`stance-${computerMove}`);
+
+    // 2. Add impact flavor: If anyone played 'rock', shake the whole arena
+    if (playerMove === "rock" || computerMove === "rock") {
+      this._parentElement.classList.add("arena-shake");
+      // Remove shake class after it finishes so it can be re-triggered
+      setTimeout(
+        () => this._parentElement.classList.remove("arena-shake"),
+        200,
+      );
+    }
+
+    // 3. Wait for the "Impact" moment.
+    // We use a fixed duration or wait for the longest animation.
+    // Since 'tara' and 'paper' are infinite, we wait a fixed 'beat' for the drama.
+    await new Promise((resolve) => setTimeout(resolve, 800));
   }
 }

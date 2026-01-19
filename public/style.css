@@ -360,8 +360,7 @@ main {
 }
 
 .winner-highlight {
-  transform: scale(1.1) rotate(-1deg);
-  /* Replace the "blinding" glow with a deep, layered gold shadow */
+  transform: scale(1.15) rotate(-2deg) !important;
   box-shadow:
     0 0 0 3px #b8860b,
     /* Darker Gold/Bronze rim */ 0 0 20px rgba(184, 134, 11, 0.6),
@@ -371,8 +370,10 @@ main {
   border: none !important;
   z-index: 100;
 
+  transition: none !important;
+
   /* Focus on opacity and shadow rather than brightness */
-  animation: pulse-prestige 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-prestige 2s ease-in-out infinite !important;
   position: relative;
   overflow: hidden; /* Clips the inner sheen */
 }
@@ -380,15 +381,17 @@ main {
 @keyframes pulse-prestige {
   0%,
   100% {
+    /* State 1: Darker, tighter Bronze glow */
     box-shadow:
       0 0 0 3px #b8860b,
-      0 0 15px rgba(184, 134, 11, 0.4);
+      0 0 15px rgba(184, 134, 11, 0.6);
   }
   50% {
-    /* Instead of brightness, we expand the shadow "aura" slightly */
+    /* State 2: Brighter, wider Gold glow */
     box-shadow:
-      0 0 0 4px #ffd700,
-      0 0 30px rgba(212, 175, 55, 0.8);
+      0 0 0 5px #ffd700,
+      0 0 30px rgba(255, 215, 0, 0.8),
+      inset 0 0 10px rgba(255, 255, 255, 0.5); /* Inner shine boost */
   }
 }
 
@@ -606,4 +609,84 @@ button:focus-visible {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+/* =============================================================================
+   8. MOVE ARCHETYPE ANIMATIONS (THE FIGHT STYLES)
+   ============================================================================= */
+
+/* ROCK: The Heavy Slam */
+.stance-rock {
+  animation: rock-slam 0.5s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+}
+@keyframes rock-slam {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-40px) rotate(-5deg);
+  } /* Wind up */
+  100% {
+    transform: translateY(0);
+  } /* Impact */
+}
+
+/* PAPER: The Enveloping Flow */
+.stance-paper {
+  animation: paper-float 1.2s ease-in-out infinite alternate;
+}
+@keyframes paper-float {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    transform: scale(1.1) translateY(-15px) rotate(2deg);
+  }
+}
+
+/* SCISSORS: The Sharp Strike */
+.stance-scissors {
+  animation: scissors-strike 0.3s ease-in-out 2; /* Quick double snip */
+}
+@keyframes scissors-strike {
+  0% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(15deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+/* TARA: The Boss Presence */
+.stance-tara {
+  animation: tara-ascend 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes tara-ascend {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Shake effect for the arena during Rock impacts */
+.arena-shake {
+  animation: shake 0.2s ease-in-out;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }

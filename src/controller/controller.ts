@@ -212,10 +212,15 @@ export class Controller {
     this.statusView.setMessage("REVEAL!");
     await this.moveRevealView.flipCards();
 
-    // 5. The Verdict
     const pMove = this.model.getPlayerMove();
     const cMove = this.model.getComputerMove();
 
+    if (pMove && cMove) {
+      this.statusView.setMessage("FIGHT!");
+      await this.moveRevealView.playFightAnimations(pMove, cMove);
+    }
+
+    // 5. The Verdict
     if (pMove && cMove && pMove !== cMove) {
       const playerWins = this.model.doesMoveBeat(pMove, cMove);
       await this.moveRevealView.highlightWinner(
