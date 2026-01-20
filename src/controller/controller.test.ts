@@ -90,6 +90,7 @@ describe("Controller", () => {
       animateEntrance: jest.fn().mockResolvedValue(undefined),
       flipCards: jest.fn().mockResolvedValue(undefined),
       highlightWinner: jest.fn().mockResolvedValue(undefined),
+      playFightAnimations: jest.fn().mockResolvedValue(undefined),
       render: jest.fn(),
       toggleVisibility: jest.fn(),
     };
