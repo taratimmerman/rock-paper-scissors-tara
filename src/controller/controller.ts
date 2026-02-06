@@ -194,42 +194,52 @@ export class Controller {
     this.model.registerPlayerMove(move);
     this.model.chooseComputerMove();
 
-    // 1. Lockdown
+    // 1. Preparation
     this.statusView.setMessage("Locking in move...");
     await this.controlsView.flipAll(false);
 
-    // 2. Prepare the Stage
     this.moveRevealView.render({
       playerMoveId: this.model.getPlayerMove(),
       computerMoveId: this.model.getComputerMove(),
     });
 
-    // 3. Entrance: Slide them in!
+    // 2. The Reveal
     this.moveRevealView.toggleVisibility(true);
     await this.moveRevealView.animateEntrance();
-
-    // 4. The Reveal
-    this.statusView.setMessage("REVEAL!");
     await this.moveRevealView.flipCards();
 
+    // 3. Combat & Drama Sequence
     const pMove = this.model.getPlayerMove();
     const cMove = this.model.getComputerMove();
 
     if (pMove && cMove) {
-      this.statusView.setMessage("FIGHT!");
       await this.moveRevealView.playFightAnimations(pMove, cMove);
-    }
 
-    // 5. The Verdict
-    if (pMove && cMove && pMove !== cMove) {
-      const playerWins = this.model.doesMoveBeat(pMove, cMove);
-      await new Promise((r) => setTimeout(r, 200));
-      await this.moveRevealView.highlightWinner(
-        playerWins ? "player" : "computer",
-      );
+      if (pMove !== cMove) {
+        const playerWins = this.model.doesMoveBeat(pMove, cMove);
+        await this.executeOutcomeDrama(playerWins);
+      }
     }
 
     this.endRound();
+  }
+
+  /**
+   * Handles the visual "aftermath" of the fight.
+   */
+  private async executeOutcomeDrama(playerWins: boolean): Promise<void> {
+    const winner = playerWins ? "player" : "computer";
+    const loser = playerWins ? "computer" : "player";
+
+    this.statusView.setMessage(`${winner.toUpperCase()} LANDS A BLOW!`);
+
+    // Sequence the impact and final states
+    await this.moveRevealView.triggerImpact(loser);
+
+    await Promise.all([
+      this.moveRevealView.highlightWinner(winner),
+      this.moveRevealView.applyDefeat(loser),
+    ]);
   }
 
   async initialize(): Promise<void> {
