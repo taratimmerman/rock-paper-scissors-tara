@@ -87,12 +87,14 @@ describe("Controller", () => {
       updateMenu: jest.fn(),
     };
     mockMoveRevealView = {
+      applyDefeat: jest.fn().mockResolvedValue(undefined),
       animateEntrance: jest.fn().mockResolvedValue(undefined),
       flipCards: jest.fn().mockResolvedValue(undefined),
       highlightWinner: jest.fn().mockResolvedValue(undefined),
       playFightAnimations: jest.fn().mockResolvedValue(undefined),
       render: jest.fn(),
       toggleVisibility: jest.fn(),
+      triggerImpact: jest.fn(),
     };
 
     mockProgressView = { render: jest.fn(), update: jest.fn() };

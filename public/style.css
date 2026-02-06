@@ -442,6 +442,36 @@ main {
   opacity: 1;
 }
 
+/* Defeated: Dimmed, Grayscale, Fallen, and Shrunken */
+.card-defeated {
+  /* Grayscale for the MK 'Fatality' feel, dimmed for the casino 'lights out' feel */
+  filter: grayscale(1) brightness(0.3) sepia(0.1) !important;
+  opacity: 0.6;
+
+  /* 1. translateY(40px): Drops it further 'onto the table'
+     2. rotate: Multiplying by -20deg tilts it AWAY from center
+     3. scale(0.85): Makes the card physically smaller
+  */
+  transform: translateY(40px) rotate(calc(var(--facing, 1) * -20deg))
+    scale(0.85) !important;
+
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  box-shadow: none !important;
+  pointer-events: none;
+  z-index: 0; /* Ensure it stays behind the winner and the VS label */
+}
+
+/* A "Cracked Glass" overlay effect for the loser */
+.card-defeated::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0 20 L30 40 L10 70 M50 0 L40 50 L80 100 M100 20 L70 30" stroke="rgba(255,255,255,0.2)" fill="none"/></svg>');
+  background-size: cover;
+  z-index: 10;
+  pointer-events: none;
+}
+
 /* =============================================================================
    4. UTILITIES
    ============================================================================= */
@@ -691,5 +721,32 @@ button:focus-visible {
   }
   75% {
     transform: translateX(5px);
+  }
+}
+
+/* Impact: A violent shake and a "crack" flash */
+.card-impact {
+  animation: impact-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  z-index: 50;
+}
+
+@keyframes impact-shake {
+  10%,
+  90% {
+    transform: translate3d(-2px, 0, 0) scale(0.95);
+  }
+  20%,
+  80% {
+    transform: translate3d(4px, 0, 0) scale(0.9);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-6px, 0, 0);
+    filter: brightness(1.5) contrast(1.2);
+  }
+  40%,
+  60% {
+    transform: translate3d(6px, 0, 0);
   }
 }

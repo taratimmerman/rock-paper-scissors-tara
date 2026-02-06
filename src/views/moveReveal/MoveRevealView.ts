@@ -18,8 +18,9 @@ export default class MoveRevealView
 
     if (!pMove || !cMove) return "";
 
+    // Player (left) faces right (1), Computer (right) faces left (-1).
     return `
-      <div class="card entering-player" id="reveal-player">
+      <div class="card entering-player" id="reveal-player" style="--facing: 1;">
         <div class="card-inner">
           <div class="card-back player-theme"></div>
           <div class="card-front">
@@ -29,7 +30,7 @@ export default class MoveRevealView
         </div>
       </div>
       <span class="vs-label">VS</span>
-      <div class="card entering-computer" id="reveal-computer">
+      <div class="card entering-computer" id="reveal-computer" style="--facing: -1;">
         <div class="card-inner">
           <div class="card-back computer-theme"></div>
           <div class="card-front">
@@ -64,9 +65,11 @@ export default class MoveRevealView
     if (!show) {
       this._parentElement.querySelectorAll(".card").forEach((el) => {
         const card = el as HTMLElement;
-        // Simply removing classes now handles the reset because we removed !important
         card.className = "card";
-        card.style.cssText = ""; // Final safety wipe
+        // Explicitly clearing the inline styles to ensure !important overrides are gone
+        card.style.filter = "";
+        card.style.opacity = "";
+        card.style.transform = "";
       });
     }
     this._toggleVisibility(this._parentElement, show);
@@ -106,26 +109,35 @@ export default class MoveRevealView
     const pCard = this._getElement("reveal-player");
     const cCard = this._getElement("reveal-computer");
 
+    // Add the stance classes
     pCard.classList.add(`stance-${playerMove}`);
     cCard.classList.add(`stance-${computerMove}`);
 
-    // Player faces normal (1), Computer mirrors (-1)
-    pCard.style.setProperty("--facing", "1");
-    cCard.style.setProperty("--facing", "-1");
-
     if (playerMove === "rock" || computerMove === "rock") {
       this._parentElement.classList.add("arena-shake");
-      // Wait for the shake to finish naturally
       await this._waitForAnimation(this._parentElement);
       this._parentElement.classList.remove("arena-shake");
     }
 
-    // Wait for the cards to reach their "Stance" positions
-    // For infinite animations (paper/tara), _waitForAnimation will resolve
-    // after the first cycle or the safety timeout.
     await Promise.all([
       this._waitForAnimation(pCard),
       this._waitForAnimation(cCard),
     ]);
+  }
+
+  public async triggerImpact(side: Participant): Promise<void> {
+    const card = this._getElement(`reveal-${side}`);
+    card.classList.add("card-impact");
+    this._parentElement.classList.add("arena-shake");
+
+    await this._waitForAnimation(card);
+
+    card.classList.remove("card-impact");
+    this._parentElement.classList.remove("arena-shake");
+  }
+
+  public async applyDefeat(side: Participant): Promise<void> {
+    const card = this._getElement(`reveal-${side}`);
+    card.classList.add("card-defeated");
   }
 }
