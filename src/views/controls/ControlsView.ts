@@ -6,7 +6,7 @@ export default class ControlsView
   extends View<ControlsViewData>
   implements IControlsView
 {
-  protected declare _parentElement: HTMLElement;
+  declare protected _parentElement: HTMLElement;
   private _moveHandler?: (move: Move) => void;
   private _nextRoundHandler?: () => void;
   // Track visual state to prevent markup-regressions during render

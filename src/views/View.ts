@@ -92,27 +92,47 @@ export default abstract class View<T = any> {
     }
   }
 
-  protected _waitForAnimation(element: HTMLElement): Promise<void> {
+  protected _waitForAnimation(
+    element: HTMLElement,
+    maxWaitMs: number = 5000,
+  ): Promise<void> {
     return new Promise((resolve) => {
       const style = getComputedStyle(element);
-      const duration =
-        parseFloat(style.transitionDuration) ||
-        parseFloat(style.animationDuration);
 
-      if (!duration || duration === 0) {
+      // Helper to parse "0.6s, 0.2s" into [0.6, 0.2]
+      const getMaxTime = (timeStr: string) =>
+        Math.max(...timeStr.split(",").map((t) => (parseFloat(t) || 0) * 1000));
+
+      const transitionDuration = getMaxTime(style.transitionDuration);
+      const animationDuration = getMaxTime(style.animationDuration);
+      const totalWait = Math.max(transitionDuration, animationDuration);
+
+      // If no animation is detected, resolve immediately
+      if (totalWait === 0) {
         resolve();
         return;
       }
 
-      // Safety fallback: if the event doesn't fire, resolve anyway after duration + 50ms
-      const timer = setTimeout(resolve, duration * 1000 + 50);
+      let resolved = false;
+      const timer = setTimeout(
+        () => {
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
+        },
+        Math.min(totalWait + 50, maxWaitMs),
+      ); // Safety cap
 
-      const handler = (e: TransitionEvent | AnimationEvent) => {
+      const handler = (e: Event) => {
         if (e.target === element) {
           element.removeEventListener("transitionend", handler);
           element.removeEventListener("animationend", handler);
-          clearTimeout(timer);
-          resolve();
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timer);
+            resolve();
+          }
         }
       };
 

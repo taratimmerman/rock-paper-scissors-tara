@@ -212,18 +212,21 @@ export class Controller {
     this.statusView.setMessage("REVEAL!");
     await this.moveRevealView.flipCards();
 
-    // 5. The Verdict
     const pMove = this.model.getPlayerMove();
     const cMove = this.model.getComputerMove();
 
+    if (pMove && cMove) {
+      this.statusView.setMessage("FIGHT!");
+      await this.moveRevealView.playFightAnimations(pMove, cMove);
+    }
+
+    // 5. The Verdict
     if (pMove && cMove && pMove !== cMove) {
       const playerWins = this.model.doesMoveBeat(pMove, cMove);
+      await new Promise((r) => setTimeout(r, 200));
       await this.moveRevealView.highlightWinner(
         playerWins ? "player" : "computer",
       );
-    } else {
-      // TIE: Maybe add a small shake here later?
-      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     this.endRound();

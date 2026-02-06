@@ -1,7 +1,7 @@
 import View from "../View";
 import { IMoveRevealView, MoveRevealData } from "./IMoveRevealView";
 import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
-import { Participant } from "../../utils/dataObjectUtils";
+import { Move, Participant } from "../../utils/dataObjectUtils";
 
 export default class MoveRevealView
   extends View<MoveRevealData>
@@ -63,7 +63,10 @@ export default class MoveRevealView
   public toggleVisibility(show: boolean): void {
     if (!show) {
       this._parentElement.querySelectorAll(".card").forEach((el) => {
-        el.classList.remove("winner-highlight");
+        const card = el as HTMLElement;
+        // Simply removing classes now handles the reset because we removed !important
+        card.className = "card";
+        card.style.cssText = ""; // Final safety wipe
       });
     }
     this._toggleVisibility(this._parentElement, show);
@@ -94,5 +97,35 @@ export default class MoveRevealView
       winningCard.classList.add("winner-highlight");
       await this._waitForAnimation(winningCard);
     }
+  }
+
+  public async playFightAnimations(
+    playerMove: Move,
+    computerMove: Move,
+  ): Promise<void> {
+    const pCard = this._getElement("reveal-player");
+    const cCard = this._getElement("reveal-computer");
+
+    pCard.classList.add(`stance-${playerMove}`);
+    cCard.classList.add(`stance-${computerMove}`);
+
+    // Player faces normal (1), Computer mirrors (-1)
+    pCard.style.setProperty("--facing", "1");
+    cCard.style.setProperty("--facing", "-1");
+
+    if (playerMove === "rock" || computerMove === "rock") {
+      this._parentElement.classList.add("arena-shake");
+      // Wait for the shake to finish naturally
+      await this._waitForAnimation(this._parentElement);
+      this._parentElement.classList.remove("arena-shake");
+    }
+
+    // Wait for the cards to reach their "Stance" positions
+    // For infinite animations (paper/tara), _waitForAnimation will resolve
+    // after the first cycle or the safety timeout.
+    await Promise.all([
+      this._waitForAnimation(pCard),
+      this._waitForAnimation(cCard),
+    ]);
   }
 }

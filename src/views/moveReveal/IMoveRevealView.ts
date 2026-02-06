@@ -10,6 +10,7 @@ export interface IMoveRevealView {
   animateEntrance(): Promise<void>;
   flipCards(): Promise<void>;
   highlightWinner(participant: Participant): Promise<void>;
+  playFightAnimations(playerMove: Move, computerMove: Move): Promise<void>;
   render(data: MoveRevealData): void;
   toggleVisibility(show: boolean): void;
 }
