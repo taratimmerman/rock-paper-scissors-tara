@@ -109,6 +109,10 @@ export default class MoveRevealView
     pCard.classList.add(`stance-${playerMove}`);
     cCard.classList.add(`stance-${computerMove}`);
 
+    // Player faces normal (1), Computer mirrors (-1)
+    pCard.style.setProperty("--facing", "1");
+    cCard.style.setProperty("--facing", "-1");
+
     if (playerMove === "rock" || computerMove === "rock") {
       this._parentElement.classList.add("arena-shake");
       // Wait for the shake to finish naturally

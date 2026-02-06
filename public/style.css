@@ -624,7 +624,9 @@ button:focus-visible {
     transform: translateY(0);
   }
   30% {
-    transform: translateY(-40px) rotate(-5deg);
+    /* Multiplies rotation by --facing (1 or -1).
+       Player (-5deg) leans left. Computer (5deg) leans right. */
+    transform: translateY(-40px) rotate(calc(-5deg * var(--facing, 1)));
   } /* Wind up */
   100% {
     transform: translateY(0);
@@ -640,7 +642,8 @@ button:focus-visible {
     transform: scale(1) translateY(0);
   }
   100% {
-    transform: scale(1.1) translateY(-15px) rotate(2deg);
+    transform: scale(1.1) translateY(-15px)
+      rotate(calc(2deg * var(--facing, 1)));
   }
 }
 
@@ -653,7 +656,7 @@ button:focus-visible {
     transform: rotate(0);
   }
   50% {
-    transform: rotate(15deg) scale(1.05);
+    transform: rotate(calc(15deg * var(--facing, 1))) scale(1.05);
   }
   100% {
     transform: rotate(0);
