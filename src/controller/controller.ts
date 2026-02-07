@@ -117,13 +117,20 @@ export class Controller {
     const playerMove = this.model.getPlayerMove();
     const computerMove = this.model.getComputerMove();
     const matchActuallyEnded = this.model.isMatchOver();
+    const isDoubleKO = this.model.isDoubleKO();
 
     this.updateHealthView();
 
     let resultMessage = roundResult.toUpperCase();
     if (matchActuallyEnded) {
-      const winner = this.model.handleMatchWin();
-      resultMessage = `${winner.toUpperCase()} WON THE MATCH!`;
+      const result = this.model.handleMatchWin();
+
+      if (isDoubleKO) {
+        resultMessage = "DOUBLE KO! NOBODY WINS!";
+      } else {
+        resultMessage = `${result.toUpperCase()} WON THE MATCH!`;
+      }
+
       this.model.incrementMatchNumber();
       this.model.setMatch(null);
     } else {
@@ -219,6 +226,10 @@ export class Controller {
       if (pMove !== cMove) {
         const playerWins = this.model.doesMoveBeat(pMove, cMove);
         await this.executeOutcomeDrama(playerWins);
+      } else {
+        this.updateHealthView();
+        await this.moveRevealView.triggerImpact("both");
+        await this.moveRevealView.triggerDefeat("both");
       }
     }
 
@@ -229,21 +240,36 @@ export class Controller {
    * Handles the visual "aftermath" of the fight.
    */
   private async executeOutcomeDrama(playerWins: boolean): Promise<void> {
+    const isDoubleKO = this.model.isDoubleKO();
+
+    if (isDoubleKO) {
+      await this.executeDoubleKODrama();
+      return;
+    }
+
     const winner = playerWins ? "player" : "computer";
     const loser = playerWins ? "computer" : "player";
 
     this.statusView.setMessage(`${winner.toUpperCase()} LANDS A BLOW!`);
-
     const impactPromise = this.moveRevealView.triggerImpact(loser);
-
     this.updateHealthView();
-
     await impactPromise;
 
     await Promise.all([
       this.moveRevealView.highlightWinner(winner),
-      this.moveRevealView.applyDefeat(loser),
+      this.moveRevealView.triggerDefeat(loser),
     ]);
+  }
+
+  private async executeDoubleKODrama(): Promise<void> {
+    this.statusView.setMessage("MUTUAL DESTRUCTION!");
+
+    const impactPromise = this.moveRevealView.triggerImpact("both");
+
+    this.updateHealthView();
+    await impactPromise;
+
+    await this.moveRevealView.triggerDefeat("both");
   }
 
   async initialize(): Promise<void> {

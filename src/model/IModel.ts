@@ -30,6 +30,7 @@ export interface IModel {
   showMostCommonMove(): boolean;
 
   // Match & round
+  isDoubleKO(): boolean;
   isMatchActive(): boolean;
   isMatchOver(): boolean;
   handleMatchWin(): Participant;

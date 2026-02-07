@@ -125,7 +125,7 @@ export default class MoveRevealView
     ]);
   }
 
-  public async triggerImpact(side: Participant): Promise<void> {
+  private async applyImpact(side: Participant): Promise<void> {
     const card = this._getElement(`reveal-${side}`);
     card.classList.add("card-impact");
     this._parentElement.classList.add("arena-shake");
@@ -136,8 +136,30 @@ export default class MoveRevealView
     this._parentElement.classList.remove("arena-shake");
   }
 
-  public async applyDefeat(side: Participant): Promise<void> {
+  public async triggerImpact(side: Participant | "both"): Promise<void> {
+    if (side === "both") {
+      await Promise.all([
+        this.applyImpact(PARTICIPANTS.PLAYER),
+        this.applyImpact(PARTICIPANTS.COMPUTER),
+      ]);
+    } else {
+      await this.applyImpact(side);
+    }
+  }
+
+  private async applyDefeat(side: Participant): Promise<void> {
     const card = this._getElement(`reveal-${side}`);
     card.classList.add("card-defeated");
+  }
+
+  public async triggerDefeat(side: Participant | "both"): Promise<void> {
+    if (side === "both") {
+      await Promise.all([
+        this.applyDefeat(PARTICIPANTS.PLAYER),
+        this.applyDefeat(PARTICIPANTS.COMPUTER),
+      ]);
+    } else {
+      await this.applyDefeat(side);
+    }
   }
 }
