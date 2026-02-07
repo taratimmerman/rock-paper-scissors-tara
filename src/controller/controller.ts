@@ -113,15 +113,14 @@ export class Controller {
     this.statusView.setMessage("Choose your attack!");
   }
 
-  private endRound(): void {
+  private endRound(roundResult: string): void {
     const playerMove = this.model.getPlayerMove();
     const computerMove = this.model.getComputerMove();
-    const result = this.model.evaluateRound();
     const matchActuallyEnded = this.model.isMatchOver();
 
     this.updateHealthView();
 
-    let resultMessage = result.toUpperCase();
+    let resultMessage = roundResult.toUpperCase();
     if (matchActuallyEnded) {
       const winner = this.model.handleMatchWin();
       resultMessage = `${winner.toUpperCase()} WON THE MATCH!`;
@@ -212,6 +211,8 @@ export class Controller {
     const pMove = this.model.getPlayerMove();
     const cMove = this.model.getComputerMove();
 
+    const roundResult = this.model.evaluateRound();
+
     if (pMove && cMove) {
       await this.moveRevealView.playFightAnimations(pMove, cMove);
 
@@ -221,7 +222,7 @@ export class Controller {
       }
     }
 
-    this.endRound();
+    this.endRound(roundResult);
   }
 
   /**
@@ -233,8 +234,11 @@ export class Controller {
 
     this.statusView.setMessage(`${winner.toUpperCase()} LANDS A BLOW!`);
 
-    // Sequence the impact and final states
-    await this.moveRevealView.triggerImpact(loser);
+    const impactPromise = this.moveRevealView.triggerImpact(loser);
+
+    this.updateHealthView();
+
+    await impactPromise;
 
     await Promise.all([
       this.moveRevealView.highlightWinner(winner),
