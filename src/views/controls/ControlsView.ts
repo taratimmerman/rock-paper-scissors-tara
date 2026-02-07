@@ -28,6 +28,12 @@ export default class ControlsView
 
     if (cards.length === 0) return;
 
+    if (faceUp) {
+      this._parentElement.classList.remove("interaction-locked");
+    } else {
+      this._parentElement.classList.add("interaction-locked");
+    }
+
     // Read 'offsetHeight' to force the browser to paint the cards
     // in their current state (visible but 0deg) BEFORE we add the class.
     // This ensures the transition actually runs.
@@ -97,11 +103,14 @@ export default class ControlsView
   private _setupListeners(): void {
     this._parentElement.onclick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const moveBtn = target.closest(".card-button");
       const nextBtn = target.closest("#play-again");
-
-      if (moveBtn && this._moveHandler) this._moveHandler(moveBtn.id as Move);
       if (nextBtn && this._nextRoundHandler) this._nextRoundHandler();
+
+      if (!this._isFaceUp) return;
+      const moveBtn = target.closest(".card-button") as HTMLButtonElement;
+      if (moveBtn && !moveBtn.disabled && this._moveHandler) {
+        this._moveHandler(moveBtn.id as Move);
+      }
     };
   }
 }
