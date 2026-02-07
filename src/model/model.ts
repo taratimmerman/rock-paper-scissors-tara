@@ -10,6 +10,9 @@ import {
 import {
   ALL_MOVE_NAMES,
   DAMAGE_PER_LOSS,
+  DAMAGE_PER_TARA_LOSS,
+  DAMAGE_PER_TARA_TIE,
+  DAMAGE_PER_TIE,
   DEFAULT_MATCH,
   HEALTH_KEYS,
   INITIAL_HEALTH,
@@ -17,7 +20,6 @@ import {
   MOVE_DATA_MAP,
   PARTICIPANTS,
   STANDARD_MOVE_NAMES,
-  VALID_HEALTH,
 } from "../utils/dataUtils";
 import { IGameStorage } from "../storage/gameStorage";
 import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
@@ -54,25 +56,25 @@ export class Model {
 
     this.state.scores.player = this.gameStorage.getScore(PARTICIPANTS.PLAYER);
     this.state.scores.computer = this.gameStorage.getScore(
-      PARTICIPANTS.COMPUTER
+      PARTICIPANTS.COMPUTER,
     );
     this.state.taras.player = this.gameStorage.getTaraCount(
-      PARTICIPANTS.PLAYER
+      PARTICIPANTS.PLAYER,
     );
     this.state.taras.computer = this.gameStorage.getTaraCount(
-      PARTICIPANTS.COMPUTER
+      PARTICIPANTS.COMPUTER,
     );
     this.state.mostCommonMove.player = this.gameStorage.getMostCommonMove(
-      PARTICIPANTS.PLAYER
+      PARTICIPANTS.PLAYER,
     );
     this.state.mostCommonMove.computer = this.gameStorage.getMostCommonMove(
-      PARTICIPANTS.COMPUTER
+      PARTICIPANTS.COMPUTER,
     );
     this.state.moveCounts.player = this.gameStorage.getMoveCounts(
-      PARTICIPANTS.PLAYER
+      PARTICIPANTS.PLAYER,
     );
     this.state.moveCounts.computer = this.gameStorage.getMoveCounts(
-      PARTICIPANTS.COMPUTER
+      PARTICIPANTS.COMPUTER,
     );
 
     this._loadOrMigrateMatchState();
@@ -94,25 +96,35 @@ export class Model {
   }
 
   evaluateRound(): string {
-    const playerMove = this.getPlayerMove();
-    const computerMove = this.getComputerMove();
-
+    let playerMove = this.getPlayerMove();
+    let computerMove = this.getComputerMove();
     if (playerMove === null || computerMove === null) return "Invalid round";
 
     this.handleTaraMove(PARTICIPANTS.PLAYER, playerMove);
     this.handleTaraMove(PARTICIPANTS.COMPUTER, computerMove);
 
-    if (playerMove === computerMove) {
+    // Sync effective moves
+    playerMove = this.getPlayerMove();
+    computerMove = this.getComputerMove();
+
+    // Calculate damage context once
+    const tieStatus = this.isTie();
+    const taraInPlay = playerMove === MOVES.TARA || computerMove === MOVES.TARA;
+    const damage = this.getDamageAmount(tieStatus, taraInPlay);
+
+    if (tieStatus) {
+      this.decrementHealth(PARTICIPANTS.PLAYER, damage);
+      this.decrementHealth(PARTICIPANTS.COMPUTER, damage);
       return "It's a tie!";
     }
 
-    if (this.doesMoveBeat(playerMove, computerMove)) {
-      this.handleRoundWin(PARTICIPANTS.PLAYER, playerMove);
-      this.decrementHealth(PARTICIPANTS.COMPUTER);
+    if (this.doesMoveBeat(playerMove!, computerMove!)) {
+      this.handleRoundWin(PARTICIPANTS.PLAYER, playerMove!);
+      this.decrementHealth(PARTICIPANTS.COMPUTER, damage);
       return "You win the round!";
     } else {
-      this.handleRoundWin(PARTICIPANTS.COMPUTER, computerMove);
-      this.decrementHealth(PARTICIPANTS.PLAYER);
+      this.handleRoundWin(PARTICIPANTS.COMPUTER, computerMove!);
+      this.decrementHealth(PARTICIPANTS.PLAYER, damage);
       return "Computer wins the round!";
     }
   }
@@ -259,10 +271,10 @@ export class Model {
 
   private chooseWeightedRandomMove(
     moves: Move[],
-    weights: Record<Move, number>
+    weights: Record<Move, number>,
   ): Move {
     const weightedPool = moves.flatMap((move) =>
-      Array(weights[move]).fill(move)
+      Array(weights[move]).fill(move),
     );
     const randomIndex = Math.floor(Math.random() * weightedPool.length);
     return weightedPool[randomIndex];
@@ -407,6 +419,21 @@ export class Model {
     this.setRoundNumber(current + 1);
   }
 
+  isTie(): boolean | "tara-tie" {
+    const playerMove = this.getPlayerMove();
+    const computerMove = this.getComputerMove();
+
+    const isTaraTie = playerMove === MOVES.TARA && computerMove === MOVES.TARA;
+
+    if (isTaraTie) return "tara-tie";
+
+    return playerMove !== null &&
+      computerMove !== null &&
+      playerMove === computerMove
+      ? true
+      : false;
+  }
+
   // ===== Tara Methods =====
 
   private decrementTaraCount(key: Participant): void {
@@ -443,6 +470,15 @@ export class Model {
     this.gameStorage.removeTaraCount(key);
   }
 
+  private taraInPlay(): boolean {
+    const playerMove = this.getPlayerMove();
+    const computerMove = this.getComputerMove();
+
+    if (this.isTie() === "tara-tie") return true;
+
+    return playerMove === MOVES.TARA || computerMove === MOVES.TARA;
+  }
+
   setPlayerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.PLAYER, count);
   }
@@ -470,12 +506,25 @@ export class Model {
 
   // ===== Match Methods =====
 
-  handleMatchWin(): Participant {
-    const winner = this.getMatchWinner();
+  handleMatchWin(): Participant | "draw" {
+    const result = this.getMatchWinner();
 
-    this.setScore(winner, this.getScore(winner) + 1);
+    if (result !== "draw") {
+      this.setScore(result, this.getScore(result) + 1);
+    }
 
-    return winner;
+    return result;
+  }
+
+  isDoubleKO(): boolean {
+    if (
+      this.isMatchOver() &&
+      this.getHealth(PARTICIPANTS.PLAYER) === 0 &&
+      this.getHealth(PARTICIPANTS.COMPUTER) === 0
+    ) {
+      return true;
+    }
+    return false;
   }
 
   setMatch(match: Match | null): void {
@@ -519,12 +568,15 @@ export class Model {
     );
   }
 
-  getMatchWinner(): Participant {
-    if (this.isDefeated(PARTICIPANTS.PLAYER)) {
-      return PARTICIPANTS.COMPUTER;
-    } else {
-      return PARTICIPANTS.PLAYER;
-    }
+  getMatchWinner(): Participant | "draw" {
+    const playerDefeated = this.isDefeated(PARTICIPANTS.PLAYER);
+    const computerDefeated = this.isDefeated(PARTICIPANTS.COMPUTER);
+
+    if (playerDefeated && computerDefeated) return "draw";
+    if (playerDefeated) return PARTICIPANTS.COMPUTER;
+    if (computerDefeated) return PARTICIPANTS.PLAYER;
+
+    return "draw";
   }
 
   incrementMatchNumber(): void {
@@ -598,19 +650,32 @@ export class Model {
     const key = this.getHealthKey(participant);
     const value = match[key];
 
-    return VALID_HEALTH.includes(value as Health) ? (value as Health) : null;
+    return value !== undefined && value !== null ? value : null;
   }
 
-  private decrementHealth(participant: Participant): boolean {
+  private getDamageAmount(
+    isTie: boolean | "tara-tie",
+    taraInPlay: boolean,
+  ): number {
+    if (isTie === "tara-tie") return DAMAGE_PER_TARA_TIE;
+    if (isTie) return DAMAGE_PER_TIE;
+    if (taraInPlay) return DAMAGE_PER_TARA_LOSS;
+
+    return DAMAGE_PER_LOSS;
+  }
+
+  private decrementHealth(participant: Participant, damage: number): boolean {
     const match = this.state.currentMatch;
     if (!match) return false;
 
     const key = this.getHealthKey(participant);
-    const currentHealth = match[key];
 
-    if (currentHealth <= 0) return false;
+    const updatedMatch = {
+      ...match,
+      [key]: Math.max(0, (match[key] ?? 0) - damage),
+    };
 
-    match[key] = Math.max(0, currentHealth - DAMAGE_PER_LOSS);
+    this.setMatch(updatedMatch);
     return true;
   }
 

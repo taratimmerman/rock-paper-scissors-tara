@@ -89,7 +89,7 @@ const DB_VALUES = Object.values(MOVES_DATABASE);
  * { ROCK: "rock", PAPER: "paper", ... }
  */
 export const MOVES = Object.fromEntries(
-  Object.entries(MOVES_DATABASE).map(([key, val]) => [key, val.id])
+  Object.entries(MOVES_DATABASE).map(([key, val]) => [key, val.id]),
 ) as { [K in keyof DbType]: DbType[K]["id"] };
 
 /**
@@ -104,16 +104,16 @@ export const MOVE_DATA = DB_VALUES.map((entry) => ({
 export const ALL_MOVE_NAMES: Move[] = DB_VALUES.map((entry) => entry.id);
 
 export const MOVE_DATA_MAP: ReadonlyMap<Move, MoveData> = new Map(
-  MOVE_DATA.map((m) => [m.name, m])
+  MOVE_DATA.map((m) => [m.name, m]),
 );
 
 // Standard Move Lists and Maps (Filtered based on 'isStandard' flag)
 export const STANDARD_MOVE_DATA = MOVE_DATA.filter(
-  (_, i) => DB_VALUES[i].isStandard
+  (_, i) => DB_VALUES[i].isStandard,
 );
 
 export const STANDARD_MOVE_NAMES = STANDARD_MOVE_DATA.map(
-  (data) => data.name
+  (data) => data.name,
 ) as StandardMove[];
 
 export const STANDARD_MOVE_DATA_MAP: ReadonlyMap<StandardMove, MoveData> =
@@ -134,7 +134,7 @@ export const PLAYER_MOVES_DATA = DB_VALUES.map((entry) => ({
  * Result: { rock: "Rock", paper: "Paper", scissors: "Scissors", tara: "Tara" }
  */
 export const MOVE_DISPLAY_NAMES: Record<Move, string> = Object.fromEntries(
-  DB_VALUES.map((entry) => [entry.id, entry.text])
+  DB_VALUES.map((entry) => [entry.id, entry.text]),
 ) as Record<Move, string>;
 
 // -----------------------------------------------------------------------------
@@ -146,10 +146,12 @@ export const PARTICIPANTS = {
   COMPUTER: "computer",
 } as const;
 
-export const VALID_HEALTH = [0, 50, 100, null] as const;
 export const INITIAL_ROUND_NUMBER = 1;
 export const INITIAL_HEALTH = 100;
 export const DAMAGE_PER_LOSS = 50;
+export const DAMAGE_PER_TARA_LOSS = 70;
+export const DAMAGE_PER_TARA_TIE = 20;
+export const DAMAGE_PER_TIE = 10;
 export const DEFAULT_MATCH_NUMBER = 1;
 
 export const DEFAULT_MATCH: Match = {

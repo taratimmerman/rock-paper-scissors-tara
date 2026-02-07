@@ -1,11 +1,11 @@
-import { MOVES, PARTICIPANTS, VALID_HEALTH } from "./dataUtils";
+import { MOVES, PARTICIPANTS } from "./dataUtils";
 
 export type Move = (typeof MOVES)[keyof typeof MOVES];
 export type StandardMove = Exclude<Move, "tara">;
 
 export type Participant = (typeof PARTICIPANTS)[keyof typeof PARTICIPANTS];
 
-export type Health = (typeof VALID_HEALTH)[number];
+export type Health = number | null;
 
 export type MoveData = {
   name: Move;

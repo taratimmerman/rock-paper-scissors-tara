@@ -49,6 +49,7 @@ describe("Controller", () => {
       getComputerMostCommonMove: jest.fn().mockReturnValue(null),
       resetBothMoveCounts: jest.fn(),
       resetMostCommonMoves: jest.fn(),
+      isDoubleKO: jest.fn().mockReturnValue(false),
       isMatchActive: jest.fn().mockReturnValue(false),
       isMatchOver: jest.fn().mockReturnValue(false),
       handleMatchWin: jest.fn().mockReturnValue(PARTICIPANTS.PLAYER),
@@ -94,6 +95,7 @@ describe("Controller", () => {
       playFightAnimations: jest.fn().mockResolvedValue(undefined),
       render: jest.fn(),
       toggleVisibility: jest.fn(),
+      triggerDefeat: jest.fn(),
       triggerImpact: jest.fn(),
     };
 
@@ -212,9 +214,13 @@ describe("Controller", () => {
       mockModel.getPlayerMove.mockReturnValue(MOVES.ROCK);
       mockModel.getComputerMove.mockReturnValue(MOVES.SCISSORS);
 
-      (controller as any).endRound();
+      const expectedMessage = "You win the round!";
 
-      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith("YOU WIN!");
+      (controller as any).endRound(expectedMessage);
+
+      expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
+        expectedMessage.toUpperCase(),
+      );
       expect(mockControlsView.render).toHaveBeenCalledWith(
         expect.objectContaining({ isMatchOver: false }),
       );
@@ -224,7 +230,7 @@ describe("Controller", () => {
       mockModel.isMatchOver.mockReturnValue(true);
       mockModel.handleMatchWin.mockReturnValue(PARTICIPANTS.PLAYER);
 
-      (controller as any).endRound();
+      (controller as any).endRound("Player won the match!");
 
       expect(mockAnnouncementView.setMessage).toHaveBeenCalledWith(
         "PLAYER WON THE MATCH!",
@@ -307,7 +313,7 @@ describe("Controller", () => {
       expect(mockModel.evaluateRound).toHaveBeenCalled();
     });
 
-    test("strictly follows reveal sequence: Flip -> Highlight -> End Round", async () => {
+    test("strictly follows reveal sequence: Flip -> Evaluate -> Highlight", async () => {
       const executionOrder: string[] = [];
 
       // Track the order of calls
@@ -329,7 +335,7 @@ describe("Controller", () => {
 
       await controller.handlePlayerMove(MOVES.ROCK);
 
-      expect(executionOrder).toEqual(["flip", "highlight", "evaluate"]);
+      expect(executionOrder).toEqual(["flip", "evaluate", "highlight"]);
     });
   });
 });
