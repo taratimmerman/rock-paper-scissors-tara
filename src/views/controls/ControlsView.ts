@@ -8,8 +8,6 @@ export default class ControlsView
 {
   declare protected _parentElement: HTMLElement;
   private _moveHandler?: (move: Move) => void;
-  private _nextRoundHandler?: () => void;
-  // Track visual state to prevent markup-regressions during render
   private _isFaceUp: boolean = false;
 
   public render(data: ControlsViewData): void {
@@ -20,7 +18,6 @@ export default class ControlsView
 
   /**
    * Orchestrates the 3D flip for all choice cards.
-   * @param faceUp - True to show icons, False to show "BACK"
    */
   public async flipAll(faceUp: boolean): Promise<void> {
     this._isFaceUp = faceUp;
@@ -28,15 +25,9 @@ export default class ControlsView
 
     if (cards.length === 0) return;
 
-    if (faceUp) {
-      this._parentElement.classList.remove("interaction-locked");
-    } else {
-      this._parentElement.classList.add("interaction-locked");
-    }
+    this._parentElement.classList.toggle("interaction-locked", !faceUp);
 
-    // Read 'offsetHeight' to force the browser to paint the cards
-    // in their current state (visible but 0deg) BEFORE we add the class.
-    // This ensures the transition actually runs.
+    // Force reflow to ensure transition runs correctly
     const _forceReflow = (cards[0] as HTMLElement).offsetHeight;
 
     cards.forEach((card) => {
@@ -45,26 +36,34 @@ export default class ControlsView
         : card.classList.remove("is-flipped");
     });
 
-    // Wait for the transition
     await this._waitForAnimation(cards[0] as HTMLElement);
   }
 
   protected _generateMarkup(): string {
-    const { playerMove, isMatchOver, moves, taraIsEnabled } = this._data;
+    const { isMatchOver, moves, taraIsEnabled } = this._data;
 
-    if (!playerMove) {
+    if (isMatchOver) {
       return `
+        <div id="progression-zone" aria-live="polite">
+          <button id="play-again" class="btn-primary">
+            Start New Match
+          </button>
+        </div>`;
+    }
+
+    return `
       <div id="choices" role="group" aria-label="Select your move">
         ${moves
           .map((move) => {
-            const disabled = move.id === "tara" && !taraIsEnabled;
-            // Maintain current flip state during re-renders
+            const isRuleDisabled = move.id === "tara" && !taraIsEnabled;
             const flipClass = this._isFaceUp ? "is-flipped" : "";
 
             return `
-            <button id="${move.id}" class="card-button" ${
-              disabled ? "disabled" : ""
-            }>
+            <button
+              id="${move.id}"
+              class="card-button"
+              ${isRuleDisabled ? "disabled" : ""}
+            >
               <div class="card-inner ${flipClass}">
                 <div class="card-back player-theme"></div>
                 <div class="card-front">
@@ -76,14 +75,6 @@ export default class ControlsView
           })
           .join("")}
       </div>`;
-    }
-
-    return `
-    <div id="progression-zone" aria-live="polite">
-      <button id="play-again" class="btn-primary">
-        ${isMatchOver ? "Start New Match" : "Next Round"}
-      </button>
-    </div>`;
   }
 
   public toggleVisibility(show: boolean): void {
@@ -93,20 +84,27 @@ export default class ControlsView
     this._toggleVisibility(this._parentElement, show);
   }
 
-  public bindPlayerMove(handler: (move: Move) => void) {
+  public bindPlayerMove(handler: (move: Move) => void): void {
     this._moveHandler = handler;
   }
-  public bindNextRound(handler: () => void) {
-    this._nextRoundHandler = handler;
+
+  /**
+   * Uses event delegation to ensure the listener survives re-renders.
+   */
+  public bindStartNewMatch(handler: () => void): void {
+    this._parentElement.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest("#play-again");
+      if (btn) handler();
+    });
   }
 
   private _setupListeners(): void {
     this._parentElement.onclick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const nextBtn = target.closest("#play-again");
-      if (nextBtn && this._nextRoundHandler) this._nextRoundHandler();
 
+      // Prevent interaction if cards are face-down or match is over
       if (!this._isFaceUp) return;
+
       const moveBtn = target.closest(".card-button") as HTMLButtonElement;
       if (moveBtn && !moveBtn.disabled && this._moveHandler) {
         this._moveHandler(moveBtn.id as Move);
