@@ -8,7 +8,6 @@ import {
   StandardMove,
 } from "../utils/dataObjectUtils";
 import {
-  ALL_MOVE_NAMES,
   DAMAGE_PER_LOSS,
   DAMAGE_PER_TARA_LOSS,
   DAMAGE_PER_TARA_TIE,
@@ -19,29 +18,18 @@ import {
   MOVES,
   MOVE_DATA_MAP,
   PARTICIPANTS,
-  STANDARD_MOVE_NAMES,
 } from "../utils/dataUtils";
+import { IComputerBrain } from "../utils/computer/IComputerBrain";
+import { AdaptiveComputer } from "../utils/computer/AdaptiveComputer";
 import { IGameStorage } from "../storage/gameStorage";
 import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
 
 export class Model {
   private state: GameState = {
-    scores: {
-      player: 0,
-      computer: 0,
-    },
-    moves: {
-      player: null,
-      computer: null,
-    },
-    taras: {
-      player: 0,
-      computer: 0,
-    },
-    mostCommonMove: {
-      player: null,
-      computer: null,
-    },
+    scores: { player: 0, computer: 0 },
+    moves: { player: null, computer: null },
+    taras: { player: 0, computer: 0 },
+    mostCommonMove: { player: null, computer: null },
     moveCounts: {
       player: { rock: 0, paper: 0, scissors: 0 },
       computer: { rock: 0, paper: 0, scissors: 0 },
@@ -49,10 +37,16 @@ export class Model {
     globalMatchNumber: null,
     currentMatch: null,
   };
-  private gameStorage: IGameStorage;
 
-  constructor(gameStorage: IGameStorage = new LocalStorageGameStorage()) {
+  private gameStorage: IGameStorage;
+  private computer: IComputerBrain;
+
+  constructor(
+    gameStorage: IGameStorage = new LocalStorageGameStorage(),
+    computer: IComputerBrain = new AdaptiveComputer(),
+  ) {
     this.gameStorage = gameStorage;
+    this.computer = computer;
 
     this.state.scores.player = this.gameStorage.getScore(PARTICIPANTS.PLAYER);
     this.state.scores.computer = this.gameStorage.getScore(
@@ -103,11 +97,9 @@ export class Model {
     this.handleTaraMove(PARTICIPANTS.PLAYER, playerMove);
     this.handleTaraMove(PARTICIPANTS.COMPUTER, computerMove);
 
-    // Sync effective moves
     playerMove = this.getPlayerMove();
     computerMove = this.getComputerMove();
 
-    // Calculate damage context once
     const tieStatus = this.isTie();
     const taraInPlay = playerMove === MOVES.TARA || computerMove === MOVES.TARA;
     const damage = this.getDamageAmount(tieStatus, taraInPlay);
@@ -152,15 +144,12 @@ export class Model {
   setPlayerScore(score: number) {
     this.setScore(PARTICIPANTS.PLAYER, score);
   }
-
   setComputerScore(score: number) {
     this.setScore(PARTICIPANTS.COMPUTER, score);
   }
-
   getPlayerScore(): number {
     return this.getScore(PARTICIPANTS.PLAYER);
   }
-
   getComputerScore() {
     return this.getScore(PARTICIPANTS.COMPUTER);
   }
@@ -198,7 +187,6 @@ export class Model {
         hasMoveFrequencyTie = true;
       }
     }
-
     return hasMoveFrequencyTie ? null : mostCommonMove;
   }
 
@@ -217,101 +205,15 @@ export class Model {
     return this.state.mostCommonMove[key];
   }
 
-  private getAvailableMoves(hasTara: boolean): Move[] {
-    if (hasTara) {
-      return ALL_MOVE_NAMES;
-    } else {
-      return STANDARD_MOVE_NAMES;
-    }
-  }
-
-  private getBaseWeights(): Record<Move, number> {
-    return {
-      [MOVES.ROCK]: 1,
-      [MOVES.PAPER]: 1,
-      [MOVES.SCISSORS]: 1,
-      [MOVES.TARA]: 0,
-    };
-  }
-
-  private getTaraWeight(moves: Move[]): number | null {
-    if (!moves.includes(MOVES.TARA)) return null;
-
-    const { player, computer } = this.state.scores;
-    const scoreDiff = player - computer;
-
-    if (scoreDiff > 0) return Math.min(3 + scoreDiff, 10);
-    if (scoreDiff < 0) return 1;
-    return 2;
-  }
-
-  private getStandardMoveWeights(): Record<StandardMove, number> {
-    const weights: Record<StandardMove, number> = {
-      [MOVES.ROCK]: 1,
-      [MOVES.PAPER]: 1,
-      [MOVES.SCISSORS]: 1,
-    };
-
-    const mostCommon = this.state.mostCommonMove.player;
-    if (!mostCommon) return weights;
-
-    const counterMap: Record<StandardMove, StandardMove> = {
-      [MOVES.ROCK]: MOVES.PAPER,
-      [MOVES.PAPER]: MOVES.SCISSORS,
-      [MOVES.SCISSORS]: MOVES.ROCK,
-    };
-
-    const counter = counterMap[mostCommon];
-    return {
-      [MOVES.ROCK]: counter === MOVES.ROCK ? 5 : 2,
-      [MOVES.PAPER]: counter === MOVES.PAPER ? 5 : 2,
-      [MOVES.SCISSORS]: counter === MOVES.SCISSORS ? 5 : 2,
-    };
-  }
-
-  private chooseWeightedRandomMove(
-    moves: Move[],
-    weights: Record<Move, number>,
-  ): Move {
-    const weightedPool = moves.flatMap((move) =>
-      Array(weights[move]).fill(move),
-    );
-    const randomIndex = Math.floor(Math.random() * weightedPool.length);
-    return weightedPool[randomIndex];
-  }
-
-  private getComputerMoveWeights(moves: Move[]): Record<Move, number> {
-    const baseWeights = this.getBaseWeights();
-    const taraWeight = this.getTaraWeight(moves);
-    const standardWeights = this.getStandardMoveWeights();
-
-    return {
-      ...baseWeights,
-      ...standardWeights,
-      ...(taraWeight !== null ? { [MOVES.TARA]: taraWeight } : {}),
-    };
-  }
-
-  private getWeightedComputerMove(): Move {
-    const hasTara = this.getComputerTaraCount() > 0;
-    const availableMoves = this.getAvailableMoves(hasTara);
-    const weights = this.getComputerMoveWeights(availableMoves);
-
-    return this.chooseWeightedRandomMove(availableMoves, weights);
-  }
-
   setPlayerMove(move: Move | null) {
     this.setMove(PARTICIPANTS.PLAYER, move);
   }
-
   getPlayerMove(): Move | null {
     return this.getMove(PARTICIPANTS.PLAYER);
   }
-
   setComputerMove(move: Move | null) {
     this.setMove(PARTICIPANTS.COMPUTER, move);
   }
-
   getComputerMove(): Move | null {
     return this.getMove(PARTICIPANTS.COMPUTER);
   }
@@ -322,7 +224,7 @@ export class Model {
   }
 
   chooseComputerMove(): void {
-    const move = this.getWeightedComputerMove();
+    const move = this.computer.calculateNextMove(this.state);
     this.registerComputerMove(move);
   }
 
@@ -395,7 +297,6 @@ export class Model {
   private resetHistory(key: Participant): void {
     this.gameStorage.removeHistory(key);
   }
-
   resetHistories(): void {
     this.resetHistory(PARTICIPANTS.PLAYER);
     this.resetHistory(PARTICIPANTS.COMPUTER);
@@ -409,24 +310,19 @@ export class Model {
 
   setRoundNumber(value: number): void {
     if (!this.state.currentMatch) return;
-
     this.state.currentMatch.matchRoundNumber = value;
     this.gameStorage.setMatch(this.state.currentMatch);
   }
 
   increaseRoundNumber(): void {
-    const current = this.getRoundNumber();
-    this.setRoundNumber(current + 1);
+    this.setRoundNumber(this.getRoundNumber() + 1);
   }
 
   isTie(): boolean | "tara-tie" {
     const playerMove = this.getPlayerMove();
     const computerMove = this.getComputerMove();
-
     const isTaraTie = playerMove === MOVES.TARA && computerMove === MOVES.TARA;
-
     if (isTaraTie) return "tara-tie";
-
     return playerMove !== null &&
       computerMove !== null &&
       playerMove === computerMove
@@ -464,29 +360,17 @@ export class Model {
   private getTaraCount(key: Participant): number {
     return this.state.taras[key];
   }
-
   private resetTaraCount(key: Participant): void {
     this.state.taras[key] = 0;
     this.gameStorage.removeTaraCount(key);
   }
 
-  private taraInPlay(): boolean {
-    const playerMove = this.getPlayerMove();
-    const computerMove = this.getComputerMove();
-
-    if (this.isTie() === "tara-tie") return true;
-
-    return playerMove === MOVES.TARA || computerMove === MOVES.TARA;
-  }
-
   setPlayerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.PLAYER, count);
   }
-
   setComputerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.COMPUTER, count);
   }
-
   resetTaras(): void {
     this.resetTaraCount(PARTICIPANTS.PLAYER);
     this.resetTaraCount(PARTICIPANTS.COMPUTER);
@@ -495,11 +379,9 @@ export class Model {
   getPlayerTaraCount(): number {
     return this.getTaraCount(PARTICIPANTS.PLAYER);
   }
-
   getComputerTaraCount(): number {
     return this.getTaraCount(PARTICIPANTS.COMPUTER);
   }
-
   taraIsEnabled(): boolean {
     return this.getTaraCount(PARTICIPANTS.PLAYER) > 0;
   }
@@ -508,23 +390,18 @@ export class Model {
 
   handleMatchWin(): Participant | "draw" {
     const result = this.getMatchWinner();
-
     if (result !== "draw") {
       this.setScore(result, this.getScore(result) + 1);
     }
-
     return result;
   }
 
   isDoubleKO(): boolean {
-    if (
+    return (
       this.isMatchOver() &&
       this.getHealth(PARTICIPANTS.PLAYER) === 0 &&
       this.getHealth(PARTICIPANTS.COMPUTER) === 0
-    ) {
-      return true;
-    }
-    return false;
+    );
   }
 
   setMatch(match: Match | null): void {
@@ -537,16 +414,8 @@ export class Model {
     this.gameStorage.setGlobalMatchNumber(matchNumber);
   }
 
-  /**
-   * Sets default match data if no match is currently active.
-   *
-   * Used as a fallback when no match data is loaded (e.g., from `_loadOrMigrateMatchState()`).
-   * Does not overwrite existing match state.
-   */
   setDefaultMatchData(): void {
-    const isMatchActive = this.isMatchActive();
-
-    if (!isMatchActive) {
+    if (!this.isMatchActive()) {
       this.setMatch({ ...DEFAULT_MATCH });
     }
   }
@@ -571,85 +440,44 @@ export class Model {
   getMatchWinner(): Participant | "draw" {
     const playerDefeated = this.isDefeated(PARTICIPANTS.PLAYER);
     const computerDefeated = this.isDefeated(PARTICIPANTS.COMPUTER);
-
     if (playerDefeated && computerDefeated) return "draw";
     if (playerDefeated) return PARTICIPANTS.COMPUTER;
     if (computerDefeated) return PARTICIPANTS.PLAYER;
-
     return "draw";
   }
 
   incrementMatchNumber(): void {
-    const currentMatchNumber = this.getMatchNumber();
-    this.setMatchNumber(currentMatchNumber + 1);
+    this.setMatchNumber(this.getMatchNumber() + 1);
   }
 
-  /**
-   * Initializes the game state based on available storage.
-   *
-   * This method is called during Model construction. It checks for:
-   * - A valid saved match (loads it and skips migration),
-   * - An old-format global round number (migrates it into a new match),
-   * - Or no valid data (leaves currentMatch unset).
-   *
-   * It also ensures the global match number is set appropriately.
-   */
   private _loadOrMigrateMatchState(): void {
     if (this.isMatchActive()) {
-      this._loadExistingMatchState();
+      this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
+      this.state.currentMatch = this.gameStorage.getMatch();
       return;
     }
-
-    const oldGlobalRoundNumber = this.gameStorage.getOldGlobalRoundNumber();
-
-    if (oldGlobalRoundNumber !== null && oldGlobalRoundNumber > 0) {
-      this._migrateOldData(oldGlobalRoundNumber);
+    const oldRound = this.gameStorage.getOldGlobalRoundNumber();
+    if (oldRound !== null && oldRound > 0) {
+      const match = {
+        matchRoundNumber: oldRound,
+        playerHealth: INITIAL_HEALTH,
+        computerHealth: INITIAL_HEALTH,
+        initialHealth: INITIAL_HEALTH,
+        damagePerLoss: DAMAGE_PER_LOSS,
+      };
+      this.setMatch(match);
+      this.gameStorage.removeOldGlobalRoundNumber();
+      this.state.globalMatchNumber = 1;
+      this.gameStorage.setGlobalMatchNumber(1);
     }
-    // Otherwise: no migration, and no existing match — do nothing.
-  }
-
-  /**
-   * Loads state for an existing match stored in the new format.
-   */
-  private _loadExistingMatchState(): void {
-    this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
-    this.state.currentMatch = this.gameStorage.getMatch();
-  }
-
-  /**
-   * Migrates match state from an older game version to the current format.
-   *
-   * @param oldRoundNumber - The round number from the old game format.
-   */
-  private _migrateOldData(oldRoundNumber: number): void {
-    const migratedMatch = {
-      matchRoundNumber: oldRoundNumber,
-      playerHealth: INITIAL_HEALTH,
-      computerHealth: INITIAL_HEALTH,
-      initialHealth: INITIAL_HEALTH,
-      damagePerLoss: DAMAGE_PER_LOSS,
-    };
-
-    this.setMatch(migratedMatch);
-    this.gameStorage.removeOldGlobalRoundNumber();
-
-    this.state.globalMatchNumber = 1;
-    this.gameStorage.setGlobalMatchNumber(this.state.globalMatchNumber);
   }
 
   // ===== Health Methods =====
 
-  private getHealthKey(participant: Participant): keyof Match {
-    return HEALTH_KEYS[participant];
-  }
-
   getHealth(participant: Participant): Health {
     const match = this.state.currentMatch;
     if (!match) return null;
-
-    const key = this.getHealthKey(participant);
-    const value = match[key];
-
+    const value = match[HEALTH_KEYS[participant]];
     return value !== undefined && value !== null ? value : null;
   }
 
@@ -660,22 +488,14 @@ export class Model {
     if (isTie === "tara-tie") return DAMAGE_PER_TARA_TIE;
     if (isTie) return DAMAGE_PER_TIE;
     if (taraInPlay) return DAMAGE_PER_TARA_LOSS;
-
     return DAMAGE_PER_LOSS;
   }
 
   private decrementHealth(participant: Participant, damage: number): boolean {
     const match = this.state.currentMatch;
     if (!match) return false;
-
-    const key = this.getHealthKey(participant);
-
-    const updatedMatch = {
-      ...match,
-      [key]: Math.max(0, (match[key] ?? 0) - damage),
-    };
-
-    this.setMatch(updatedMatch);
+    const key = HEALTH_KEYS[participant];
+    this.setMatch({ ...match, [key]: Math.max(0, (match[key] ?? 0) - damage) });
     return true;
   }
 
@@ -683,6 +503,4 @@ export class Model {
     const health = this.getHealth(participant);
     return health !== null && health <= 0;
   }
-
-  // ===== END OF CLASS =====
 }
