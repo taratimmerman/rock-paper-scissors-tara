@@ -98,78 +98,74 @@ export class Controller {
   private async startGame(): Promise<void> {
     this.model.setDefaultMatchData();
 
-    this.gameView.toggleVisibility(true);
-    this.updateProgressView({ isVisible: true });
-    this.menuView.toggleMenuVisibility(false);
-    this.statsView.toggleGameStatsVisibility(true);
+    this.resetArenaVisuals();
     this.statusView.setMessage("Get ready...");
 
-    this.updateControlsView();
-    this.updateHealthView();
+    this.menuView.toggleMenuVisibility(false);
+    this.gameView.toggleVisibility(true);
+    this.statsView.toggleGameStatsVisibility(true);
     this.controlsView.toggleVisibility(true);
 
-    await this.controlsView.flipAll(true);
-
-    this.statusView.setMessage("Choose your attack!");
+    await this.handleNextRound();
   }
 
   private endRound(roundResult: string): void {
-    const playerMove = this.model.getPlayerMove();
-    const computerMove = this.model.getComputerMove();
     const matchActuallyEnded = this.model.isMatchOver();
     const isDoubleKO = this.model.isDoubleKO();
 
     this.updateHealthView();
-
     let resultMessage = roundResult.toUpperCase();
+
+    this.statusView.setMessage(
+      `You played ${MOVE_DISPLAY_NAMES[this.model.getPlayerMove()]}. Computer played ${MOVE_DISPLAY_NAMES[this.model.getComputerMove()]}.`,
+    );
+
+    // --- MATCH END ---
     if (matchActuallyEnded) {
       const result = this.model.handleMatchWin();
 
-      if (isDoubleKO) {
-        resultMessage = "DOUBLE KO! NOBODY WINS!";
-      } else {
-        resultMessage = `${result.toUpperCase()} WON THE MATCH!`;
-      }
+      resultMessage = isDoubleKO
+        ? "DOUBLE KO! NOBODY WINS!"
+        : `${result.toUpperCase()} WON THE MATCH!`;
+
+      this.announcementView.setMessage(resultMessage);
 
       this.model.incrementMatchNumber();
+
+      this.updateScoreView();
+      this.updateMostCommonMoveView();
+      this.updateTaraView();
+      this.updateControlsView();
+
       this.model.setMatch(null);
-    } else {
-      this.model.increaseRoundNumber();
+      return;
     }
 
-    this.statusView.setMessage(
-      `You played ${MOVE_DISPLAY_NAMES[playerMove]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`,
-    );
-
+    // --- ROUND CONTINUES ---
     this.announcementView.setMessage(resultMessage);
-
-    this.controlsView.render({
-      playerMove: this.model.getPlayerMove(),
-      isMatchOver: matchActuallyEnded,
-      taraIsEnabled: this.model.taraIsEnabled(),
-      moves: PLAYER_MOVES_DATA,
-    });
-
     this.updateScoreView();
     this.updateTaraView();
     this.updateMostCommonMoveView();
+
+    this.model.increaseRoundNumber();
+
+    setTimeout(() => {
+      this.handleNextRound();
+    }, 2000);
   }
 
   private async handleNextRound(): Promise<void> {
     this.model.resetMoves();
-    this.model.setDefaultMatchData();
-
-    this.updateHealthView();
-    this.updateProgressView({ isVisible: true });
 
     this.announcementView.setMessage("");
     this.moveRevealView.toggleVisibility(false);
 
     this.updateControlsView();
+    this.updateProgressView({ isVisible: true });
 
     this.statusView.setMessage("Prepare your next move...");
-    await this.controlsView.flipAll(true);
 
+    await this.controlsView.flipAll(true);
     this.statusView.setMessage("Choose your attack!");
   }
 
@@ -194,6 +190,13 @@ export class Controller {
     this.controlsView.toggleVisibility(false);
     this.menuView.updateMenu({ isMatchActive });
     this.announcementView.setMessage("");
+  }
+
+  private resetArenaVisuals(): void {
+    this.moveRevealView.clear();
+    this.announcementView.setMessage("");
+    this.updateProgressView({ isVisible: true });
+    this.updateHealthView();
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
@@ -299,6 +302,6 @@ export class Controller {
     this.menuView.bindStartMatch(() => this.startGame());
     this.menuView.bindResetGame(() => this.resetGameState());
     this.controlsView.bindPlayerMove((move) => this.handlePlayerMove(move));
-    this.controlsView.bindNextRound(() => this.handleNextRound());
+    this.controlsView.bindStartNewMatch(() => this.startGame());
   }
 }

@@ -62,8 +62,6 @@ describe("ControlsView", () => {
     expect(container.classList.contains("hidden")).toBe(false);
   });
 
-  // ===== STATE A: PLAYER MOVE SELECTION =====
-
   test("renders move buttons when playerMove is null", () => {
     view.render({
       playerMove: null,
@@ -109,23 +107,21 @@ describe("ControlsView", () => {
     expect(handler).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
-  // ===== STATE B: ROUND/MATCH PROGRESSION =====
-
-  test("renders 'Next Round' button when playerMove exists and match is NOT over", () => {
+  test("renders move buttons when match is NOT over", () => {
     view.render({
-      playerMove: MOVES.ROCK,
+      playerMove: null,
       isMatchOver: false,
       taraIsEnabled: true,
       moves: mockMoves,
     });
 
-    const btn = document.getElementById("play-again");
-    expect(btn).toBeTruthy();
-    expect(btn?.textContent?.trim()).toBe("Next Round");
-    expect(document.querySelector(".card-button")).toBeFalsy();
+    const buttons = document.querySelectorAll(".card-button");
+    expect(buttons.length).toBe(mockMoves.length);
+    expect(document.getElementById("choices")).toBeTruthy();
+    expect(document.getElementById("play-again")).toBeFalsy();
   });
 
-  test("renders 'Start New Match' button when match is over", () => {
+  test("renders 'Start New Match' button ONLY when match is over", () => {
     view.render({
       playerMove: MOVES.ROCK,
       isMatchOver: true,
@@ -134,35 +130,12 @@ describe("ControlsView", () => {
     });
 
     const btn = document.getElementById("play-again");
+    expect(btn).toBeTruthy();
     expect(btn?.textContent?.trim()).toBe("Start New Match");
+    expect(document.getElementById("choices")).toBeFalsy();
   });
 
-  test("bindNextRound() triggers handler on play-again button click", () => {
-    const handler = jest.fn();
-    view.bindNextRound(handler);
-
-    view.render({
-      playerMove: MOVES.SCISSORS,
-      isMatchOver: false,
-      taraIsEnabled: true,
-      moves: mockMoves,
-    });
-
-    document.getElementById("play-again")?.click();
-    expect(handler).toHaveBeenCalledTimes(1);
-  });
-
-  // ===== RE-RENDERING / DOM DIFFING =====
-
-  test("switching from Selection to Progression clears the container", () => {
-    view.render({
-      playerMove: null,
-      isMatchOver: false,
-      taraIsEnabled: true,
-      moves: mockMoves,
-    });
-    expect(document.getElementById("choices")).toBeTruthy();
-
+  test("cards remain in DOM if playerMove exists but match is NOT over", () => {
     view.render({
       playerMove: MOVES.ROCK,
       isMatchOver: false,
@@ -170,9 +143,26 @@ describe("ControlsView", () => {
       moves: mockMoves,
     });
 
-    expect(document.getElementById("choices")).toBeFalsy();
-    expect(document.getElementById("play-again")).toBeTruthy();
+    expect(document.getElementById("choices")).toBeTruthy();
+    expect(document.getElementById("play-again")).toBeFalsy();
   });
+
+  test("bindStartNewMatch() triggers handler via delegation", () => {
+    const handler = jest.fn();
+    view.render({
+      playerMove: MOVES.ROCK,
+      isMatchOver: true,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    view.bindStartNewMatch(handler);
+    document.getElementById("play-again")?.click();
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  // ===== RE-RENDERING / DOM DIFFING =====
 
   test("maintains flipped state in markup across multiple renders", async () => {
     const data = {

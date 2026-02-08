@@ -162,4 +162,10 @@ export default class MoveRevealView
       await this.applyDefeat(side);
     }
   }
+
+  public clear(): void {
+    this._clear();
+    this._data = {} as any;
+    this.toggleVisibility(false);
+  }
 }
