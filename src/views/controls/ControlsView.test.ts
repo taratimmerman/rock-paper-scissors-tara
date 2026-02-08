@@ -93,7 +93,7 @@ describe("ControlsView", () => {
     expect(rockBtn.disabled).toBe(false);
   });
 
-  test("bindPlayerMove() dispatches move id on click", () => {
+  test("bindPlayerMove() dispatches move id on click", async () => {
     const handler = jest.fn();
     view.bindPlayerMove(handler);
     view.render({
@@ -103,7 +103,9 @@ describe("ControlsView", () => {
       moves: mockMoves,
     });
 
+    await view.flipAll(true);
     document.getElementById(MOVES.PAPER)?.click();
+
     expect(handler).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
@@ -204,5 +206,61 @@ describe("ControlsView", () => {
 
     const card = document.querySelector(".card-inner");
     expect(card?.classList.contains("is-flipped")).toBe(true);
+  });
+
+  test("prevents move selection when cards are face-down", async () => {
+    const handler = jest.fn();
+    view.bindPlayerMove(handler);
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    // 1. Flip cards face-down (isFaceUp = false)
+    await view.flipAll(false);
+
+    // 2. Attempt to click a move
+    document.getElementById(MOVES.ROCK)?.click();
+
+    // ASSERT: Handler should NOT have been called
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  test("allows move selection only when cards are face-up", async () => {
+    const handler = jest.fn();
+    view.bindPlayerMove(handler);
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    // 1. Flip cards face-up
+    await view.flipAll(true);
+
+    // 2. Click a move
+    document.getElementById(MOVES.ROCK)?.click();
+
+    // ASSERT: Handler should be called
+    expect(handler).toHaveBeenCalledWith(MOVES.ROCK);
+  });
+
+  test("applies 'interaction-locked' class when face-down", async () => {
+    const container = document.getElementById("game-controls")!;
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    await view.flipAll(false);
+    expect(container.classList.contains("interaction-locked")).toBe(true);
+
+    await view.flipAll(true);
+    expect(container.classList.contains("interaction-locked")).toBe(false);
   });
 });
