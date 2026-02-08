@@ -57,6 +57,8 @@ body {
   min-height: 100vh;
   width: 100vw;
   overflow-x: hidden;
+  /* Prevent bounce on mobile */
+  overscroll-behavior: none;
 }
 
 header,
@@ -71,7 +73,7 @@ main,
 main {
   max-width: 800px;
   width: 100%;
-  padding: 1rem;
+  padding: 0.5rem; /* Reduced padding for mobile */
 }
 
 #game-container {
@@ -79,7 +81,16 @@ main {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  gap: 2rem;
+  gap: 1rem; /* Tighter gap for short screens */
+}
+
+@media (min-width: 768px) {
+  main {
+    padding: 1rem;
+  }
+  #game-container {
+    gap: 2rem;
+  }
 }
 
 /* =============================================================================
@@ -98,28 +109,30 @@ main {
   flex: 0 0 100%;
   order: -1;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0.25rem;
   align-self: center;
 }
 
 .stats {
   flex: 1 1 40%;
   min-width: 0;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .score-row {
   font-weight: bold;
+  font-size: 0.9rem;
 }
 
 .bar-wrapper {
   position: relative;
-  max-width: 100%;
-  width: 300px;
-  height: 40px;
+  /* Fluid width for mobile */
+  width: 100%;
+  max-width: 300px;
+  height: 30px; /* Slightly smaller for mobile */
   border: 2px solid var(--color-text);
   border-radius: var(--radius-sm);
   background-color: var(--color-danger);
@@ -143,7 +156,7 @@ main {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   color: #fff;
   z-index: 5;
@@ -156,23 +169,20 @@ main {
   align-items: flex-start;
   text-align: left;
 }
-
 #player-stats .bar-text {
-  left: 10px;
+  left: 8px;
 }
 
 #computer-stats {
   align-items: flex-end;
   text-align: right;
 }
-
 #computer-stats .bar {
   right: 0;
   left: auto;
 }
-
 #computer-stats .bar-text {
-  right: 10px;
+  right: 8px;
 }
 
 @media (min-width: 768px) {
@@ -182,15 +192,23 @@ main {
     align-items: end;
     gap: 0;
   }
-
   #game-progress-container {
     order: 0;
     padding: 0 2rem;
     min-width: 180px;
   }
-
   .stats {
     width: auto;
+    gap: 0.5rem;
+  }
+  .bar-wrapper {
+    height: 40px;
+  }
+  .bar-text {
+    font-size: 1.1rem;
+  }
+  .score-row {
+    font-size: 1rem;
   }
 }
 
@@ -205,13 +223,16 @@ main {
   justify-content: center;
   align-items: center;
   width: 100%;
-  gap: 0.75rem;
+  gap: 0.5rem; /* Tight gap for mobile */
 }
 
 .card,
 .card-button {
-  flex: 0 1 120px;
-  width: 100%;
+  /* Flexible sizing for mobile fitting (375px width support) */
+  flex: 1 1 0;
+  min-width: 80px;
+  max-width: 130px;
+
   aspect-ratio: 2/3;
   perspective: 1200px;
   background: transparent;
@@ -252,7 +273,7 @@ main {
 }
 
 .card-back {
-  transform: rotateY(0deg) translateZ(1px); /* Push slightly toward user */
+  transform: rotateY(0deg) translateZ(1px);
   backface-visibility: hidden;
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -303,13 +324,15 @@ main {
   cursor: default;
 }
 
-.card-button:not(:disabled):hover {
-  transform: translateY(-5px);
-}
-
-.card-button:not(:disabled):hover .card-front {
-  border-color: rgba(0, 0, 0, 0.3);
-  background-color: #fff;
+/* Hover effects only on devices that support hover (not touch) */
+@media (hover: hover) {
+  .card-button:not(:disabled):hover {
+    transform: translateY(-5px);
+  }
+  .card-button:not(:disabled):hover .card-front {
+    border-color: rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+  }
 }
 
 .card-button:disabled {
@@ -331,13 +354,13 @@ main {
 }
 
 .icon {
-  font-size: 2.5rem;
+  font-size: 2.25rem; /* Smaller for mobile */
   line-height: 1;
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
 }
 
 .label {
-  font-size: 0.7rem;
+  font-size: 0.65rem; /* Smaller for mobile */
   font-weight: 700;
   color: #666;
   text-transform: uppercase;
@@ -345,11 +368,11 @@ main {
 }
 
 .vs-label {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: #ddd;
   font-style: italic;
-  margin: 0 0.5rem;
+  margin: 0 0.25rem;
 }
 
 @media (min-width: 768px) {
@@ -357,51 +380,59 @@ main {
   #move-reveal {
     gap: 1.5rem;
   }
+  .card,
+  .card-button {
+    flex: 0 1 120px;
+  } /* Return to fixed ideal size */
   .icon {
     font-size: 4rem;
   }
   .label {
     font-size: 0.9rem;
   }
+  .vs-label {
+    font-size: 1.5rem;
+    margin: 0 0.5rem;
+  }
 }
 
+/* Winner Animation */
 .winner-highlight {
-  transform: scale(1.15) rotate(-2deg);
+  transform: scale(1.05) rotate(-2deg); /* Reduce scale slightly for mobile safety */
   box-shadow:
     0 0 0 3px #b8860b,
-    /* Darker Gold/Bronze rim */ 0 0 20px rgba(184, 134, 11, 0.6),
-    /* Muted outer glow */ inset 0 0 20px rgba(255, 215, 0, 0.3); /* Soft inner warmth */
-
+    0 0 20px rgba(184, 134, 11, 0.6),
+    inset 0 0 20px rgba(255, 215, 0, 0.3);
   border-radius: 12px;
   border: none !important;
   z-index: 100;
-
   transition: none !important;
-
-  /* Focus on opacity and shadow rather than brightness */
   animation: pulse-prestige 2s ease-in-out infinite !important;
   position: relative;
-  overflow: hidden; /* Clips the inner sheen */
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .winner-highlight {
+    transform: scale(1.15) rotate(-2deg);
+  }
 }
 
 @keyframes pulse-prestige {
   0%,
   100% {
-    /* State 1: Darker, tighter Bronze glow */
     box-shadow:
       0 0 0 3px #b8860b,
       0 0 15px rgba(184, 134, 11, 0.6);
   }
   50% {
-    /* State 2: Brighter, wider Gold glow */
     box-shadow:
       0 0 0 5px #ffd700,
       0 0 30px rgba(255, 215, 0, 0.8),
-      inset 0 0 10px rgba(255, 255, 255, 0.5); /* Inner shine boost */
+      inset 0 0 10px rgba(255, 255, 255, 0.5);
   }
 }
 
-/* The "Casino Sheen" effect */
 .winner-highlight::after {
   content: "";
   position: absolute;
@@ -432,7 +463,7 @@ main {
   perspective: 1200px;
 }
 
-/* 1. Initial State (Off-screen) */
+/* Initial States */
 .card.entering-player {
   transform: translateX(-150%) rotate(-10deg);
   opacity: 0;
@@ -448,26 +479,18 @@ main {
   opacity: 1;
 }
 
-/* Defeated: Dimmed, Grayscale, Fallen, and Shrunken */
+/* Defeated State */
 .card-defeated {
-  /* Grayscale for the MK 'Fatality' feel, dimmed for the casino 'lights out' feel */
   filter: grayscale(1) brightness(0.3) sepia(0.1) !important;
   opacity: 0.6;
-
-  /* 1. translateY(40px): Drops it further 'onto the table'
-     2. rotate: Multiplying by -20deg tilts it AWAY from center
-     3. scale(0.85): Makes the card physically smaller
-  */
   transform: translateY(40px) rotate(calc(var(--facing, 1) * -20deg))
     scale(0.85) !important;
-
   transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
   box-shadow: none !important;
   pointer-events: none;
-  z-index: 0; /* Ensure it stays behind the winner and the VS label */
+  z-index: 0;
 }
 
-/* A "Cracked Glass" overlay effect for the loser */
 .card-defeated::before {
   content: "";
   position: absolute;
@@ -513,14 +536,22 @@ main {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
-  max-width: 400px;
+  gap: 1.5rem;
+  max-width: 90%; /* Fluid width */
   width: 100%;
-  padding: 2rem;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .menu-content {
+    max-width: 400px;
+    gap: 2.5rem;
+    padding: 2rem;
+  }
 }
 
 .title-large {
-  font-size: 3rem;
+  font-size: 2rem; /* Smaller for mobile */
   font-weight: 800;
   line-height: 1.1;
   color: var(--color-primary);
@@ -528,10 +559,16 @@ main {
   letter-spacing: -1px;
 }
 
+@media (min-width: 768px) {
+  .title-large {
+    font-size: 3rem;
+  }
+}
+
 .menu-controls {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
 }
 
@@ -541,11 +578,9 @@ button {
   touch-action: manipulation;
 }
 
-/* Standard Focus Handling */
 button:focus {
   outline: none;
 }
-
 button:focus-visible {
   outline: 3px solid var(--color-warning);
   outline-offset: 2px;
@@ -555,7 +590,7 @@ button:focus-visible {
 .btn-primary,
 .btn-secondary,
 #play-again {
-  padding: 0.85rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 700;
@@ -605,19 +640,36 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 250px;
+  /* Min height reduced for mobile vertical constraint */
+  min-height: 180px;
   width: 100%;
-  gap: 1rem;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  #arena {
+    min-height: 250px;
+    gap: 1rem;
+  }
 }
 
 #announcement-container {
   text-align: center;
-  min-height: 2.5rem;
+  min-height: 2rem;
 }
 
 #announcement-container h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   margin: 0;
+}
+
+@media (min-width: 768px) {
+  #announcement-container {
+    min-height: 2.5rem;
+  }
+  #announcement-container h2 {
+    font-size: 1.5rem;
+  }
 }
 
 #status-container {
@@ -626,7 +678,7 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 3rem;
+  min-height: 2.5rem;
 }
 
 /* =============================================================================
@@ -648,7 +700,7 @@ button:focus-visible {
 }
 
 /* =============================================================================
-   8. MOVE ARCHETYPE ANIMATIONS (THE FIGHT STYLES)
+   8. MOVE ARCHETYPE ANIMATIONS
    ============================================================================= */
 
 /* ROCK: The Heavy Slam */
@@ -660,13 +712,11 @@ button:focus-visible {
     transform: translateY(0);
   }
   30% {
-    /* Multiplies rotation by --facing (1 or -1).
-       Player (-5deg) leans left. Computer (5deg) leans right. */
     transform: translateY(-40px) rotate(calc(-5deg * var(--facing, 1)));
-  } /* Wind up */
+  }
   100% {
     transform: translateY(0);
-  } /* Impact */
+  }
 }
 
 /* PAPER: The Enveloping Flow */
@@ -685,7 +735,7 @@ button:focus-visible {
 
 /* SCISSORS: The Sharp Strike */
 .stance-scissors {
-  animation: scissors-strike 0.3s ease-in-out 2; /* Quick double snip */
+  animation: scissors-strike 0.3s ease-in-out 2;
 }
 @keyframes scissors-strike {
   0% {
@@ -703,7 +753,6 @@ button:focus-visible {
 .stance-tara {
   animation: tara-ascend 1.5s ease-in-out infinite alternate;
 }
-
 @keyframes tara-ascend {
   0% {
     transform: translateY(0);
@@ -713,7 +762,7 @@ button:focus-visible {
   }
 }
 
-/* Shake effect for the arena during Rock impacts */
+/* Shake effect */
 .arena-shake {
   animation: shake 0.2s ease-in-out;
 }
@@ -730,7 +779,7 @@ button:focus-visible {
   }
 }
 
-/* Impact: A violent shake and a "crack" flash */
+/* Impact effect */
 .card-impact {
   animation: impact-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   z-index: 50;
