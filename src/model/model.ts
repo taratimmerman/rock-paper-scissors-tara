@@ -246,27 +246,39 @@ export class Model {
   }
 
   private getStandardMoveWeights(): Record<StandardMove, number> {
+    // 1. Establish base weights (The "Safety Net")
     const weights: Record<StandardMove, number> = {
       [MOVES.ROCK]: 1,
       [MOVES.PAPER]: 1,
       [MOVES.SCISSORS]: 1,
     };
 
-    const mostCommon = this.state.mostCommonMove.player;
-    if (!mostCommon) return weights;
+    const playerMostCommon = this.state.mostCommonMove.player;
+    const computerMostCommon = this.state.mostCommonMove.computer;
 
-    const counterMap: Record<StandardMove, StandardMove> = {
-      [MOVES.ROCK]: MOVES.PAPER,
-      [MOVES.PAPER]: MOVES.SCISSORS,
-      [MOVES.SCISSORS]: MOVES.ROCK,
-    };
+    // 2. SCENARIO A: The Player has a pattern. Counter it!
+    if (playerMostCommon) {
+      const counterMap: Record<StandardMove, StandardMove> = {
+        [MOVES.ROCK]: MOVES.PAPER,
+        [MOVES.PAPER]: MOVES.SCISSORS,
+        [MOVES.SCISSORS]: MOVES.ROCK,
+      };
 
-    const counter = counterMap[mostCommon];
-    return {
-      [MOVES.ROCK]: counter === MOVES.ROCK ? 5 : 2,
-      [MOVES.PAPER]: counter === MOVES.PAPER ? 5 : 2,
-      [MOVES.SCISSORS]: counter === MOVES.SCISSORS ? 5 : 2,
-    };
+      const counter = counterMap[playerMostCommon];
+      return {
+        [MOVES.ROCK]: counter === MOVES.ROCK ? 5 : 2,
+        [MOVES.PAPER]: counter === MOVES.PAPER ? 5 : 2,
+        [MOVES.SCISSORS]: counter === MOVES.SCISSORS ? 5 : 2,
+      };
+    }
+
+    // 3. SCENARIO B: The Player is unpredictable.
+    // Fall back to the Computer's own habits.
+    if (computerMostCommon) {
+      weights[computerMostCommon] += 2;
+    }
+
+    return weights;
   }
 
   private chooseWeightedRandomMove(
@@ -296,8 +308,9 @@ export class Model {
     const hasTara = this.getComputerTaraCount() > 0;
     const availableMoves = this.getAvailableMoves(hasTara);
     const weights = this.getComputerMoveWeights(availableMoves);
+    const move = this.chooseWeightedRandomMove(availableMoves, weights);
 
-    return this.chooseWeightedRandomMove(availableMoves, weights);
+    return move;
   }
 
   setPlayerMove(move: Move | null) {

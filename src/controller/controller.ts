@@ -200,8 +200,11 @@ export class Controller {
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
-    this.model.registerPlayerMove(move);
+    // Let the computer choose based on PREVIOUS history
     this.model.chooseComputerMove();
+
+    // Record the player's move for NEXT round's calculations
+    this.model.registerPlayerMove(move);
 
     // 1. Preparation
     this.statusView.setMessage("Locking in move...");
