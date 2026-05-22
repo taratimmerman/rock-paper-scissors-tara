@@ -8,7 +8,6 @@ import { IControlsView } from "../views/controls/IControlsView";
 import { IGameView } from "../views/game/IGameView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
-import { IProgressView } from "../views/progress/IProgressView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { MOVES } from "../utils/dataUtils";
@@ -22,7 +21,6 @@ describe("Controller", () => {
     gameView: jest.Mocked<IGameView>;
     menuView: jest.Mocked<IMenuView>;
     moveRevealView: jest.Mocked<IMoveRevealView>;
-    progressView: jest.Mocked<IProgressView>;
     statsView: jest.Mocked<IStatsView>;
     statusView: jest.Mocked<IStatusView>;
   };
@@ -92,12 +90,12 @@ describe("Controller", () => {
         triggerDefeat: jest.fn().mockResolvedValue(undefined),
         highlightWinner: jest.fn().mockResolvedValue(undefined),
       } as any,
-      progressView: { render: jest.fn(), update: jest.fn() } as any,
       statsView: {
         updateScores: jest.fn(),
         updateTaraCounts: jest.fn(),
         updateMostCommonMoves: jest.fn(),
         updateHealthBar: jest.fn(),
+        updateProgress: jest.fn(),
         toggleGameStatsVisibility: jest.fn(),
       } as any,
       statusView: { render: jest.fn(), setMessage: jest.fn() } as any,

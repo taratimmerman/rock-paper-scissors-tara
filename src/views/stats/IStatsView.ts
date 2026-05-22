@@ -5,7 +5,12 @@ export interface IStatsView {
   updateHealthBar(participant: Participant, health: Health): void;
   updateMostCommonMoves(
     playerMove: Move | null,
-    computerMove: Move | null
+    computerMove: Move | null,
+  ): void;
+  updateProgress(
+    matchNumber: number,
+    roundNumber: number,
+    isVisible: boolean,
   ): void;
   updateScores(playerScore: number, computerScore: number): void;
   updateTaraCounts(playerTara: number, computerTara: number): void;

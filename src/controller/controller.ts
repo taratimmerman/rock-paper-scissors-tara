@@ -4,7 +4,6 @@ import { IControlsView } from "../views/controls/IControlsView";
 import { IGameView } from "../views/game/IGameView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
-import { IProgressView } from "../views/progress/IProgressView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { Move } from "../utils/dataObjectUtils";
@@ -21,7 +20,6 @@ export class Controller {
   private gameView: IGameView;
   private menuView: IMenuView;
   private moveRevealView: IMoveRevealView;
-  private progressView: IProgressView;
   private statsView: IStatsView;
   private statusView: IStatusView;
 
@@ -33,7 +31,6 @@ export class Controller {
       gameView: IGameView;
       menuView: IMenuView;
       moveRevealView: IMoveRevealView;
-      progressView: IProgressView;
       statsView: IStatsView;
       statusView: IStatusView;
     },
@@ -44,7 +41,6 @@ export class Controller {
     this.gameView = views.gameView;
     this.menuView = views.menuView;
     this.moveRevealView = views.moveRevealView;
-    this.progressView = views.progressView;
     this.statsView = views.statsView;
     this.statusView = views.statusView;
   }
@@ -59,11 +55,11 @@ export class Controller {
   }
 
   private updateProgressView(options: { isVisible: boolean }): void {
-    this.progressView.update({
-      matchNumber: this.model.getMatchNumber(),
-      roundNumber: this.model.getRoundNumber(),
-      isVisible: options.isVisible,
-    });
+    this.statsView.updateProgress(
+      this.model.getMatchNumber(),
+      this.model.getRoundNumber(),
+      options.isVisible,
+    );
   }
 
   private updateScoreView(): void {
@@ -283,11 +279,11 @@ export class Controller {
 
     this.menuView.render({ isMatchActive });
 
-    this.progressView.render({
-      matchNumber: this.model.getMatchNumber(),
-      roundNumber: this.model.getRoundNumber(),
-      isVisible: false,
-    });
+    this.statsView.updateProgress(
+      this.model.getMatchNumber(),
+      this.model.getRoundNumber(),
+      false,
+    );
 
     this.announcementView.render({ message: "" });
     this.statusView.render({ message: "" });
