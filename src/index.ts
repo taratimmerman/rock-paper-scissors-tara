@@ -6,7 +6,6 @@ import ControlsView from "./views/controls/ControlsView";
 import GameView from "./views/game/GameView";
 import MenuView from "./views/menu/MenuView";
 import MoveRevealView from "./views/moveReveal/MoveRevealView";
-import ProgressView from "./views/progress/ProgressView";
 import StatsView from "./views/stats/StatsView";
 import StatusView from "./views/status/StatusView";
 
@@ -19,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     gameView: new GameView(),
     menuView: new MenuView(),
     moveRevealView: new MoveRevealView(),
-    progressView: new ProgressView(),
     statsView: new StatsView(),
     statusView: new StatusView(),
   });
