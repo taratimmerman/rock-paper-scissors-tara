@@ -128,6 +128,22 @@ describe("StatsView", () => {
       expect(document.getElementById("player-score")!.textContent).toBe("12");
       expect(document.getElementById("computer-score")!.textContent).toBe("10");
     });
+
+    test("handles zero values correctly", () => {
+      view.updateScores(0, 0);
+      expect(document.getElementById("player-score")!.textContent).toBe("00");
+      expect(document.getElementById("computer-score")!.textContent).toBe("00");
+    });
+
+    test("throws an error if the DOM elements are missing", () => {
+      // Clear the DOM to simulate a broken state
+      document.body.innerHTML = "";
+
+      // Wrap in a function to test the error throw from _getElement
+      expect(() => {
+        view.updateScores(1, 1);
+      }).toThrow("Element #player-score not found.");
+    });
   });
 
   describe("updateTaraCounts()", () => {
