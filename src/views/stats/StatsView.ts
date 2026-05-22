@@ -3,7 +3,7 @@ import { IStatsView } from "./IStatsView";
 import { Health, Participant, StandardMove } from "../../utils/dataObjectUtils";
 
 export default class StatsView extends View implements IStatsView {
-  protected declare _parentElement: HTMLElement;
+  declare protected _parentElement: HTMLElement;
 
   private get _computerHealthBarElement() {
     return this._getElement<HTMLElement>("computer-health");
@@ -21,6 +21,10 @@ export default class StatsView extends View implements IStatsView {
     return this._getElement<HTMLElement>("computer-tara");
   }
 
+  private get _matchElement() {
+    return this._getElement<HTMLElement>("match");
+  }
+
   private get _playerHealthBarElement() {
     return this._getElement<HTMLElement>("player-health");
   }
@@ -35,6 +39,14 @@ export default class StatsView extends View implements IStatsView {
 
   private get _playerTaraCountElement() {
     return this._getElement<HTMLElement>("player-tara");
+  }
+
+  private get _progressContainerElement() {
+    return this._getElement<HTMLElement>("game-progress-container");
+  }
+
+  private get _roundElement() {
+    return this._getElement<HTMLElement>("round");
   }
 
   // ===== General Methods =====
@@ -75,10 +87,22 @@ export default class StatsView extends View implements IStatsView {
 
   updateMostCommonMoves(
     player: StandardMove | null,
-    computer: StandardMove | null
+    computer: StandardMove | null,
   ): void {
     this._playerMostCommonMoveElement.textContent = player ?? "N/A";
     this._computerMostCommonMoveElement.textContent = computer ?? "N/A";
+  }
+
+  // ===== Progress Methods =====
+
+  public updateProgress(
+    matchNumber: number,
+    roundNumber: number,
+    isVisible: boolean,
+  ): void {
+    this._matchElement.textContent = `Match ${matchNumber}`;
+    this._roundElement.textContent = `Round ${roundNumber}`;
+    this._toggleVisibility(this._progressContainerElement, isVisible);
   }
 
   // ===== Score Methods =====
