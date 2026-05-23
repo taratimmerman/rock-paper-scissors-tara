@@ -1073,85 +1073,39 @@ describe("Model", () => {
     });
   });
 
-  describe("Model Constructor - Initialization and Migration", () => {
+  describe("Model Constructor - State Initialization", () => {
     let constructorMockGameStorage: jest.Mocked<IGameStorage>;
     let constructorModel: Model;
 
     beforeEach(() => {
       constructorMockGameStorage = {
-        getScore: jest.fn((_participant: Participant) => 0),
-        setScore: jest.fn((_participant: Participant, _score: number) => {}),
-        removeScore: jest.fn((_participant: Participant) => {}),
-
-        getTaraCount: jest.fn((_participant: Participant) => 0),
-        setTaraCount: jest.fn(
-          (_participant: Participant, _count: number) => {},
-        ),
-        removeTaraCount: jest.fn((_participant: Participant) => {}),
-
-        getMostCommonMove: jest.fn((_participant: Participant) => null),
-        setMostCommonMove: jest.fn(
-          (_participant: Participant, _move: StandardMove | null) => {},
-        ),
-        removeMostCommonMove: jest.fn((_participant: Participant) => {}),
-
-        getMoveCounts: jest.fn((_participant: Participant) => ({
-          rock: 0,
-          paper: 0,
-          scissors: 0,
-        })),
-        setMoveCounts: jest.fn(
-          (_participant: Participant, _moveCounts: MoveCount) => {},
-        ),
-        removeMoveCounts: jest.fn((_participant: Participant) => {}),
-
-        getRoundNumber: jest.fn(() => 1),
-        removeHistory: jest.fn((_participant: Participant) => {}),
-
-        getMatch: jest.fn(() => null),
-        setMatch: jest.fn(),
-        getGlobalMatchNumber: jest.fn(() => 1),
-        setGlobalMatchNumber: jest.fn(),
-        removeGlobalMatchNumber: jest.fn(),
-        getOldGlobalRoundNumber: jest.fn(() => null),
-        removeOldGlobalRoundNumber: jest.fn(),
-      } as jest.Mocked<IGameStorage>;
+        getScore: jest.fn(() => 0),
+        getTaraCount: jest.fn(() => 0),
+        getMostCommonMove: jest.fn(() => null),
+        getMoveCounts: jest.fn(() => ({ rock: 0, paper: 0, scissors: 0 })),
+        getMatch: jest.fn(),
+        getGlobalMatchNumber: jest.fn(),
+      } as unknown as jest.Mocked<IGameStorage>;
 
       jest.clearAllMocks();
     });
 
-    // Test Scenario 1: No stored match data (no new match, no old round)
-    test("should initialize with null match state if no match or old round number is stored", () => {
-      // Explicitly set ALL necessary mock return values for this test scenario.
-      // The Model constructor will call these methods to determine initial state.
+    test("should load global match number even if there is no active match (Regression Test)", () => {
       constructorMockGameStorage.getMatch.mockReturnValue(null);
-      constructorMockGameStorage.getOldGlobalRoundNumber.mockReturnValue(null);
-      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(null);
+      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(42);
 
-      // Initialize the model *after* setting up mocks for this specific test.
       constructorModel = new Model(constructorMockGameStorage);
 
       expect(constructorModel["state"].currentMatch).toBeNull();
-      expect(constructorModel["state"].globalMatchNumber).toBeNull();
+      expect(constructorModel["state"].globalMatchNumber).toBe(42);
 
       expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
       expect(
-        constructorMockGameStorage.getOldGlobalRoundNumber,
-      ).toHaveBeenCalledTimes(1);
-      expect(
         constructorMockGameStorage.getGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(constructorMockGameStorage.setMatch).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.removeOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled();
+      ).toHaveBeenCalledTimes(1);
     });
 
-    // Test Scenario 2: Resuming an Existing Match (New format)
-    test("should load existing match and global match number from storage", () => {
+    test("should load both active match and global match number from storage", () => {
       const existingMatch: Match = {
         matchRoundNumber: 3,
         playerHealth: 50,
@@ -1159,14 +1113,11 @@ describe("Model", () => {
       };
       const existingGlobalMatchNumber = 5;
 
-      // Set up specific mock return values *before* the model is re-initialized for this test
       constructorMockGameStorage.getMatch.mockReturnValue(existingMatch);
       constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(
         existingGlobalMatchNumber,
       );
-      constructorMockGameStorage.getOldGlobalRoundNumber.mockReturnValue(null); // Explicitly ensure this is null for this path
 
-      // Re-initialize the model *after* setting up mocks for this specific test
       constructorModel = new Model(constructorMockGameStorage);
 
       expect(constructorModel["state"].currentMatch).toEqual(existingMatch);
@@ -1174,70 +1125,16 @@ describe("Model", () => {
         existingGlobalMatchNumber,
       );
 
-      expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(2);
-      expect(
-        constructorMockGameStorage.getGlobalMatchNumber,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.getOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled(); // Should NOT be called
-      expect(constructorMockGameStorage.setMatch).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.removeOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled();
-    });
-
-    // Test Scenario 3: Migration from Old Global Round Number
-    test("should migrate old round number data to a new match object", () => {
-      const oldRoundNumber = 7;
-      constructorMockGameStorage.getMatch.mockReturnValue(null); // Ensure no new match
-      constructorMockGameStorage.getOldGlobalRoundNumber.mockReturnValue(
-        oldRoundNumber,
-      ); // Old round number exists
-
-      // Re-initialize for this specific test's mocks
-      constructorModel = new Model(constructorMockGameStorage);
-
-      expect(constructorModel["state"].currentMatch).toEqual({
-        matchRoundNumber: oldRoundNumber,
-        playerHealth: INITIAL_HEALTH,
-        computerHealth: INITIAL_HEALTH,
-        initialHealth: INITIAL_HEALTH,
-        damagePerLoss: DAMAGE_PER_LOSS,
-      });
-      expect(constructorModel["state"].globalMatchNumber).toBe(1);
-
       expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
       expect(
-        constructorMockGameStorage.getOldGlobalRoundNumber,
-      ).toHaveBeenCalledTimes(1);
-      expect(constructorMockGameStorage.setMatch).toHaveBeenCalledTimes(1);
-      expect(constructorMockGameStorage.setMatch).toHaveBeenCalledWith(
-        constructorModel["state"].currentMatch,
-      );
-      expect(
-        constructorMockGameStorage.removeOldGlobalRoundNumber,
-      ).toHaveBeenCalledTimes(1);
-      expect(
         constructorMockGameStorage.getGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
       ).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
-      ).toHaveBeenCalledWith(1);
     });
 
-    // Test Scenario 4: Old Global Round Number is Invalid (e.g., 0 or null from parse error)
-    test("should have no match data if old round number data is invalid or null", () => {
-      constructorMockGameStorage.getMatch.mockReturnValue(null); // Ensure no new match
-      constructorMockGameStorage.getOldGlobalRoundNumber.mockReturnValue(0); // Simulate invalid old data
+    test("should initialize with null match and match number if storage is empty", () => {
+      constructorMockGameStorage.getMatch.mockReturnValue(null);
+      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(null);
 
-      // Re-initialize for this specific test's mocks
       constructorModel = new Model(constructorMockGameStorage);
 
       expect(constructorModel["state"].currentMatch).toBeNull();
@@ -1245,76 +1142,8 @@ describe("Model", () => {
 
       expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
       expect(
-        constructorMockGameStorage.getOldGlobalRoundNumber,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.removeOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled();
-      expect(constructorMockGameStorage.setMatch).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.getGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-    });
-
-    // Test Scenario 5: Invalid Match Data (getMatch returns null due to parse error)
-    test("should initialize no match data if stored currentMatch data is invalid and no old round data exists", () => {
-      constructorMockGameStorage.getMatch.mockReturnValue(null); // Simulate parse error from storage
-      constructorMockGameStorage.getOldGlobalRoundNumber.mockReturnValue(null); // No old data to fall back on
-
-      // Re-initialize for this specific test's mocks
-      constructorModel = new Model(constructorMockGameStorage);
-
-      expect(constructorModel["state"].currentMatch).toBeNull();
-      expect(constructorModel["state"].globalMatchNumber).toBeNull();
-
-      expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.getOldGlobalRoundNumber,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(constructorMockGameStorage.setMatch).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.removeOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled();
-    });
-
-    // Test Scenario 6: Global Match Number Data is Invalid (getGlobalMatchNumber returns default 1)
-    test("should still load active match, but default global match number if its data is invalid", () => {
-      const existingMatch: Match = {
-        matchRoundNumber: 1,
-        playerHealth: 100,
-        computerHealth: 100,
-      };
-
-      constructorMockGameStorage.getMatch.mockReturnValue(existingMatch);
-      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(1); // Simulate invalid data returning default 1
-      constructorMockGameStorage.getOldGlobalRoundNumber.mockReturnValue(null); // Not checked in this path
-
-      // Re-initialize for this specific test's mocks
-      constructorModel = new Model(constructorMockGameStorage);
-
-      expect(constructorModel["state"].currentMatch).toEqual(existingMatch);
-      expect(constructorModel["state"].globalMatchNumber).toBe(1);
-
-      expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(2);
-      expect(
         constructorMockGameStorage.getGlobalMatchNumber,
       ).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.getOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled();
-      expect(constructorMockGameStorage.setMatch).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.setGlobalMatchNumber,
-      ).not.toHaveBeenCalled();
-      expect(
-        constructorMockGameStorage.removeOldGlobalRoundNumber,
-      ).not.toHaveBeenCalled();
     });
   });
 

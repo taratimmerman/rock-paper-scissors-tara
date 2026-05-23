@@ -250,7 +250,6 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
-    console.log(this.model.getMatchNumber());
     this.menuView.render({ isMatchActive });
 
     this.announcementView.render({ message: "" });
@@ -258,7 +257,6 @@ export class Controller {
 
     this.updateControlsView();
     this.updateStatsView();
-    console.log(this.model.getMatchNumber());
 
     this.statsView.toggleGameStatsVisibility(false);
     this.controlsView.toggleVisibility(false);
