@@ -35,11 +35,7 @@ export default class StatsView
       computerMostCommonMove,
       matchNumber,
       roundNumber,
-      isProgressVisible,
     } = this._data;
-
-    const progressClass = isProgressVisible ? "" : "hidden";
-    const progressInert = isProgressVisible ? "" : "inert";
 
     return `
       <aside id="player-stats" class="stats">
@@ -52,7 +48,7 @@ export default class StatsView
         <p><small><span>Common: </span><span>${playerMostCommonMove ?? "–"}</span></small></p>
       </aside>
 
-      <section id="game-progress-container" class="${progressClass}" ${progressInert}>
+      <section id="game-progress-container">
         <h2>Match ${matchNumber}</h2>
         <h3>Round ${roundNumber}</h3>
       </section>

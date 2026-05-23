@@ -71,7 +71,7 @@ export class Model {
       PARTICIPANTS.COMPUTER,
     );
 
-    this._loadOrMigrateMatchState();
+    this._loadMatchState();
   }
 
   // ===== General Methods =====
@@ -450,26 +450,9 @@ export class Model {
     this.setMatchNumber(this.getMatchNumber() + 1);
   }
 
-  private _loadOrMigrateMatchState(): void {
-    if (this.isMatchActive()) {
-      this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
-      this.state.currentMatch = this.gameStorage.getMatch();
-      return;
-    }
-    const oldRound = this.gameStorage.getOldGlobalRoundNumber();
-    if (oldRound !== null && oldRound > 0) {
-      const match = {
-        matchRoundNumber: oldRound,
-        playerHealth: INITIAL_HEALTH,
-        computerHealth: INITIAL_HEALTH,
-        initialHealth: INITIAL_HEALTH,
-        damagePerLoss: DAMAGE_PER_LOSS,
-      };
-      this.setMatch(match);
-      this.gameStorage.removeOldGlobalRoundNumber();
-      this.state.globalMatchNumber = 1;
-      this.gameStorage.setGlobalMatchNumber(1);
-    }
+  private _loadMatchState(): void {
+    this.state.globalMatchNumber = this.gameStorage.getGlobalMatchNumber();
+    this.state.currentMatch = this.gameStorage.getMatch();
   }
 
   // ===== Health Methods =====

@@ -27,7 +27,6 @@ describe("StatsView", () => {
       computerMostCommonMove: null,
       matchNumber: 1,
       roundNumber: 1,
-      isProgressVisible: true,
     };
   });
 
@@ -127,25 +126,6 @@ describe("StatsView", () => {
         document.querySelector("#computer-stats small span:last-child")!
           .textContent,
       ).toBe(MOVES.PAPER);
-    });
-
-    test("toggles progress container visibility based on isProgressVisible", () => {
-      const progressContainer = document.getElementById(
-        "game-progress-container",
-      )!;
-
-      // Initially true (from beforeEach)
-      expect(progressContainer.classList.contains("hidden")).toBe(false);
-
-      // Update to false
-      view.update({ ...defaultData, isProgressVisible: false });
-      expect(progressContainer.classList.contains("hidden")).toBe(true);
-      expect(progressContainer.hasAttribute("inert")).toBe(true);
-
-      // Update back to true
-      view.update({ ...defaultData, isProgressVisible: true });
-      expect(progressContainer.classList.contains("hidden")).toBe(false);
-      expect(progressContainer.hasAttribute("inert")).toBe(false);
     });
   });
 });

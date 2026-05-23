@@ -54,7 +54,7 @@ export class Controller {
     });
   }
 
-  private updateStatsView(options: { isProgressVisible?: boolean } = {}): void {
+  private updateStatsView(): void {
     const data: StatsViewData = {
       playerHealth: this.model.getHealth(PARTICIPANTS.PLAYER) ?? 100,
       computerHealth: this.model.getHealth(PARTICIPANTS.COMPUTER) ?? 100,
@@ -64,9 +64,8 @@ export class Controller {
       computerTara: this.model.getComputerTaraCount() || 0,
       playerMostCommonMove: this.model.getPlayerMostCommonMove(),
       computerMostCommonMove: this.model.getComputerMostCommonMove(),
-      matchNumber: this.model.getMatchNumber() || 1,
-      roundNumber: this.model.getRoundNumber() || 1,
-      isProgressVisible: options.isProgressVisible ?? true,
+      matchNumber: this.model.getMatchNumber(),
+      roundNumber: this.model.getRoundNumber(),
     };
 
     if (!this.statsView.hasData) {
@@ -78,6 +77,7 @@ export class Controller {
 
   private async startGame(): Promise<void> {
     this.model.setDefaultMatchData();
+    this.updateStatsView();
 
     this.resetArenaVisuals();
     this.statusView.setMessage("Get ready...");
@@ -111,11 +111,10 @@ export class Controller {
 
       this.announcementView.setMessage(resultMessage);
 
-      this.model.incrementMatchNumber();
-
       this.updateStatsView();
       this.updateControlsView();
 
+      this.model.incrementMatchNumber();
       this.model.setMatch(null);
       return;
     }
@@ -138,7 +137,7 @@ export class Controller {
     this.moveRevealView.toggleVisibility(false);
 
     this.updateControlsView();
-    this.updateStatsView({ isProgressVisible: true });
+    this.updateStatsView();
 
     this.statusView.setMessage("Prepare your next move...");
 
@@ -155,7 +154,10 @@ export class Controller {
     this.model.resetMatchData();
 
     this.menuView.updateMenu({ isMatchActive: false });
-    this.updateStatsView({ isProgressVisible: false });
+    this.menuView.bindStartMatch(() => this.startGame());
+    this.menuView.bindResetGame(() => this.resetGameState());
+
+    this.updateStatsView();
 
     this.moveRevealView.toggleVisibility(false);
     this.controlsView.toggleVisibility(false);
@@ -164,7 +166,7 @@ export class Controller {
   private resetArenaVisuals(): void {
     this.moveRevealView.clear();
     this.announcementView.setMessage("");
-    this.updateStatsView({ isProgressVisible: true });
+    this.updateStatsView();
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
@@ -248,16 +250,16 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
-
+    console.log(this.model.getMatchNumber());
     this.menuView.render({ isMatchActive });
 
     this.announcementView.render({ message: "" });
     this.statusView.render({ message: "" });
 
     this.updateControlsView();
-    this.updateStatsView({ isProgressVisible: false });
+    this.updateStatsView();
+    console.log(this.model.getMatchNumber());
 
-    this.menuView.updateMenu({ isMatchActive });
     this.statsView.toggleGameStatsVisibility(false);
     this.controlsView.toggleVisibility(false);
     this.menuView.toggleMenuVisibility(true);

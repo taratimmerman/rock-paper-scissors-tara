@@ -11,7 +11,6 @@ export interface StatsViewData {
   computerMostCommonMove: Move | null;
   matchNumber: number;
   roundNumber: number;
-  isProgressVisible: boolean;
 }
 
 export interface IStatsView {
