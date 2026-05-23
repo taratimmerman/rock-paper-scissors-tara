@@ -1,12 +1,11 @@
 import { IModel } from "../model/IModel";
-import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
+import { IArenaView } from "../views/arena/IArenaView";
 import { IControlsView } from "../views/controls/IControlsView";
 import { IGameView } from "../views/game/IGameView";
 import { IMenuView } from "../views/menu/IMenuView";
-import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IStatsView, StatsViewData } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
-import { Move } from "../utils/dataObjectUtils";
+import { Move, Participant } from "../utils/dataObjectUtils";
 import {
   MOVE_DISPLAY_NAMES,
   PARTICIPANTS,
@@ -15,32 +14,29 @@ import {
 
 export class Controller {
   private model: IModel;
-  private announcementView: IAnnouncementView;
+  private arenaView: IArenaView;
   private controlsView: IControlsView;
   private gameView: IGameView;
   private menuView: IMenuView;
-  private moveRevealView: IMoveRevealView;
   private statsView: IStatsView;
   private statusView: IStatusView;
 
   constructor(
     model: IModel,
     views: {
-      announcementView: IAnnouncementView;
+      arenaView: IArenaView;
       controlsView: IControlsView;
       gameView: IGameView;
       menuView: IMenuView;
-      moveRevealView: IMoveRevealView;
       statsView: IStatsView;
       statusView: IStatusView;
     },
   ) {
     this.model = model;
-    this.announcementView = views.announcementView;
+    this.arenaView = views.arenaView;
     this.controlsView = views.controlsView;
     this.gameView = views.gameView;
     this.menuView = views.menuView;
-    this.moveRevealView = views.moveRevealView;
     this.statsView = views.statsView;
     this.statusView = views.statusView;
   }
@@ -90,26 +86,27 @@ export class Controller {
     await this.handleNextRound();
   }
 
-  private endRound(roundResult: string): void {
+  private endRound(): void {
     const matchActuallyEnded = this.model.isMatchOver();
     const isDoubleKO = this.model.isDoubleKO();
 
     this.updateStatsView();
-    let resultMessage = roundResult.toUpperCase();
-
-    this.statusView.setMessage(
-      `You played ${MOVE_DISPLAY_NAMES[this.model.getPlayerMove()]}. Computer played ${MOVE_DISPLAY_NAMES[this.model.getComputerMove()]}.`,
-    );
 
     // --- MATCH END ---
     if (matchActuallyEnded) {
       const result = this.model.handleMatchWin();
 
-      resultMessage = isDoubleKO
+      const resultMessage = isDoubleKO
         ? "DOUBLE KO! NOBODY WINS!"
         : `${result.toUpperCase()} WON THE MATCH!`;
 
-      this.announcementView.setMessage(resultMessage);
+      // Update the arena view to show the final match message, keeping cards visible
+      this.arenaView.update({
+        phase: "result",
+        playerMoveId: this.model.getPlayerMove(),
+        computerMoveId: this.model.getComputerMove(),
+        announcementMessage: resultMessage,
+      });
 
       this.updateStatsView();
       this.updateControlsView();
@@ -120,9 +117,7 @@ export class Controller {
     }
 
     // --- ROUND CONTINUES ---
-    this.announcementView.setMessage(resultMessage);
     this.updateStatsView();
-
     this.model.increaseRoundNumber();
 
     setTimeout(() => {
@@ -133,8 +128,7 @@ export class Controller {
   private async handleNextRound(): Promise<void> {
     this.model.resetMoves();
 
-    this.announcementView.setMessage("");
-    this.moveRevealView.toggleVisibility(false);
+    this.arenaView.clear();
 
     this.updateControlsView();
     this.updateStatsView();
@@ -159,13 +153,12 @@ export class Controller {
 
     this.updateStatsView();
 
-    this.moveRevealView.toggleVisibility(false);
+    this.arenaView.clear();
     this.controlsView.toggleVisibility(false);
   }
 
   private resetArenaVisuals(): void {
-    this.moveRevealView.clear();
-    this.announcementView.setMessage("");
+    this.arenaView.clear();
     this.updateStatsView();
   }
 
@@ -180,79 +173,46 @@ export class Controller {
     this.statusView.setMessage("Locking in move...");
     await this.controlsView.flipAll(false);
 
-    this.moveRevealView.render({
-      playerMoveId: this.model.getPlayerMove(),
-      computerMoveId: this.model.getComputerMove(),
-    });
-
-    // 2. The Reveal
-    this.moveRevealView.toggleVisibility(true);
-    await this.moveRevealView.animateEntrance();
-    await this.moveRevealView.flipCards();
-
-    // 3. Combat & Drama Sequence
     const pMove = this.model.getPlayerMove();
     const cMove = this.model.getComputerMove();
-
     const roundResult = this.model.evaluateRound();
-
-    if (pMove && cMove) {
-      await this.moveRevealView.playFightAnimations(pMove, cMove);
-
-      if (pMove !== cMove) {
-        const playerWins = this.model.doesMoveBeat(pMove, cMove);
-        await this.executeOutcomeDrama(playerWins);
-      } else {
-        this.updateStatsView();
-        await this.moveRevealView.triggerImpact("both");
-        await this.moveRevealView.triggerDefeat("both");
-      }
-    }
-
-    this.endRound(roundResult);
-  }
-
-  /**
-   * Handles the visual "aftermath" of the fight.
-   */
-  private async executeOutcomeDrama(playerWins: boolean): Promise<void> {
     const isDoubleKO = this.model.isDoubleKO();
 
-    if (isDoubleKO) {
-      await this.executeDoubleKODrama();
-      return;
+    let winner: Participant | "tie" = "tie";
+    if (pMove !== cMove) {
+      winner = this.model.doesMoveBeat(pMove, cMove)
+        ? PARTICIPANTS.PLAYER
+        : PARTICIPANTS.COMPUTER;
     }
 
-    const winner = playerWins ? "player" : "computer";
-    const loser = playerWins ? "computer" : "player";
+    this.statusView.setMessage(
+      `You played ${MOVE_DISPLAY_NAMES[this.model.getPlayerMove()]}. Computer played ${MOVE_DISPLAY_NAMES[this.model.getComputerMove()]}.`,
+    );
 
-    this.statusView.setMessage(`${winner.toUpperCase()} LANDS A BLOW!`);
-    const impactPromise = this.moveRevealView.triggerImpact(loser);
+    // 2. Play out the entire visual sequence via the View
+    await this.arenaView.playRoundSequence({
+      phase: "waiting", // Starting state, the View will progress this
+      playerMoveId: pMove,
+      computerMoveId: cMove,
+      winner: winner,
+      isDoubleKO: isDoubleKO,
+      announcementMessage: isDoubleKO
+        ? "MUTUAL DESTRUCTION!"
+        : winner !== "tie"
+          ? `${winner.toUpperCase()} LANDS A BLOW!`
+          : roundResult.toUpperCase(),
+    });
+
+    // 3. Process game logic end-of-round
     this.updateStatsView();
-    await impactPromise;
-
-    await Promise.all([
-      this.moveRevealView.highlightWinner(winner),
-      this.moveRevealView.triggerDefeat(loser),
-    ]);
-  }
-
-  private async executeDoubleKODrama(): Promise<void> {
-    this.statusView.setMessage("MUTUAL DESTRUCTION!");
-
-    const impactPromise = this.moveRevealView.triggerImpact("both");
-
-    this.updateStatsView();
-    await impactPromise;
-
-    await this.moveRevealView.triggerDefeat("both");
+    this.endRound();
   }
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
     this.menuView.render({ isMatchActive });
 
-    this.announcementView.render({ message: "" });
+    this.arenaView.render({ phase: "waiting" });
     this.statusView.render({ message: "" });
 
     this.updateControlsView();
