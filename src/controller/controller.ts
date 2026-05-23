@@ -4,7 +4,7 @@ import { IControlsView } from "../views/controls/IControlsView";
 import { IGameView } from "../views/game/IGameView";
 import { IMenuView } from "../views/menu/IMenuView";
 import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
-import { IStatsView } from "../views/stats/IStatsView";
+import { IStatsView, StatsViewData } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { Move } from "../utils/dataObjectUtils";
 import {
@@ -54,45 +54,30 @@ export class Controller {
     });
   }
 
-  private updateProgressView(options: { isVisible: boolean }): void {
-    this.statsView.updateProgress(
-      this.model.getMatchNumber(),
-      this.model.getRoundNumber(),
-      options.isVisible,
-    );
-  }
+  private updateStatsView(): void {
+    const data: StatsViewData = {
+      playerHealth: this.model.getHealth(PARTICIPANTS.PLAYER) ?? 100,
+      computerHealth: this.model.getHealth(PARTICIPANTS.COMPUTER) ?? 100,
+      playerScore: this.model.getPlayerScore() || 0,
+      computerScore: this.model.getComputerScore() || 0,
+      playerTara: this.model.getPlayerTaraCount() || 0,
+      computerTara: this.model.getComputerTaraCount() || 0,
+      playerMostCommonMove: this.model.getPlayerMostCommonMove(),
+      computerMostCommonMove: this.model.getComputerMostCommonMove(),
+      matchNumber: this.model.getMatchNumber(),
+      roundNumber: this.model.getRoundNumber(),
+    };
 
-  private updateScoreView(): void {
-    this.statsView.updateScores(
-      this.model.getPlayerScore(),
-      this.model.getComputerScore(),
-    );
-  }
-
-  private updateTaraView(): void {
-    this.statsView.updateTaraCounts(
-      this.model.getPlayerTaraCount(),
-      this.model.getComputerTaraCount(),
-    );
-  }
-
-  private updateMostCommonMoveView(): void {
-    this.statsView.updateMostCommonMoves(
-      this.model.getPlayerMostCommonMove(),
-      this.model.getComputerMostCommonMove(),
-    );
-  }
-
-  private updateHealthView(): void {
-    const playerHealth = this.model.getHealth(PARTICIPANTS.PLAYER);
-    const computerHealth = this.model.getHealth(PARTICIPANTS.COMPUTER);
-
-    this.statsView.updateHealthBar(PARTICIPANTS.PLAYER, playerHealth);
-    this.statsView.updateHealthBar(PARTICIPANTS.COMPUTER, computerHealth);
+    if (!this.statsView.hasData) {
+      this.statsView.render(data);
+    } else {
+      this.statsView.update(data);
+    }
   }
 
   private async startGame(): Promise<void> {
     this.model.setDefaultMatchData();
+    this.updateStatsView();
 
     this.resetArenaVisuals();
     this.statusView.setMessage("Get ready...");
@@ -109,7 +94,7 @@ export class Controller {
     const matchActuallyEnded = this.model.isMatchOver();
     const isDoubleKO = this.model.isDoubleKO();
 
-    this.updateHealthView();
+    this.updateStatsView();
     let resultMessage = roundResult.toUpperCase();
 
     this.statusView.setMessage(
@@ -126,22 +111,17 @@ export class Controller {
 
       this.announcementView.setMessage(resultMessage);
 
-      this.model.incrementMatchNumber();
-
-      this.updateScoreView();
-      this.updateMostCommonMoveView();
-      this.updateTaraView();
+      this.updateStatsView();
       this.updateControlsView();
 
+      this.model.incrementMatchNumber();
       this.model.setMatch(null);
       return;
     }
 
     // --- ROUND CONTINUES ---
     this.announcementView.setMessage(resultMessage);
-    this.updateScoreView();
-    this.updateTaraView();
-    this.updateMostCommonMoveView();
+    this.updateStatsView();
 
     this.model.increaseRoundNumber();
 
@@ -157,7 +137,7 @@ export class Controller {
     this.moveRevealView.toggleVisibility(false);
 
     this.updateControlsView();
-    this.updateProgressView({ isVisible: true });
+    this.updateStatsView();
 
     this.statusView.setMessage("Prepare your next move...");
 
@@ -167,32 +147,26 @@ export class Controller {
 
   async resetGameState(): Promise<void> {
     this.model.resetScores();
-    this.model.resetMoves();
     this.model.resetTaras();
     this.model.resetHistories();
     this.model.resetBothMoveCounts();
     this.model.resetMostCommonMoves();
     this.model.resetMatchData();
 
-    const isMatchActive = this.model.isMatchActive();
+    this.menuView.updateMenu({ isMatchActive: false });
+    this.menuView.bindStartMatch(() => this.startGame());
+    this.menuView.bindResetGame(() => this.resetGameState());
 
-    this.updateScoreView();
-    this.updateTaraView();
-    this.updateHealthView();
-    this.updateMostCommonMoveView();
-    this.updateControlsView();
+    this.updateStatsView();
 
     this.moveRevealView.toggleVisibility(false);
     this.controlsView.toggleVisibility(false);
-    this.menuView.updateMenu({ isMatchActive });
-    this.announcementView.setMessage("");
   }
 
   private resetArenaVisuals(): void {
     this.moveRevealView.clear();
     this.announcementView.setMessage("");
-    this.updateProgressView({ isVisible: true });
-    this.updateHealthView();
+    this.updateStatsView();
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
@@ -229,7 +203,7 @@ export class Controller {
         const playerWins = this.model.doesMoveBeat(pMove, cMove);
         await this.executeOutcomeDrama(playerWins);
       } else {
-        this.updateHealthView();
+        this.updateStatsView();
         await this.moveRevealView.triggerImpact("both");
         await this.moveRevealView.triggerDefeat("both");
       }
@@ -254,7 +228,7 @@ export class Controller {
 
     this.statusView.setMessage(`${winner.toUpperCase()} LANDS A BLOW!`);
     const impactPromise = this.moveRevealView.triggerImpact(loser);
-    this.updateHealthView();
+    this.updateStatsView();
     await impactPromise;
 
     await Promise.all([
@@ -268,7 +242,7 @@ export class Controller {
 
     const impactPromise = this.moveRevealView.triggerImpact("both");
 
-    this.updateHealthView();
+    this.updateStatsView();
     await impactPromise;
 
     await this.moveRevealView.triggerDefeat("both");
@@ -276,24 +250,14 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
-
     this.menuView.render({ isMatchActive });
-
-    this.statsView.updateProgress(
-      this.model.getMatchNumber(),
-      this.model.getRoundNumber(),
-      false,
-    );
 
     this.announcementView.render({ message: "" });
     this.statusView.render({ message: "" });
 
     this.updateControlsView();
-    this.updateScoreView();
-    this.updateTaraView();
-    this.updateMostCommonMoveView();
+    this.updateStatsView();
 
-    this.menuView.updateMenu({ isMatchActive });
     this.statsView.toggleGameStatsVisibility(false);
     this.controlsView.toggleVisibility(false);
     this.menuView.toggleMenuVisibility(true);

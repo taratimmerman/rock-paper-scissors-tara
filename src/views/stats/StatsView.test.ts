@@ -3,43 +3,37 @@
  */
 import { MOVES } from "../../utils/dataUtils";
 import StatsView from "./StatsView";
+import { StatsViewData } from "./IStatsView";
 
 describe("StatsView", () => {
   let view: StatsView;
+  let defaultData: StatsViewData;
 
   beforeEach(() => {
-    // Scaffold the full expected DOM for all StatsView methods
-    document.body.innerHTML = `
-      <section id="game-stats">
-        <aside id="player-stats">
-          <span id="player-score">00</span>
-          <div id="player-health"></div>
-          <span id="player-tara">0</span>
-          <span id="player-most-common-move">–</span>
-        </aside>
-        
-        <section id="game-progress-container">
-          <h2 id="match"></h2>
-          <h3 id="round"></h3>
-        </section>
-        
-        <aside id="computer-stats">
-          <span id="computer-score">00</span>
-          <div id="computer-health"></div>
-          <span id="computer-tara">0</span>
-          <span id="computer-most-common-move">–</span>
-        </aside>
-      </section>
-    `;
+    // 1. Scaffold only the mount point, just like the real index.html
+    document.body.innerHTML = `<section id="game-stats"></section>`;
 
     view = new StatsView();
 
-    // In StatsView, render() just hooks up the _parentElement
-    view.render();
+    // 2. Setup baseline data for rendering
+    defaultData = {
+      playerHealth: 100,
+      computerHealth: 100,
+      playerScore: 0,
+      computerScore: 0,
+      playerTara: 0,
+      computerTara: 0,
+      playerMostCommonMove: null,
+      computerMostCommonMove: null,
+      matchNumber: 1,
+      roundNumber: 1,
+    };
   });
 
   describe("toggleGameStatsVisibility()", () => {
     test("adds or removes the hidden class on the main stats container", () => {
+      // Must render first so the parent element is cached
+      view.render(defaultData);
       const statsContainer = document.getElementById("game-stats")!;
 
       view.toggleGameStatsVisibility(false);
@@ -50,107 +44,88 @@ describe("StatsView", () => {
     });
   });
 
-  describe("updateProgress()", () => {
-    test("updates text content while preserving DOM nodes", () => {
-      const matchText = document.getElementById("match")!;
-      const roundText = document.getElementById("round")!;
+  describe("render()", () => {
+    test("generates and injects the full markup based on state", () => {
+      view.render(defaultData);
 
-      // Store current references to check persistence
-      const oldMatchRef = matchText;
-
-      view.updateProgress(2, 5, true);
-
-      expect(matchText.textContent).toBe("Match 2");
-      expect(roundText.textContent).toBe("Round 5");
-
-      // Verify node persistence (no innerHTML wiping)
-      expect(document.getElementById("match")).toBe(oldMatchRef);
-    });
-
-    test("toggles visibility of the progress container", () => {
-      const progressContainer = document.getElementById(
-        "game-progress-container",
-      )!;
-
-      view.updateProgress(1, 1, false);
-      expect(progressContainer.classList.contains("hidden")).toBe(true);
-
-      view.updateProgress(1, 1, true);
-      expect(progressContainer.classList.contains("hidden")).toBe(false);
-    });
-  });
-
-  describe("updateHealthBar()", () => {
-    test("updates the inline width style of the player health bar", () => {
-      view.updateHealthBar("player", 75);
-      const playerHealth = document.getElementById("player-health")!;
-      expect(playerHealth.style.width).toBe("75%");
-    });
-
-    test("updates the inline width style of the computer health bar", () => {
-      view.updateHealthBar("computer", 40);
-      const computerHealth = document.getElementById("computer-health")!;
-      expect(computerHealth.style.width).toBe("40%");
-    });
-  });
-
-  describe("updateMostCommonMoves()", () => {
-    test("updates text content for both participants", () => {
-      view.updateMostCommonMoves(MOVES.ROCK, MOVES.PAPER);
+      expect(document.getElementById("player-health")!.style.width).toBe(
+        "100%",
+      );
+      expect(document.getElementById("computer-health")!.style.width).toBe(
+        "100%",
+      );
+      // Finds the <span> inside the score-row
       expect(
-        document.getElementById("player-most-common-move")!.textContent,
+        document.querySelector("#player-stats .score-row span")!.textContent,
+      ).toBe("00");
+      expect(
+        document.querySelector("#game-progress-container h2")!.textContent,
+      ).toBe("Match 1");
+    });
+
+    test("formats null common moves as '–'", () => {
+      view.render(defaultData);
+      // Fix: target the last span
+      expect(
+        document.querySelector("#player-stats small span:last-child")!
+          .textContent,
+      ).toBe("–");
+    });
+  });
+
+  describe("update()", () => {
+    beforeEach(() => {
+      // Render initial state to set up DOM for diffing
+      view.render(defaultData);
+    });
+
+    test("updates health bar width attributes without replacing elements", () => {
+      const oldPlayerHealthBar = document.getElementById("player-health")!;
+
+      const newData = { ...defaultData, playerHealth: 45, computerHealth: 12 };
+      view.update(newData);
+
+      const newPlayerHealthBar = document.getElementById("player-health")!;
+
+      expect(newPlayerHealthBar.style.width).toBe("45%");
+      expect(document.getElementById("computer-health")!.style.width).toBe(
+        "12%",
+      );
+
+      // Crucial check: ensures DOM diffing worked and didn't just wipe innerHTML
+      expect(newPlayerHealthBar).toBe(oldPlayerHealthBar);
+    });
+
+    test("updates scores and pads them correctly", () => {
+      const newData = { ...defaultData, playerScore: 5, computerScore: 12 };
+      view.update(newData);
+
+      expect(
+        document.querySelector("#player-stats .score-row span:first-child")!
+          .textContent,
+      ).toBe("05");
+      expect(
+        document.querySelector("#computer-stats .score-row span:last-child")!
+          .textContent,
+      ).toBe("12");
+    });
+
+    test("updates most common moves", () => {
+      const newData = {
+        ...defaultData,
+        playerMostCommonMove: MOVES.ROCK,
+        computerMostCommonMove: MOVES.PAPER,
+      };
+      view.update(newData);
+
+      expect(
+        document.querySelector("#player-stats small span:last-child")!
+          .textContent,
       ).toBe(MOVES.ROCK);
       expect(
-        document.getElementById("computer-most-common-move")!.textContent,
+        document.querySelector("#computer-stats small span:last-child")!
+          .textContent,
       ).toBe(MOVES.PAPER);
-    });
-
-    test("defaults to 'N/A' if null is passed", () => {
-      view.updateMostCommonMoves(null, null);
-      expect(
-        document.getElementById("player-most-common-move")!.textContent,
-      ).toBe("N/A");
-      expect(
-        document.getElementById("computer-most-common-move")!.textContent,
-      ).toBe("N/A");
-    });
-  });
-
-  describe("updateScores()", () => {
-    test("pads single-digit scores with a leading zero", () => {
-      view.updateScores(5, 9);
-      expect(document.getElementById("player-score")!.textContent).toBe("05");
-      expect(document.getElementById("computer-score")!.textContent).toBe("09");
-    });
-
-    test("does not pad double-digit scores", () => {
-      view.updateScores(12, 10);
-      expect(document.getElementById("player-score")!.textContent).toBe("12");
-      expect(document.getElementById("computer-score")!.textContent).toBe("10");
-    });
-
-    test("handles zero values correctly", () => {
-      view.updateScores(0, 0);
-      expect(document.getElementById("player-score")!.textContent).toBe("00");
-      expect(document.getElementById("computer-score")!.textContent).toBe("00");
-    });
-
-    test("throws an error if the DOM elements are missing", () => {
-      // Clear the DOM to simulate a broken state
-      document.body.innerHTML = "";
-
-      // Wrap in a function to test the error throw from _getElement
-      expect(() => {
-        view.updateScores(1, 1);
-      }).toThrow("Element #player-score not found.");
-    });
-  });
-
-  describe("updateTaraCounts()", () => {
-    test("updates text content with the correct counts", () => {
-      view.updateTaraCounts(3, 1);
-      expect(document.getElementById("player-tara")!.textContent).toBe("3");
-      expect(document.getElementById("computer-tara")!.textContent).toBe("1");
     });
   });
 });

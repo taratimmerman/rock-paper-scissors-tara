@@ -91,11 +91,9 @@ describe("Controller", () => {
         highlightWinner: jest.fn().mockResolvedValue(undefined),
       } as any,
       statsView: {
-        updateScores: jest.fn(),
-        updateTaraCounts: jest.fn(),
-        updateMostCommonMoves: jest.fn(),
-        updateHealthBar: jest.fn(),
-        updateProgress: jest.fn(),
+        hasData: false,
+        render: jest.fn(),
+        update: jest.fn(),
         toggleGameStatsVisibility: jest.fn(),
       } as any,
       statusView: { render: jest.fn(), setMessage: jest.fn() } as any,
@@ -125,7 +123,10 @@ describe("Controller", () => {
       controller.endRound("player wins round");
 
       expect(mockModel.handleMatchWin).toHaveBeenCalled();
-      expect(mockViews.statsView.updateScores).toHaveBeenCalled();
+
+      // Since mockViews.statsView.hasData is false, it should call render instead of update
+      expect(mockViews.statsView.render).toHaveBeenCalled();
+
       expect(mockViews.controlsView.render).toHaveBeenCalledWith(
         expect.objectContaining({
           isMatchOver: true,
@@ -166,7 +167,9 @@ describe("Controller", () => {
 
       expect(mockModel.resetScores).toHaveBeenCalled();
       expect(mockModel.resetMatchData).toHaveBeenCalled();
-      expect(mockViews.statsView.updateScores).toHaveBeenCalled();
+
+      expect(mockViews.statsView.render).toHaveBeenCalled();
+
       expect(mockViews.moveRevealView.toggleVisibility).toHaveBeenCalledWith(
         false,
       );
