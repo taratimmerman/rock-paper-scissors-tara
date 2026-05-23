@@ -3,11 +3,10 @@
  */
 import { Controller } from "./controller";
 import { IModel } from "../model/IModel";
-import { IAnnouncementView } from "../views/announcement/IAnnouncementView";
+import { IArenaView } from "../views/arena/IArenaView";
 import { IControlsView } from "../views/controls/IControlsView";
 import { IGameView } from "../views/game/IGameView";
 import { IMenuView } from "../views/menu/IMenuView";
-import { IMoveRevealView } from "../views/moveReveal/IMoveRevealView";
 import { IStatsView } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { MOVES } from "../utils/dataUtils";
@@ -16,11 +15,10 @@ describe("Controller", () => {
   let controller: Controller;
   let mockModel: jest.Mocked<IModel>;
   let mockViews: {
-    announcementView: jest.Mocked<IAnnouncementView>;
+    arenaView: jest.Mocked<IArenaView>;
     controlsView: jest.Mocked<IControlsView>;
     gameView: jest.Mocked<IGameView>;
     menuView: jest.Mocked<IMenuView>;
-    moveRevealView: jest.Mocked<IMoveRevealView>;
     statsView: jest.Mocked<IStatsView>;
     statusView: jest.Mocked<IStatusView>;
   };
@@ -63,7 +61,12 @@ describe("Controller", () => {
 
     // 2. Setup Mock Views
     mockViews = {
-      announcementView: { render: jest.fn(), setMessage: jest.fn() } as any,
+      arenaView: {
+        render: jest.fn(),
+        clear: jest.fn(),
+        playRoundSequence: jest.fn(),
+        update: jest.fn(),
+      } as any,
       controlsView: {
         render: jest.fn(),
         toggleVisibility: jest.fn(),
@@ -78,17 +81,6 @@ describe("Controller", () => {
         updateMenu: jest.fn(),
         bindStartMatch: jest.fn(),
         bindResetGame: jest.fn(),
-      } as any,
-      moveRevealView: {
-        render: jest.fn(),
-        toggleVisibility: jest.fn(),
-        clear: jest.fn(),
-        animateEntrance: jest.fn().mockResolvedValue(undefined),
-        flipCards: jest.fn().mockResolvedValue(undefined),
-        playFightAnimations: jest.fn().mockResolvedValue(undefined),
-        triggerImpact: jest.fn().mockResolvedValue(undefined),
-        triggerDefeat: jest.fn().mockResolvedValue(undefined),
-        highlightWinner: jest.fn().mockResolvedValue(undefined),
       } as any,
       statsView: {
         hasData: false,
@@ -108,8 +100,7 @@ describe("Controller", () => {
       await controller.startGame();
 
       expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
-      expect(mockViews.moveRevealView.clear).toHaveBeenCalled();
-      expect(mockViews.announcementView.setMessage).toHaveBeenCalledWith("");
+      expect(mockViews.arenaView.clear).toHaveBeenCalled();
       expect(mockViews.gameView.toggleVisibility).toHaveBeenCalledWith(true);
     });
   });
@@ -156,8 +147,7 @@ describe("Controller", () => {
 
       expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);
       expect(mockViews.controlsView.flipAll).toHaveBeenCalledWith(false);
-      expect(mockViews.moveRevealView.render).toHaveBeenCalled();
-      expect(mockViews.moveRevealView.playFightAnimations).toHaveBeenCalled();
+      expect(mockViews.arenaView.playRoundSequence).toHaveBeenCalled();
     });
   });
 
@@ -170,9 +160,7 @@ describe("Controller", () => {
 
       expect(mockViews.statsView.render).toHaveBeenCalled();
 
-      expect(mockViews.moveRevealView.toggleVisibility).toHaveBeenCalledWith(
-        false,
-      );
+      expect(mockViews.arenaView.clear).toHaveBeenCalled();
       expect(mockViews.controlsView.toggleVisibility).toHaveBeenCalledWith(
         false,
       );

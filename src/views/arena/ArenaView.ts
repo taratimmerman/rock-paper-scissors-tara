@@ -2,6 +2,7 @@
 import View from "../View";
 import { IArenaView, ArenaViewData } from "./IArenaView";
 import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
+import { Participant } from "../../utils/dataObjectUtils";
 
 export default class ArenaView
   extends View<ArenaViewData>
@@ -134,5 +135,32 @@ export default class ArenaView
 
   public clear(): void {
     this.render({ phase: "waiting" });
+  }
+
+  public update(data: ArenaViewData): void {
+    this._data = { ...this._data, ...data };
+    this._parentElement.innerHTML = this._generateMarkup();
+
+    // If we are in the result phase and have a winner, re-apply the styles
+    if (data.phase === "result" && data.winner) {
+      this.applyWinnerStyles(data.winner);
+    }
+  }
+
+  private applyWinnerStyles(winner: Participant | "tie"): void {
+    if (winner === "tie") return;
+
+    const pCard = document.getElementById("reveal-player");
+    const cCard = document.getElementById("reveal-computer");
+
+    if (!pCard || !cCard) return;
+
+    if (winner === "player") {
+      pCard.classList.add("winner-highlight");
+      cCard.classList.add("card-defeated");
+    } else if (winner === "computer") {
+      cCard.classList.add("winner-highlight");
+      pCard.classList.add("card-defeated");
+    }
   }
 }

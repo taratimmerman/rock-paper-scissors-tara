@@ -106,6 +106,7 @@ export class Controller {
         playerMoveId: this.model.getPlayerMove(),
         computerMoveId: this.model.getComputerMove(),
         announcementMessage: resultMessage,
+        winner: result as Participant,
       });
 
       this.updateStatsView();
@@ -151,9 +152,7 @@ export class Controller {
     this.menuView.bindStartMatch(() => this.startGame());
     this.menuView.bindResetGame(() => this.resetGameState());
 
-    this.updateStatsView();
-
-    this.arenaView.clear();
+    this.resetArenaVisuals();
     this.controlsView.toggleVisibility(false);
   }
 
