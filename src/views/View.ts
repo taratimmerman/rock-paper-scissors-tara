@@ -3,6 +3,13 @@ export default abstract class View<T = any> {
   protected _parentElement!: HTMLElement;
 
   /**
+   * Returns true if the view has been provided with data.
+   */
+  public get hasData(): boolean {
+    return this._data !== undefined;
+  }
+
+  /**
    * Standard render method used by all views.
    *
    * @param data The state/data needed for the UI render.

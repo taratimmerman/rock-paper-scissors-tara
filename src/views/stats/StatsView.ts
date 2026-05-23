@@ -1,123 +1,71 @@
 import View from "../View";
-import { IStatsView } from "./IStatsView";
-import { Health, Participant, StandardMove } from "../../utils/dataObjectUtils";
+import { IStatsView, StatsViewData } from "./IStatsView";
 
-export default class StatsView extends View implements IStatsView {
+export default class StatsView
+  extends View<StatsViewData>
+  implements IStatsView
+{
   declare protected _parentElement: HTMLElement;
 
-  private get _computerHealthBarElement() {
-    return this._getElement<HTMLElement>("computer-health");
+  private _ensureParentElement(): void {
+    if (!this._parentElement || !document.body.contains(this._parentElement)) {
+      this._parentElement = this._getElement<HTMLElement>("game-stats");
+    }
   }
 
-  private get _computerMostCommonMoveElement() {
-    return this._getElement<HTMLElement>("computer-most-common-move");
+  public render(data: StatsViewData): void {
+    this._ensureParentElement();
+    super.render(data);
   }
 
-  private get _computerScoreElement() {
-    return this._getElement<HTMLElement>("computer-score");
-  }
-
-  private get _computerTaraCountElement() {
-    return this._getElement<HTMLElement>("computer-tara");
-  }
-
-  private get _matchElement() {
-    return this._getElement<HTMLElement>("match");
-  }
-
-  private get _playerHealthBarElement() {
-    return this._getElement<HTMLElement>("player-health");
-  }
-
-  private get _playerMostCommonMoveElement() {
-    return this._getElement<HTMLElement>("player-most-common-move");
-  }
-
-  private get _playerScoreElement() {
-    return this._getElement<HTMLElement>("player-score");
-  }
-
-  private get _playerTaraCountElement() {
-    return this._getElement<HTMLElement>("player-tara");
-  }
-
-  private get _progressContainerElement() {
-    return this._getElement<HTMLElement>("game-progress-container");
-  }
-
-  private get _roundElement() {
-    return this._getElement<HTMLElement>("round");
-  }
-
-  // ===== General Methods =====
-
-  // Satisfy the abstract requirement without doing anything
-  protected _generateMarkup(): string {
-    return "";
-  }
-
-  public render(): void {
-    this._parentElement = this._getElement<HTMLElement>("game-stats");
-
-    // DO NOT call super.render().
-    // Calling super.render() triggers _clear()
-  }
-
-  public toggleGameStatsVisibility(show: boolean) {
-    this._parentElement = this._getElement("game-stats");
+  public toggleGameStatsVisibility(show: boolean): void {
+    this._ensureParentElement();
     this._toggleVisibility(this._parentElement, show);
   }
 
-  // ===== Health Methods =====
+  protected _generateMarkup(): string {
+    const {
+      playerHealth,
+      computerHealth,
+      playerScore,
+      computerScore,
+      playerTara,
+      computerTara,
+      playerMostCommonMove,
+      computerMostCommonMove,
+      matchNumber,
+      roundNumber,
+      isProgressVisible,
+    } = this._data;
 
-  public updateHealthBar(participant: Participant, health: Health): void {
-    const bar = this._getHealthBar(participant);
+    const progressClass = isProgressVisible ? "" : "hidden";
+    const progressInert = isProgressVisible ? "" : "inert";
 
-    // Directly set width percentage
-    bar.style.width = `${health}%`;
-  }
+    return `
+      <aside id="player-stats" class="stats">
+        <div class="score-row"><span>${playerScore.toString().padStart(2, "0")}</span> <span>WINS</span></div>
+        <div class="bar-wrapper">
+          <div class="bar" id="player-health" style="width: ${playerHealth}%"></div>
+          <span class="bar-text">PLAYER</span>
+        </div>
+        <p><span>Tara x</span><span>${playerTara}</span></p>
+        <p><small><span>Common: </span><span>${playerMostCommonMove ?? "–"}</span></small></p>
+      </aside>
 
-  private _getHealthBar(participant: Participant): HTMLElement {
-    return participant === "player"
-      ? this._playerHealthBarElement
-      : this._computerHealthBarElement;
-  }
+      <section id="game-progress-container" class="${progressClass}" ${progressInert}>
+        <h2>Match ${matchNumber}</h2>
+        <h3>Round ${roundNumber}</h3>
+      </section>
 
-  // ===== History Methods =====
-
-  updateMostCommonMoves(
-    player: StandardMove | null,
-    computer: StandardMove | null,
-  ): void {
-    this._playerMostCommonMoveElement.textContent = player ?? "N/A";
-    this._computerMostCommonMoveElement.textContent = computer ?? "N/A";
-  }
-
-  // ===== Progress Methods =====
-
-  public updateProgress(
-    matchNumber: number,
-    roundNumber: number,
-    isVisible: boolean,
-  ): void {
-    this._matchElement.textContent = `Match ${matchNumber}`;
-    this._roundElement.textContent = `Round ${roundNumber}`;
-    this._toggleVisibility(this._progressContainerElement, isVisible);
-  }
-
-  // ===== Score Methods =====
-
-  public updateScores(player: number, computer: number): void {
-    this._playerScoreElement.textContent = player!.toString().padStart(2, "0");
-    this._computerScoreElement.textContent = computer!
-      .toString()
-      .padStart(2, "0");
-  }
-
-  // ===== Tara Methods =====
-
-  updateTaraCounts(playerCount: number, computerCount: number): void {
-    this._playerTaraCountElement.textContent = playerCount.toString();
-    this._computerTaraCountElement.textContent = computerCount.toString();
+      <aside id="computer-stats" class="stats">
+        <div class="score-row"><span>WINS</span> <span>${computerScore.toString().padStart(2, "0")}</span></div>
+        <div class="bar-wrapper">
+          <div class="bar" id="computer-health" style="width: ${computerHealth}%"></div>
+          <span class="bar-text">COMPUTER</span>
+        </div>
+        <p><span>Tara x</span><span>${computerTara}</span></p>
+        <p><small><span>Common: </span><span>${computerMostCommonMove ?? "–"}</span></small></p>
+      </aside>
+    `;
   }
 }
