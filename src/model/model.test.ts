@@ -34,8 +34,7 @@ function simulateComputerChoices(
   };
 
   for (let i = 0; i < runs; i++) {
-    model.chooseComputerMove();
-    const move = model.getComputerMove();
+    const move = model.getCalculatedComputerMove();
     if (move) results[move]++;
   }
 
@@ -164,16 +163,14 @@ describe("Model", () => {
       expect(model.getComputerMove()).toBe(MOVES.SCISSORS);
     });
 
-    test("chooseComputerMove picks a valid move from MOVES", () => {
-      model.chooseComputerMove();
-      const move = model.getComputerMove();
+    test("getCalculatedComputerMove returns a valid move from MOVES", () => {
+      const move = model.getCalculatedComputerMove();
       const validMoveNames = Object.values(MOVES);
       expect(validMoveNames).toContain(move);
     });
 
-    test("chooseComputerMove sets a non-empty move", () => {
-      model.chooseComputerMove();
-      const move = model.getComputerMove();
+    test("getCalculatedComputerMove sets a non-empty move", () => {
+      const move = model.getCalculatedComputerMove();
       expect(move).not.toBe("");
     });
   });
@@ -200,6 +197,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: "tie",
         damageCalculated: DAMAGE_PER_TIE,
+        isDoubleKO: false,
       });
       expect(model.getPlayerScore()).toBe(0);
       expect(model.getComputerScore()).toBe(0);
@@ -212,6 +210,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: PARTICIPANTS.PLAYER,
         damageCalculated: DAMAGE_PER_LOSS,
+        isDoubleKO: false,
       });
     });
 
@@ -222,6 +221,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: PARTICIPANTS.COMPUTER,
         damageCalculated: DAMAGE_PER_LOSS,
+        isDoubleKO: false,
       });
     });
   });
@@ -311,6 +311,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: "tie",
         damageCalculated: DAMAGE_PER_TIE,
+        isDoubleKO: false,
       });
       expect(model.getPlayerMove()).toBe(MOVES.ROCK);
       expect(model.getComputerMove()).toBe(MOVES.ROCK);
@@ -326,6 +327,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: "tie",
         damageCalculated: DAMAGE_PER_TARA_TIE,
+        isDoubleKO: false,
       });
       expect(model.getPlayerScore()).toBe(0);
       expect(model.getComputerScore()).toBe(0);
@@ -340,6 +342,7 @@ describe("Model", () => {
         expect(model.evaluateRound()).toEqual({
           winner: PARTICIPANTS.PLAYER,
           damageCalculated: DAMAGE_PER_TARA_LOSS,
+          isDoubleKO: false,
         });
       }
     });
@@ -353,6 +356,7 @@ describe("Model", () => {
         expect(model.evaluateRound()).toEqual({
           winner: PARTICIPANTS.COMPUTER,
           damageCalculated: DAMAGE_PER_TARA_LOSS,
+          isDoubleKO: false,
         });
       }
     });
@@ -886,6 +890,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: PARTICIPANTS.PLAYER,
         damageCalculated: DAMAGE_PER_LOSS,
+        isDoubleKO: false,
       });
 
       expect(model["state"].currentMatch?.computerHealth).toBe(
@@ -901,6 +906,7 @@ describe("Model", () => {
       expect(model.evaluateRound()).toEqual({
         winner: PARTICIPANTS.COMPUTER,
         damageCalculated: DAMAGE_PER_LOSS,
+        isDoubleKO: false,
       });
 
       expect(model["state"].currentMatch?.playerHealth).toBe(

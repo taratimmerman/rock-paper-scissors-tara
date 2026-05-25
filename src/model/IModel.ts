@@ -18,7 +18,8 @@ export interface IModel {
   getPlayerMove(): Move;
   getComputerMove(): Move;
   registerPlayerMove(move: Move): void;
-  chooseComputerMove(): void;
+  registerComputerMove(move: Move): void;
+  getCalculatedComputerMove(): Move;
   evaluateRound(): RoundResult;
   resetMoves(): void;
 

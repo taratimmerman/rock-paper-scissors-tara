@@ -156,41 +156,37 @@ export class Controller {
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
-    // Let the computer choose based on PREVIOUS round data, before we record the player's current move
-    this.model.chooseComputerMove();
-
-    // Record the player's move for THIS round's calculations
-    this.model.registerPlayerMove(move);
-
-    // 1. Preparation
     this.statusView.setMessage("Locking in move...");
     await this.controlsView.flipAll(false);
 
-    // 2. Fetch data from the Model for the upcoming round
-    const pMove = this.model.getPlayerMove();
-    const cMove = this.model.getComputerMove();
-    const isDoubleKO = this.model.isDoubleKO();
+    // 1. Get the computer's move purely based on historical state
+    const computerMove = this.model.getCalculatedComputerMove();
+
+    // 2. Explicitly commit both moves to state (this triggers the metric counters)
+    this.model.registerPlayerMove(move);
+    this.model.registerComputerMove(computerMove);
+
+    // 3. Evaluate the rules deterministically
     const roundResult = this.model.evaluateRound();
 
+    // 4. Update UI using the plain variables we have right here
     this.statusView.setMessage(
-      `You played ${MOVE_DISPLAY_NAMES[pMove]}. Computer played ${MOVE_DISPLAY_NAMES[cMove]}.`,
+      `You played ${MOVE_DISPLAY_NAMES[move]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`,
     );
 
-    // 3. Play out the entire visual sequence via the View
     await this.arenaView.playRoundSequence({
-      phase: "waiting", // Starting state, the View will progress this
-      playerMoveId: pMove,
-      computerMoveId: cMove,
+      phase: "waiting",
+      playerMoveId: move,
+      computerMoveId: computerMove,
       winner: roundResult.winner,
-      isDoubleKO: isDoubleKO,
-      announcementMessage: isDoubleKO
+      isDoubleKO: roundResult.isDoubleKO,
+      announcementMessage: roundResult.isDoubleKO
         ? "MUTUAL DESTRUCTION!"
         : roundResult.winner !== "tie"
           ? `${roundResult.winner.toUpperCase()} LANDS A BLOW!`
           : "IT'S A TIE!",
     });
 
-    // 4. Process game logic end-of-round
     this.updateStatsView();
     this.endRound();
   }

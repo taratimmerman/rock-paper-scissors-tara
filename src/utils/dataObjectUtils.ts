@@ -31,6 +31,9 @@ export interface RoundResult {
    * In the event of a tie, this damage is applied to both participants.
    */
   damageCalculated: number;
+
+  /** True if both players dropped to 0 health simultaneously this round */
+  isDoubleKO: boolean;
 }
 
 export type VoidHandler = () => void;
