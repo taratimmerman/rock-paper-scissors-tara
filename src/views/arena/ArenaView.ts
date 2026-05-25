@@ -104,15 +104,15 @@ export default class ArenaView
 
     // 5. Outcome Drama
     this.update({ ...data, phase: "result" });
-    await this.executeOutcomeDrama(data, pCard, cCard, moveRevealContainer);
+    await this.executeOutcomeDrama(data);
   }
 
-  private async executeOutcomeDrama(
-    data: ArenaViewData,
-    pCard: HTMLElement,
-    cCard: HTMLElement,
-    container: HTMLElement,
-  ): Promise<void> {
+  private async executeOutcomeDrama(data: ArenaViewData): Promise<void> {
+    // Get fresh element references after DOM update
+    const pCard = this._getElement("reveal-player");
+    const cCard = this._getElement("reveal-computer");
+    const container = this._getElement("move-reveal");
+
     if (data.isDoubleKO || data.winner === "tie") {
       pCard.classList.add("card-impact", "card-defeated");
       cCard.classList.add("card-impact", "card-defeated");
