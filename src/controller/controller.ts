@@ -143,7 +143,6 @@ export class Controller {
   async resetGameState(): Promise<void> {
     this.model.resetScores();
     this.model.resetTaras();
-    this.model.resetHistories();
     this.model.resetBothMoveCounts();
     this.model.resetMostCommonMoves();
     this.model.resetMatchData();

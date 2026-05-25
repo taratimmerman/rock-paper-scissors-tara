@@ -323,14 +323,6 @@ export class Model {
     );
   }
 
-  private resetHistory(key: Participant): void {
-    this.gameStorage.removeHistory(key);
-  }
-  resetHistories(): void {
-    this.resetHistory(PARTICIPANTS.PLAYER);
-    this.resetHistory(PARTICIPANTS.COMPUTER);
-  }
-
   // ===== Round Methods =====
 
   getRoundNumber(): number {

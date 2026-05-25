@@ -35,7 +35,6 @@ export interface IGameStorage {
   removeTaraCount(participant: Participant): void;
   removeMostCommonMove(participant: Participant): void;
   removeMoveCounts(participant: Participant): void;
-  removeHistory(participant: Participant): void;
   removeGlobalMatchNumber(): void;
   removeOldGlobalRoundNumber(): void;
 }

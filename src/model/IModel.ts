@@ -46,7 +46,6 @@ export interface IModel {
   getMatchNumber(): number;
   setMatch(match: Match | null): void;
   setDefaultMatchData(): void;
-  resetHistories(): void;
   resetMatchData(): void;
 
   // Health

@@ -11,7 +11,6 @@ const KEY_SUFFIX_SCORE = "Score";
 const KEY_SUFFIX_TARA_COUNT = "TaraCount";
 const KEY_SUFFIX_MOST_COMMON_MOVE = "MostCommonMove";
 const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
-const KEY_SUFFIX_HISTORY = "History";
 
 const KEY_ROUND_NUMBER = "roundNumber";
 const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
@@ -47,7 +46,7 @@ export class LocalStorageGameStorage implements IGameStorage {
     const key = this.formatKey(participant, KEY_SUFFIX_SCORE);
     return parseInt(
       localStorage.getItem(key) || DEFAULT_NUMERIC_VALUE.toString(),
-      10
+      10,
     );
   }
 
@@ -55,7 +54,7 @@ export class LocalStorageGameStorage implements IGameStorage {
     const key = this.formatKey(participant, KEY_SUFFIX_TARA_COUNT);
     return parseInt(
       localStorage.getItem(key) || DEFAULT_NUMERIC_VALUE.toString(),
-      10
+      10,
     );
   }
 
@@ -107,7 +106,7 @@ export class LocalStorageGameStorage implements IGameStorage {
     // Check if parsing resulted in NaN (Not a Number), meaning the stored value was invalid.
     if (isNaN(parsedRound)) {
       console.warn(
-        `Legacy 'roundNumber' in localStorage (${roundString}) is not a valid number. Skipping migration.`
+        `Legacy 'roundNumber' in localStorage (${roundString}) is not a valid number. Skipping migration.`,
       );
       return null; // Treat invalid data as if it doesn't exist for migration purposes
     }
@@ -176,11 +175,6 @@ export class LocalStorageGameStorage implements IGameStorage {
 
   removeMoveCounts(participant: Participant): void {
     const key = this.formatKey(participant, KEY_SUFFIX_MOVE_COUNTS);
-    localStorage.removeItem(key);
-  }
-
-  removeHistory(participant: Participant): void {
-    const key = this.formatKey(participant, KEY_SUFFIX_HISTORY);
     localStorage.removeItem(key);
   }
 
