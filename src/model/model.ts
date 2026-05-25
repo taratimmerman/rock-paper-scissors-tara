@@ -147,6 +147,7 @@ export class Model {
     return {
       winner,
       damageCalculated: damage,
+      isDoubleKO: this.isDoubleKO(),
     };
   }
 
@@ -250,12 +251,15 @@ export class Model {
   setPlayerMove(move: Move | null) {
     this.setMove(PARTICIPANTS.PLAYER, move);
   }
+
   getPlayerMove(): Move | null {
     return this.getMove(PARTICIPANTS.PLAYER);
   }
+
   setComputerMove(move: Move | null) {
     this.setMove(PARTICIPANTS.COMPUTER, move);
   }
+
   getComputerMove(): Move | null {
     return this.getMove(PARTICIPANTS.COMPUTER);
   }
@@ -265,9 +269,8 @@ export class Model {
     this.setComputerMove(null);
   }
 
-  chooseComputerMove(): void {
-    const move = this.computer.calculateNextMove(this.state);
-    this.registerComputerMove(move);
+  getCalculatedComputerMove(): Move {
+    return this.computer.calculateNextMove(this.state);
   }
 
   registerPlayerMove(move: Move) {
