@@ -125,4 +125,58 @@ describe("ArenaView", () => {
       expect(content).toContain("❓"); // The fallback we discussed earlier
     });
   });
+
+  describe("Tie Animation Regression", () => {
+    it("should apply tie animation classes to both cards on tie", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "rock" as Move,
+        winner: "tie" as const,
+        isDoubleKO: false,
+        announcementMessage: "IT'S A TIE!",
+      };
+
+      await view.playRoundSequence(data);
+
+      const playerCard = document.getElementById("reveal-player");
+      const computerCard = document.getElementById("reveal-computer");
+      const container = document.getElementById("move-reveal");
+
+      // Both cards should have impact and defeated classes
+      expect(playerCard?.classList.contains("card-impact")).toBe(true);
+      expect(playerCard?.classList.contains("card-defeated")).toBe(true);
+      expect(computerCard?.classList.contains("card-impact")).toBe(true);
+      expect(computerCard?.classList.contains("card-defeated")).toBe(true);
+
+      // Container should shake
+      expect(container?.classList.contains("arena-shake")).toBe(true);
+    });
+
+    it("should apply double KO animation classes when isDoubleKO is true", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+        winner: "player" as const, // winner doesn't matter for double KO
+        isDoubleKO: true,
+        announcementMessage: "MUTUAL DESTRUCTION!",
+      };
+
+      await view.playRoundSequence(data);
+
+      const playerCard = document.getElementById("reveal-player");
+      const computerCard = document.getElementById("reveal-computer");
+      const container = document.getElementById("move-reveal");
+
+      // Both cards should have impact and defeated classes
+      expect(playerCard?.classList.contains("card-impact")).toBe(true);
+      expect(playerCard?.classList.contains("card-defeated")).toBe(true);
+      expect(computerCard?.classList.contains("card-impact")).toBe(true);
+      expect(computerCard?.classList.contains("card-defeated")).toBe(true);
+
+      // Container should shake
+      expect(container?.classList.contains("arena-shake")).toBe(true);
+    });
+  });
 });
