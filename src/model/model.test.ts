@@ -455,72 +455,58 @@ describe("Model", () => {
   });
 
   describe("Reset", () => {
-    test("resetScores should set both player and computer scores to 0", () => {
+    test("resetGame should completely wipe all game state, scores, and restore match defaults", () => {
+      // 1. Arrange: Populate the model and localStorage with dirty session data
       model.setPlayerScore(3);
       model.setComputerScore(2);
-      model.resetScores();
-      expect(model.getPlayerScore()).toBe(0);
-      expect(model.getComputerScore()).toBe(0);
-    });
-
-    test("resetTaras should set both player and computer Tara counts to 0", () => {
       model.setPlayerTaraCount(2);
       model.setComputerTaraCount(4);
-      model.resetTaras();
-      expect(model.getPlayerTaraCount()).toBe(0);
-      expect(model.getComputerTaraCount()).toBe(0);
-    });
 
-    test("resetMostCommonMoves removes most common moves from localStorage", () => {
       localStorage.setItem("playerMostCommonMove", MOVES.ROCK);
       localStorage.setItem("computerMostCommonMove", MOVES.SCISSORS);
 
-      model.resetMostCommonMoves();
-
-      expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
-      expect(localStorage.getItem("computerMostCommonMove")).toBeNull();
-    });
-
-    test("resetMostCommonMoves clears most common move from state", () => {
-      model.setPlayerMostCommonMove();
-      model.setComputerMostCommonMove();
-
-      model.resetMostCommonMoves();
-
-      expect(model.getPlayerMostCommonMove()).toBeNull();
-      expect(model.getComputerMostCommonMove()).toBeNull();
-    });
-
-    test("resetBothMoveCounts resets both participants' localStorage counts", () => {
-      const playerMoveCounts = {
-        rock: 1,
-        paper: 1,
-        scissors: 0,
-      };
-      const computerMoveCounts = {
-        rock: 1,
-        paper: 0,
-        scissors: 1,
-      };
-
+      // Seed move data to test the move counts wipe
       model.registerPlayerMove(MOVES.ROCK);
       model.registerPlayerMove(MOVES.PAPER);
       model.registerComputerMove(MOVES.SCISSORS);
       model.registerComputerMove(MOVES.ROCK);
 
-      const initialPlayerStorage = localStorage.getItem("playerMoveCounts");
-      const initialComputerStorage = localStorage.getItem("computerMoveCounts");
+      // Give them non-default match data
+      const dirtyMatch = {
+        matchRoundNumber: 4,
+        playerHealth: 30,
+        computerHealth: 50,
+      } as Match;
+      model.setMatch(dirtyMatch);
+      model.setMatchNumber(5);
 
-      expect(JSON.parse(initialPlayerStorage!)).toEqual(playerMoveCounts);
-      expect(JSON.parse(initialComputerStorage!)).toEqual(computerMoveCounts);
+      // 2. Act: Call the single public entry point
+      model.resetGame();
 
-      model.resetBothMoveCounts();
+      // 3. Assert: Verify scores and other metrics are wiped to 0 / null
+      expect(model.getPlayerScore()).toBe(0);
+      expect(model.getComputerScore()).toBe(0);
 
-      const playerStorage = localStorage.getItem("playerMoveCounts");
-      const computerStorage = localStorage.getItem("computerMoveCounts");
+      expect(model.getPlayerTaraCount()).toBe(0);
+      expect(model.getComputerTaraCount()).toBe(0);
 
-      expect(JSON.parse(playerStorage!)).toEqual(null);
-      expect(JSON.parse(computerStorage!)).toEqual(null);
+      expect(model.getPlayerMostCommonMove()).toBeNull();
+      expect(model.getComputerMostCommonMove()).toBeNull();
+
+      // Match number resets to default
+      expect(model.getMatchNumber()).toBe(DEFAULT_MATCH_NUMBER);
+
+      // Health values query from the current match state, reverting to 100
+      expect(model.getHealth(PARTICIPANTS.PLAYER)).toBe(INITIAL_HEALTH);
+      expect(model.getHealth(PARTICIPANTS.COMPUTER)).toBe(INITIAL_HEALTH);
+
+      // LocalStorage Cleanliness
+      expect(localStorage.getItem("playerMostCommonMove")).toBeNull();
+      expect(localStorage.getItem("computerMostCommonMove")).toBeNull();
+      expect(localStorage.getItem("playerMoveCounts")).toBeNull();
+      expect(localStorage.getItem("computerMoveCounts")).toBeNull();
+      expect(localStorage.getItem("globalMatchNumber")).toBeNull();
+      expect(localStorage.getItem("currentMatch")).toBeNull();
     });
   });
 

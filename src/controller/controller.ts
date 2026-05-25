@@ -127,25 +127,20 @@ export class Controller {
   }
 
   private async handleNextRound(): Promise<void> {
+    this.statusView.setMessage("Prepare your next move...");
+
     this.model.resetMoves();
 
     this.arenaView.clear();
-
     this.updateControlsView();
     this.updateStatsView();
-
-    this.statusView.setMessage("Prepare your next move...");
 
     await this.controlsView.flipAll(true);
     this.statusView.setMessage("Choose your attack!");
   }
 
   async resetGameState(): Promise<void> {
-    this.model.resetScores();
-    this.model.resetTaras();
-    this.model.resetBothMoveCounts();
-    this.model.resetMostCommonMoves();
-    this.model.resetMatchData();
+    this.model.resetGame();
 
     this.menuView.updateMenu({ isMatchActive: false });
     this.menuView.bindStartMatch(() => this.startGame());

@@ -26,13 +26,10 @@ export interface IModel {
   getPlayerTaraCount(): number;
   getComputerTaraCount(): number;
   taraIsEnabled(): boolean;
-  resetTaras(): void;
 
   // Most common moves
   getPlayerMostCommonMove(): Move | null;
   getComputerMostCommonMove(): Move | null;
-  resetBothMoveCounts(): void;
-  resetMostCommonMoves(): void;
   showMostCommonMove(): boolean;
 
   // Match & round
@@ -46,11 +43,10 @@ export interface IModel {
   getMatchNumber(): number;
   setMatch(match: Match | null): void;
   setDefaultMatchData(): void;
-  resetMatchData(): void;
 
   // Health
   getHealth(participant: Participant): Health;
 
-  // Optional setters for testing or future expansion
-  resetScores(): void;
+  // Reset all match data
+  resetGame(): void;
 }
