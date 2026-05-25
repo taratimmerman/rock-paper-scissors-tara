@@ -18,7 +18,6 @@ export interface IGameStorage {
   getMoveCounts(participant: Participant): MoveCount;
   getGlobalMatchNumber(): number | null;
   getMatch(): Match | null;
-  getOldGlobalRoundNumber(): number | null;
 
   // ===== Setters =====
 
@@ -36,5 +35,4 @@ export interface IGameStorage {
   removeMostCommonMove(participant: Participant): void;
   removeMoveCounts(participant: Participant): void;
   removeGlobalMatchNumber(): void;
-  removeOldGlobalRoundNumber(): void;
 }

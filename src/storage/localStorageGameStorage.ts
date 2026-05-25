@@ -12,7 +12,6 @@ const KEY_SUFFIX_TARA_COUNT = "TaraCount";
 const KEY_SUFFIX_MOST_COMMON_MOVE = "MostCommonMove";
 const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
 
-const KEY_ROUND_NUMBER = "roundNumber";
 const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
 const KEY_CURRENT_MATCH = "currentMatch";
 
@@ -92,28 +91,6 @@ export class LocalStorageGameStorage implements IGameStorage {
     }
   }
 
-  getOldGlobalRoundNumber(): number | null {
-    const roundString = localStorage.getItem(KEY_ROUND_NUMBER);
-
-    // If the item doesn't exist in localStorage, getItem returns null.
-    if (roundString === null) {
-      return null;
-    }
-
-    // Attempt to parse the string to an integer.
-    const parsedRound = parseInt(roundString, 10);
-
-    // Check if parsing resulted in NaN (Not a Number), meaning the stored value was invalid.
-    if (isNaN(parsedRound)) {
-      console.warn(
-        `Legacy 'roundNumber' in localStorage (${roundString}) is not a valid number. Skipping migration.`,
-      );
-      return null; // Treat invalid data as if it doesn't exist for migration purposes
-    }
-
-    return parsedRound;
-  }
-
   // ===== Setters =====
 
   setScore(participant: Participant, score: number): void {
@@ -180,9 +157,5 @@ export class LocalStorageGameStorage implements IGameStorage {
 
   removeGlobalMatchNumber(): void {
     localStorage.removeItem(KEY_GLOBAL_MATCH_NUMBER);
-  }
-
-  removeOldGlobalRoundNumber(): void {
-    localStorage.removeItem(KEY_ROUND_NUMBER);
   }
 }

@@ -109,8 +109,6 @@ describe("Model", () => {
       getGlobalMatchNumber: jest.fn(() => 1),
       setGlobalMatchNumber: jest.fn(),
       removeGlobalMatchNumber: jest.fn(),
-      getOldGlobalRoundNumber: jest.fn(() => null),
-      removeOldGlobalRoundNumber: jest.fn(),
     } as jest.Mocked<IGameStorage>;
     model = new Model(mockGameStorage);
   });
