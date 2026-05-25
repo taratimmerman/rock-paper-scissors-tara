@@ -53,7 +53,6 @@ describe("Controller", () => {
       isMatchActive: jest.fn().mockReturnValue(false),
       resetScores: jest.fn(),
       resetTaras: jest.fn(),
-      resetHistories: jest.fn(),
       resetBothMoveCounts: jest.fn(),
       resetMostCommonMoves: jest.fn(),
       resetMatchData: jest.fn(),

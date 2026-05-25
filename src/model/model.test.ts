@@ -109,8 +109,6 @@ describe("Model", () => {
       getGlobalMatchNumber: jest.fn(() => 1),
       setGlobalMatchNumber: jest.fn(),
       removeGlobalMatchNumber: jest.fn(),
-      getOldGlobalRoundNumber: jest.fn(() => null),
-      removeOldGlobalRoundNumber: jest.fn(),
     } as jest.Mocked<IGameStorage>;
     model = new Model(mockGameStorage);
   });
@@ -491,22 +489,6 @@ describe("Model", () => {
 
       expect(model.getPlayerMostCommonMove()).toBeNull();
       expect(model.getComputerMostCommonMove()).toBeNull();
-    });
-
-    test("resetHistories clears histories from localStorage", () => {
-      localStorage.setItem(
-        "playerHistory",
-        JSON.stringify([MOVES.ROCK, MOVES.PAPER]),
-      );
-      localStorage.setItem(
-        "computerHistory",
-        JSON.stringify([MOVES.SCISSORS, MOVES.ROCK]),
-      );
-
-      model.resetHistories();
-
-      expect(localStorage.getItem("playerHistory")).toBe(null);
-      expect(localStorage.getItem("computerHistory")).toBe(null);
     });
 
     test("resetBothMoveCounts resets both participants' localStorage counts", () => {

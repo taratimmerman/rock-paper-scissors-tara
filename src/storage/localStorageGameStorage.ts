@@ -11,9 +11,7 @@ const KEY_SUFFIX_SCORE = "Score";
 const KEY_SUFFIX_TARA_COUNT = "TaraCount";
 const KEY_SUFFIX_MOST_COMMON_MOVE = "MostCommonMove";
 const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
-const KEY_SUFFIX_HISTORY = "History";
 
-const KEY_ROUND_NUMBER = "roundNumber";
 const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
 const KEY_CURRENT_MATCH = "currentMatch";
 
@@ -47,7 +45,7 @@ export class LocalStorageGameStorage implements IGameStorage {
     const key = this.formatKey(participant, KEY_SUFFIX_SCORE);
     return parseInt(
       localStorage.getItem(key) || DEFAULT_NUMERIC_VALUE.toString(),
-      10
+      10,
     );
   }
 
@@ -55,7 +53,7 @@ export class LocalStorageGameStorage implements IGameStorage {
     const key = this.formatKey(participant, KEY_SUFFIX_TARA_COUNT);
     return parseInt(
       localStorage.getItem(key) || DEFAULT_NUMERIC_VALUE.toString(),
-      10
+      10,
     );
   }
 
@@ -91,28 +89,6 @@ export class LocalStorageGameStorage implements IGameStorage {
       console.warn(`LocalStorage Error: Failed to parse currentMatch.`, e);
       return null;
     }
-  }
-
-  getOldGlobalRoundNumber(): number | null {
-    const roundString = localStorage.getItem(KEY_ROUND_NUMBER);
-
-    // If the item doesn't exist in localStorage, getItem returns null.
-    if (roundString === null) {
-      return null;
-    }
-
-    // Attempt to parse the string to an integer.
-    const parsedRound = parseInt(roundString, 10);
-
-    // Check if parsing resulted in NaN (Not a Number), meaning the stored value was invalid.
-    if (isNaN(parsedRound)) {
-      console.warn(
-        `Legacy 'roundNumber' in localStorage (${roundString}) is not a valid number. Skipping migration.`
-      );
-      return null; // Treat invalid data as if it doesn't exist for migration purposes
-    }
-
-    return parsedRound;
   }
 
   // ===== Setters =====
@@ -179,16 +155,7 @@ export class LocalStorageGameStorage implements IGameStorage {
     localStorage.removeItem(key);
   }
 
-  removeHistory(participant: Participant): void {
-    const key = this.formatKey(participant, KEY_SUFFIX_HISTORY);
-    localStorage.removeItem(key);
-  }
-
   removeGlobalMatchNumber(): void {
     localStorage.removeItem(KEY_GLOBAL_MATCH_NUMBER);
-  }
-
-  removeOldGlobalRoundNumber(): void {
-    localStorage.removeItem(KEY_ROUND_NUMBER);
   }
 }
