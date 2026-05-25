@@ -1,4 +1,10 @@
-import { Health, Match, Move, Participant } from "../utils/dataObjectUtils";
+import {
+  Health,
+  Match,
+  Move,
+  Participant,
+  RoundResult,
+} from "../utils/dataObjectUtils";
 
 export interface IModel {
   // Score
@@ -13,7 +19,7 @@ export interface IModel {
   getComputerMove(): Move;
   registerPlayerMove(move: Move): void;
   chooseComputerMove(): void;
-  evaluateRound(): string;
+  evaluateRound(): RoundResult;
   resetMoves(): void;
 
   // Tara

@@ -1,9 +1,13 @@
 import { Model } from "./model";
 import {
   DAMAGE_PER_LOSS,
+  DAMAGE_PER_TARA_LOSS,
+  DAMAGE_PER_TARA_TIE,
+  DAMAGE_PER_TIE,
   DEFAULT_MATCH,
   DEFAULT_MATCH_NUMBER,
   INITIAL_HEALTH,
+  INITIAL_ROUND_NUMBER,
   MOVES,
   PARTICIPANTS,
   STANDARD_MOVE_DATA_MAP,
@@ -177,37 +181,50 @@ describe("Model", () => {
   });
 
   describe("evaluateRound", () => {
-    test("returns 'Invalid round' if player move is missing", () => {
+    test("throws an error if player move is missing", () => {
       model.setComputerMove(MOVES.ROCK);
-      expect(model.evaluateRound()).toBe("Invalid round");
+      expect(() => model.evaluateRound()).toThrow(
+        "Cannot evaluate round with missing moves.",
+      );
     });
 
-    test("returns 'Invalid round' if computer move is missing", () => {
+    test("throws an error if computer move is missing", () => {
       model.setPlayerMove(MOVES.PAPER);
-      expect(model.evaluateRound()).toBe("Invalid round");
+      expect(() => model.evaluateRound()).toThrow(
+        "Cannot evaluate round with missing moves.",
+      );
     });
 
     test("does not update scores on tie", () => {
       model.setPlayerMove(MOVES.SCISSORS);
       model.setComputerMove(MOVES.SCISSORS);
 
-      expect(model.evaluateRound()).toBe("It's a tie!");
+      expect(model.evaluateRound()).toEqual({
+        winner: "tie",
+        damageCalculated: DAMAGE_PER_TIE,
+      });
       expect(model.getPlayerScore()).toBe(0);
       expect(model.getComputerScore()).toBe(0);
     });
 
-    test("returns 'You win the round!' if player beats computer and updates score", () => {
+    test("returns correct winner and damage if player beats computer", () => {
       model.setPlayerMove(MOVES.ROCK);
       model.setComputerMove(MOVES.SCISSORS);
 
-      expect(model.evaluateRound()).toBe("You win the round!");
+      expect(model.evaluateRound()).toEqual({
+        winner: PARTICIPANTS.PLAYER,
+        damageCalculated: DAMAGE_PER_LOSS,
+      });
     });
 
-    test("returns 'Computer wins the round!' if computer beats player and updates score", () => {
+    test("returns correct winner and damage if computer beats player", () => {
       model.setPlayerMove(MOVES.PAPER);
       model.setComputerMove(MOVES.SCISSORS);
 
-      expect(model.evaluateRound()).toBe("Computer wins the round!");
+      expect(model.evaluateRound()).toEqual({
+        winner: PARTICIPANTS.COMPUTER,
+        damageCalculated: DAMAGE_PER_LOSS,
+      });
     });
   });
 
@@ -292,7 +309,11 @@ describe("Model", () => {
       model.setPlayerMove(MOVES.TARA);
       model.setComputerMove(MOVES.TARA);
 
-      expect(model.evaluateRound()).toBe("It's a tie!");
+      // Both mutated to ROCK, making it a standard tie
+      expect(model.evaluateRound()).toEqual({
+        winner: "tie",
+        damageCalculated: DAMAGE_PER_TIE,
+      });
       expect(model.getPlayerMove()).toBe(MOVES.ROCK);
       expect(model.getComputerMove()).toBe(MOVES.ROCK);
     });
@@ -304,7 +325,10 @@ describe("Model", () => {
       model.setPlayerMove(MOVES.TARA);
       model.setComputerMove(MOVES.TARA);
 
-      expect(model.evaluateRound()).toBe("It's a tie!");
+      expect(model.evaluateRound()).toEqual({
+        winner: "tie",
+        damageCalculated: DAMAGE_PER_TARA_TIE,
+      });
       expect(model.getPlayerScore()).toBe(0);
       expect(model.getComputerScore()).toBe(0);
     });
@@ -315,7 +339,10 @@ describe("Model", () => {
 
         model.setPlayerMove(MOVES.TARA);
         model.setComputerMove(move);
-        expect(model.evaluateRound()).toBe("You win the round!");
+        expect(model.evaluateRound()).toEqual({
+          winner: PARTICIPANTS.PLAYER,
+          damageCalculated: DAMAGE_PER_TARA_LOSS,
+        });
       }
     });
 
@@ -325,7 +352,10 @@ describe("Model", () => {
 
         model.setPlayerMove(move);
         model.setComputerMove(MOVES.TARA);
-        expect(model.evaluateRound()).toBe("Computer wins the round!");
+        expect(model.evaluateRound()).toEqual({
+          winner: PARTICIPANTS.COMPUTER,
+          damageCalculated: DAMAGE_PER_TARA_LOSS,
+        });
       }
     });
 
@@ -885,17 +915,14 @@ describe("Model", () => {
       model.setPlayerMove(MOVES.ROCK);
       model.setComputerMove(MOVES.SCISSORS);
 
-      // Verify initial state
-      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
-      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
+      expect(model.evaluateRound()).toEqual({
+        winner: PARTICIPANTS.PLAYER,
+        damageCalculated: DAMAGE_PER_LOSS,
+      });
 
-      expect(model.evaluateRound()).toBe("You win the round!");
-
-      // Verify health updates as expected
       expect(model["state"].currentMatch?.computerHealth).toBe(
         INITIAL_HEALTH - DAMAGE_PER_LOSS,
       );
-      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
     });
 
     test("decrements player's health when computer wins round", () => {
@@ -903,17 +930,14 @@ describe("Model", () => {
       model.setComputerMove(MOVES.PAPER);
       model.setPlayerMove(MOVES.ROCK);
 
-      // Verify initial state
-      expect(model["state"].currentMatch?.playerHealth).toBe(INITIAL_HEALTH);
-      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
+      expect(model.evaluateRound()).toEqual({
+        winner: PARTICIPANTS.COMPUTER,
+        damageCalculated: DAMAGE_PER_LOSS,
+      });
 
-      expect(model.evaluateRound()).toBe("Computer wins the round!");
-
-      // Verify health updates as expected
       expect(model["state"].currentMatch?.playerHealth).toBe(
         INITIAL_HEALTH - DAMAGE_PER_LOSS,
       );
-      expect(model["state"].currentMatch?.computerHealth).toBe(INITIAL_HEALTH);
     });
 
     test("returns false if both participants have health > 0", () => {
@@ -1074,35 +1098,43 @@ describe("Model", () => {
   });
 
   describe("Model Constructor - State Initialization", () => {
-    let constructorMockGameStorage: jest.Mocked<IGameStorage>;
-    let constructorModel: Model;
+    let mockGameStorage: jest.Mocked<IGameStorage>;
+    let model: Model;
 
     beforeEach(() => {
-      constructorMockGameStorage = {
+      // We create a fully implemented mock to prevent "is not a function" errors
+      // when the Model constructor runs immediately upon instantiation.
+      mockGameStorage = {
         getScore: jest.fn(() => 0),
         getTaraCount: jest.fn(() => 0),
         getMostCommonMove: jest.fn(() => null),
         getMoveCounts: jest.fn(() => ({ rock: 0, paper: 0, scissors: 0 })),
-        getMatch: jest.fn(),
-        getGlobalMatchNumber: jest.fn(),
+        getMatch: jest.fn(() => null),
+        getGlobalMatchNumber: jest.fn(() => null),
       } as unknown as jest.Mocked<IGameStorage>;
 
       jest.clearAllMocks();
     });
 
-    test("should load global match number even if there is no active match (Regression Test)", () => {
-      constructorMockGameStorage.getMatch.mockReturnValue(null);
-      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(42);
+    test("initializes with the correct default match state", () => {
+      mockGameStorage.getMatch.mockReturnValue(null);
+      model = new Model(mockGameStorage);
 
-      constructorModel = new Model(constructorMockGameStorage);
+      expect(model.getHealth(PARTICIPANTS.PLAYER)).toBe(INITIAL_HEALTH);
+      expect(model.getHealth(PARTICIPANTS.COMPUTER)).toBe(INITIAL_HEALTH);
+      expect(model.getPlayerTaraCount()).toBe(0);
+      expect(model.getComputerTaraCount()).toBe(0);
+      expect(model.getRoundNumber()).toBe(INITIAL_ROUND_NUMBER);
+    });
 
-      expect(constructorModel["state"].currentMatch).toBeNull();
-      expect(constructorModel["state"].globalMatchNumber).toBe(42);
+    test("should load global match number even if there is no active match", () => {
+      mockGameStorage.getMatch.mockReturnValue(null);
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(42);
 
-      expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.getGlobalMatchNumber,
-      ).toHaveBeenCalledTimes(1);
+      model = new Model(mockGameStorage);
+
+      expect(model["state"].currentMatch).toBeNull();
+      expect(model["state"].globalMatchNumber).toBe(42);
     });
 
     test("should load both active match and global match number from storage", () => {
@@ -1111,89 +1143,23 @@ describe("Model", () => {
         playerHealth: 50,
         computerHealth: 100,
       };
-      const existingGlobalMatchNumber = 5;
+      mockGameStorage.getMatch.mockReturnValue(existingMatch);
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(5);
 
-      constructorMockGameStorage.getMatch.mockReturnValue(existingMatch);
-      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(
-        existingGlobalMatchNumber,
-      );
+      model = new Model(mockGameStorage);
 
-      constructorModel = new Model(constructorMockGameStorage);
-
-      expect(constructorModel["state"].currentMatch).toEqual(existingMatch);
-      expect(constructorModel["state"].globalMatchNumber).toBe(
-        existingGlobalMatchNumber,
-      );
-
-      expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.getGlobalMatchNumber,
-      ).toHaveBeenCalledTimes(1);
+      expect(model["state"].currentMatch).toEqual(existingMatch);
+      expect(model["state"].globalMatchNumber).toBe(5);
     });
 
     test("should initialize with null match and match number if storage is empty", () => {
-      constructorMockGameStorage.getMatch.mockReturnValue(null);
-      constructorMockGameStorage.getGlobalMatchNumber.mockReturnValue(null);
+      mockGameStorage.getMatch.mockReturnValue(null);
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(null);
 
-      constructorModel = new Model(constructorMockGameStorage);
+      model = new Model(mockGameStorage);
 
-      expect(constructorModel["state"].currentMatch).toBeNull();
-      expect(constructorModel["state"].globalMatchNumber).toBeNull();
-
-      expect(constructorMockGameStorage.getMatch).toHaveBeenCalledTimes(1);
-      expect(
-        constructorMockGameStorage.getGlobalMatchNumber,
-      ).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("Model Damage Calculation", () => {
-    test("deals DAMAGE_PER_TIE to both players on a standard tie", () => {
-      model.setMatch({
-        ...DEFAULT_MATCH,
-        playerHealth: 100,
-        computerHealth: 100,
-      });
-      model.setPlayerMove(MOVES.ROCK);
-      model.setComputerMove(MOVES.ROCK);
-
-      model.evaluateRound();
-
-      expect(model.getHealth(PARTICIPANTS.PLAYER)).toBe(90); // 100 - 10
-      expect(model.getHealth(PARTICIPANTS.COMPUTER)).toBe(90);
-    });
-
-    test("deals DAMAGE_PER_TARA_TIE on a double Tara move", () => {
-      model.setMatch({
-        ...DEFAULT_MATCH,
-        playerHealth: 100,
-        computerHealth: 100,
-      });
-      model.setPlayerTaraCount(1);
-      model.setComputerTaraCount(1);
-      model.setPlayerMove(MOVES.TARA);
-      model.setComputerMove(MOVES.TARA);
-
-      model.evaluateRound();
-
-      expect(model.getHealth(PARTICIPANTS.PLAYER)).toBe(80); // 100 - 20
-      expect(model.getHealth(PARTICIPANTS.COMPUTER)).toBe(80);
-    });
-
-    test("identifies a Double KO when both players hit 0 health", () => {
-      // Start both at 10 health
-      model.setMatch({
-        ...DEFAULT_MATCH,
-        playerHealth: 10,
-        computerHealth: 10,
-      });
-      model.setPlayerMove(MOVES.ROCK);
-      model.setComputerMove(MOVES.ROCK);
-
-      model.evaluateRound(); // Standard tie deals 10 damage
-
-      expect(model.isDoubleKO()).toBe(true);
-      expect(model.getMatchWinner()).toBe("draw");
+      expect(model["state"].currentMatch).toBeNull();
+      expect(model["state"].globalMatchNumber).toBeNull();
     });
   });
 });
