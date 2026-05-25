@@ -143,6 +143,11 @@ describe("Controller", () => {
 
   describe("handlePlayerMove", () => {
     test("executes the full combat sequence", async () => {
+      (mockModel.evaluateRound as jest.Mock).mockReturnValue({
+        winner: "player",
+        damageCalculated: 50,
+      });
+
       await controller.handlePlayerMove(MOVES.ROCK);
 
       expect(mockModel.registerPlayerMove).toHaveBeenCalledWith(MOVES.ROCK);

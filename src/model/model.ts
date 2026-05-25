@@ -21,6 +21,7 @@ import {
 } from "../utils/dataUtils";
 import { IComputerBrain } from "../utils/computer/IComputerBrain";
 import { AdaptiveComputer } from "../utils/computer/AdaptiveComputer";
+import { RoundResult } from "../utils/dataObjectUtils";
 import { IGameStorage } from "../storage/gameStorage";
 import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
 
@@ -89,36 +90,64 @@ export class Model {
     }
   }
 
-  evaluateRound(): string {
-    let playerMove = this.getPlayerMove();
-    let computerMove = this.getComputerMove();
-    if (playerMove === null || computerMove === null) return "Invalid round";
+  private determineWinner(
+    playerMove: Move,
+    computerMove: Move,
+  ): Participant | "tie" {
+    if (playerMove === computerMove) return "tie";
 
-    this.handleTaraMove(PARTICIPANTS.PLAYER, playerMove);
-    this.handleTaraMove(PARTICIPANTS.COMPUTER, computerMove);
+    return this.doesMoveBeat(playerMove, computerMove)
+      ? PARTICIPANTS.PLAYER
+      : PARTICIPANTS.COMPUTER;
+  }
 
-    playerMove = this.getPlayerMove();
-    computerMove = this.getComputerMove();
-
-    const tieStatus = this.isTie();
-    const taraInPlay = playerMove === MOVES.TARA || computerMove === MOVES.TARA;
-    const damage = this.getDamageAmount(tieStatus, taraInPlay);
-
-    if (tieStatus) {
+  private applyRoundResults(
+    winner: Participant | "tie",
+    pMove: Move,
+    cMove: Move,
+    damage: number,
+  ): void {
+    if (winner === "tie") {
       this.decrementHealth(PARTICIPANTS.PLAYER, damage);
       this.decrementHealth(PARTICIPANTS.COMPUTER, damage);
-      return "It's a tie!";
+      return;
     }
 
-    if (this.doesMoveBeat(playerMove!, computerMove!)) {
-      this.handleRoundWin(PARTICIPANTS.PLAYER, playerMove!);
-      this.decrementHealth(PARTICIPANTS.COMPUTER, damage);
-      return "You win the round!";
-    } else {
-      this.handleRoundWin(PARTICIPANTS.COMPUTER, computerMove!);
-      this.decrementHealth(PARTICIPANTS.PLAYER, damage);
-      return "Computer wins the round!";
+    const winningMove = winner === PARTICIPANTS.PLAYER ? pMove : cMove;
+    const loser =
+      winner === PARTICIPANTS.PLAYER
+        ? PARTICIPANTS.COMPUTER
+        : PARTICIPANTS.PLAYER;
+
+    this.handleRoundWin(winner, winningMove);
+    this.decrementHealth(loser, damage);
+  }
+
+  evaluateRound(): RoundResult {
+    const rawPlayerMove = this.getPlayerMove();
+    const rawComputerMove = this.getComputerMove();
+
+    if (!rawPlayerMove || !rawComputerMove) {
+      throw new Error("Cannot evaluate round with missing moves.");
     }
+
+    // Step 1: Validate intended moves (Handles Tara consumption/penalties)
+    const pMove = this.getEffectiveMove(PARTICIPANTS.PLAYER, rawPlayerMove);
+    const cMove = this.getEffectiveMove(PARTICIPANTS.COMPUTER, rawComputerMove);
+
+    // Step 2: Calculate the outcome
+    const winner = this.determineWinner(pMove, cMove);
+    const taraInPlay = pMove === MOVES.TARA || cMove === MOVES.TARA;
+    const damage = this.getDamageAmount(winner === "tie", taraInPlay);
+
+    // Step 3: Apply the outcome to the Model's state
+    this.applyRoundResults(winner, pMove, cMove, damage);
+
+    // Step 4: Return pure data for the Controller/View to use
+    return {
+      winner,
+      damageCalculated: damage,
+    };
   }
 
   isMatchActive(): boolean {
@@ -341,15 +370,21 @@ export class Model {
     }
   }
 
-  private handleTaraMove(key: Participant, move: Move): void {
-    if (move === MOVES.TARA) {
-      const currentTara = this.getTaraCount(key);
-      if (currentTara > 0) {
-        this.decrementTaraCount(key);
-      } else {
-        this.setMove(key, MOVES.ROCK);
-      }
+  /**
+   * Checks if a Tara move is valid. If valid, consumes a charge.
+   * If invalid (no charges left), forces the move to ROCK as a fallback.
+   */
+  private getEffectiveMove(participant: Participant, intendedMove: Move): Move {
+    if (intendedMove !== MOVES.TARA) return intendedMove;
+
+    if (this.getTaraCount(participant) > 0) {
+      this.decrementTaraCount(participant);
+      return MOVES.TARA; // Valid Tara
     }
+
+    // Invalid Tara! Force fallback to Rock and update the state to match.
+    this.setMove(participant, MOVES.ROCK);
+    return MOVES.ROCK;
   }
 
   private setTaraCount(key: Participant, value: number): void {
@@ -459,19 +494,19 @@ export class Model {
 
   getHealth(participant: Participant): Health {
     const match = this.state.currentMatch;
-    if (!match) return null;
+    if (!match) return INITIAL_HEALTH;
     const value = match[HEALTH_KEYS[participant]];
-    return value !== undefined && value !== null ? value : null;
+    return value !== undefined && value !== null ? value : INITIAL_HEALTH;
   }
 
-  private getDamageAmount(
-    isTie: boolean | "tara-tie",
-    taraInPlay: boolean,
-  ): number {
-    if (isTie === "tara-tie") return DAMAGE_PER_TARA_TIE;
-    if (isTie) return DAMAGE_PER_TIE;
-    if (taraInPlay) return DAMAGE_PER_TARA_LOSS;
-    return DAMAGE_PER_LOSS;
+  private getDamageAmount(isTie: boolean, taraInPlay: boolean): number {
+    if (isTie) {
+      // If it's a tie AND Tara is in play, they both played Tara
+      return taraInPlay ? DAMAGE_PER_TARA_TIE : DAMAGE_PER_TIE;
+    } else {
+      // If it's a win/loss AND Tara is in play, someone took Tara damage
+      return taraInPlay ? DAMAGE_PER_TARA_LOSS : DAMAGE_PER_LOSS;
+    }
   }
 
   private decrementHealth(participant: Participant, damage: number): boolean {
