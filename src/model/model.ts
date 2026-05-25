@@ -154,6 +154,14 @@ export class Model {
     return this.gameStorage.getMatch() !== null;
   }
 
+  resetGame(): void {
+    this.resetScores();
+    this.resetTaras();
+    this.resetMostCommonMoves();
+    this.resetMoveCounts();
+    this.resetMatchData();
+  }
+
   // ===== Score Methods =====
 
   private setScore(key: Participant, value: number): void {
@@ -170,6 +178,11 @@ export class Model {
     this.gameStorage.removeScore(key);
   }
 
+  private resetScores(): void {
+    this.resetScore(PARTICIPANTS.PLAYER);
+    this.resetScore(PARTICIPANTS.COMPUTER);
+  }
+
   setPlayerScore(score: number) {
     this.setScore(PARTICIPANTS.PLAYER, score);
   }
@@ -181,11 +194,6 @@ export class Model {
   }
   getComputerScore() {
     return this.getScore(PARTICIPANTS.COMPUTER);
-  }
-
-  resetScores(): void {
-    this.resetScore(PARTICIPANTS.PLAYER);
-    this.resetScore(PARTICIPANTS.COMPUTER);
   }
 
   // ===== Move Methods =====
@@ -222,6 +230,11 @@ export class Model {
   private resetMostCommonMove(key: Participant): void {
     this.state.mostCommonMove[key] = null;
     this.gameStorage.removeMostCommonMove(key);
+  }
+
+  private resetMostCommonMoves(): void {
+    this.resetMostCommonMove(PARTICIPANTS.PLAYER);
+    this.resetMostCommonMove(PARTICIPANTS.COMPUTER);
   }
 
   private setMostCommonMove(key: Participant, moveCounts: MoveCount): void {
@@ -283,11 +296,6 @@ export class Model {
     this.setMostCommonMove(PARTICIPANTS.COMPUTER, moveCounts);
   }
 
-  resetMostCommonMoves(): void {
-    this.resetMostCommonMove(PARTICIPANTS.PLAYER);
-    this.resetMostCommonMove(PARTICIPANTS.COMPUTER);
-  }
-
   getPlayerMostCommonMove(): StandardMove | null {
     return this.getMostCommonMove(PARTICIPANTS.PLAYER);
   }
@@ -302,18 +310,18 @@ export class Model {
     this.gameStorage.setMoveCounts(key, this.state.moveCounts[key]);
   }
 
-  private resetMoveCounts(key: Participant): void {
+  private resetMoveCount(key: Participant): void {
     this.state.moveCounts[key] = { rock: 0, paper: 0, scissors: 0 };
     this.gameStorage.removeMoveCounts(key);
   }
 
-  private getMoveCounts(key: Participant): MoveCount {
-    return this.state.moveCounts[key];
+  private resetMoveCounts(): void {
+    this.resetMoveCount(PARTICIPANTS.PLAYER);
+    this.resetMoveCount(PARTICIPANTS.COMPUTER);
   }
 
-  resetBothMoveCounts(): void {
-    this.resetMoveCounts(PARTICIPANTS.PLAYER);
-    this.resetMoveCounts(PARTICIPANTS.COMPUTER);
+  private getMoveCounts(key: Participant): MoveCount {
+    return this.state.moveCounts[key];
   }
 
   showMostCommonMove(): boolean {
@@ -392,15 +400,17 @@ export class Model {
     this.gameStorage.removeTaraCount(key);
   }
 
+  private resetTaras(): void {
+    this.resetTaraCount(PARTICIPANTS.PLAYER);
+    this.resetTaraCount(PARTICIPANTS.COMPUTER);
+  }
+
   setPlayerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.PLAYER, count);
   }
+
   setComputerTaraCount(count: number): void {
     this.setTaraCount(PARTICIPANTS.COMPUTER, count);
-  }
-  resetTaras(): void {
-    this.resetTaraCount(PARTICIPANTS.PLAYER);
-    this.resetTaraCount(PARTICIPANTS.COMPUTER);
   }
 
   getPlayerTaraCount(): number {
@@ -447,7 +457,7 @@ export class Model {
     }
   }
 
-  resetMatchData(): void {
+  private resetMatchData(): void {
     this.state.currentMatch = null;
     this.gameStorage.setMatch(null);
     this.setMatchNumber(null);

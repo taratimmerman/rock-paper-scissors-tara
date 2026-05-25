@@ -51,11 +51,7 @@ describe("Controller", () => {
       doesMoveBeat: jest.fn().mockReturnValue(true),
       setMatch: jest.fn(),
       isMatchActive: jest.fn().mockReturnValue(false),
-      resetScores: jest.fn(),
-      resetTaras: jest.fn(),
-      resetBothMoveCounts: jest.fn(),
-      resetMostCommonMoves: jest.fn(),
-      resetMatchData: jest.fn(),
+      resetGame: jest.fn(),
     } as any;
 
     // 2. Setup Mock Views
@@ -159,11 +155,8 @@ describe("Controller", () => {
     test("completely wipes model data and refreshes all views", async () => {
       await controller.resetGameState();
 
-      expect(mockModel.resetScores).toHaveBeenCalled();
-      expect(mockModel.resetMatchData).toHaveBeenCalled();
-
+      expect(mockModel.resetGame).toHaveBeenCalled();
       expect(mockViews.statsView.render).toHaveBeenCalled();
-
       expect(mockViews.arenaView.clear).toHaveBeenCalled();
       expect(mockViews.controlsView.toggleVisibility).toHaveBeenCalledWith(
         false,
