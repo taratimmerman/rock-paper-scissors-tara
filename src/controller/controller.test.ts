@@ -111,8 +111,7 @@ describe("Controller", () => {
 
       expect(mockModel.handleMatchWin).toHaveBeenCalled();
 
-      // Since mockViews.statsView.hasData is false, it should call render instead of update
-      expect(mockViews.statsView.render).toHaveBeenCalled();
+      expect(mockViews.statsView.update).toHaveBeenCalled();
 
       expect(mockViews.controlsView.render).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -157,7 +156,7 @@ describe("Controller", () => {
       await controller.resetGameState();
 
       expect(mockModel.resetGame).toHaveBeenCalled();
-      expect(mockViews.statsView.render).toHaveBeenCalled();
+      expect(mockViews.statsView.update).toHaveBeenCalled();
       expect(mockViews.arenaView.clear).toHaveBeenCalled();
       expect(mockViews.controlsView.toggleVisibility).toHaveBeenCalledWith(
         false,

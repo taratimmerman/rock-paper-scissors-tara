@@ -14,8 +14,6 @@ export interface StatsViewData {
 }
 
 export interface IStatsView {
-  render(data: StatsViewData): void;
   update(data: StatsViewData): void;
-  readonly hasData: boolean;
   toggleGameStatsVisibility(show: boolean): void;
 }
