@@ -76,7 +76,10 @@ export default class ArenaView
     `;
   }
 
-  public async playRoundSequence(data: ArenaViewData): Promise<void> {
+  public async playRoundSequence(
+    data: ArenaViewData,
+    onOutcomeStart?: () => void,
+  ): Promise<void> {
     // 1. Render initial hidden cards
     this.render({ ...data, phase: "revealing", announcementMessage: "" });
     this._toggleVisibility(this._parentElement, true);
@@ -130,6 +133,8 @@ export default class ArenaView
 
     // 5. Outcome Drama
     this.update({ ...data, phase: "result" });
+    // Trigger health update the moment the blow lands
+    onOutcomeStart?.();
     await this.executeOutcomeDrama(data);
   }
 
