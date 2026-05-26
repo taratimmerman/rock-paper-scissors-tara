@@ -179,4 +179,147 @@ describe("ArenaView", () => {
       expect(container?.classList.contains("arena-shake")).toBe(true);
     });
   });
+
+  describe("Stance Animations Regression", () => {
+    it("should include stance classes in markup during combat phase", () => {
+      // Render directly with combat phase to verify markup generation
+      view.render({
+        phase: "combat" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+      });
+
+      const playerCard = document.getElementById("reveal-player");
+      const computerCard = document.getElementById("reveal-computer");
+
+      // Stance classes should be generated in markup when phase === "combat"
+      expect(playerCard?.classList.contains("stance-rock")).toBe(true);
+      expect(computerCard?.classList.contains("stance-paper")).toBe(true);
+    });
+
+    it("should generate correct stance classes for all move types in combat phase", () => {
+      const testCases: Array<[Move, string]> = [
+        ["rock", "stance-rock"],
+        ["paper", "stance-paper"],
+        ["scissors", "stance-scissors"],
+        ["tara", "stance-tara"],
+      ];
+
+      for (const [move, expectedClass] of testCases) {
+        view.render({
+          phase: "combat" as const,
+          playerMoveId: move,
+          computerMoveId: "rock" as Move,
+        });
+
+        const playerCard = document.getElementById("reveal-player");
+        expect(playerCard?.classList.contains(expectedClass)).toBe(true);
+      }
+    });
+
+    it("should not include stance classes in non-combat phases", () => {
+      view.render({
+        phase: "result" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+      });
+
+      const playerCard = document.getElementById("reveal-player");
+      const computerCard = document.getElementById("reveal-computer");
+
+      // Stance classes should NOT be in markup when phase !== "combat"
+      expect(playerCard?.classList.contains("stance-rock")).toBe(false);
+      expect(computerCard?.classList.contains("stance-paper")).toBe(false);
+    });
+
+    it("should fire stance animations during combat phase", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+        winner: "computer" as const,
+        isDoubleKO: false,
+        announcementMessage: "TEST",
+      };
+
+      let stanceAnimationsTriggered = false;
+
+      // Track calls to _waitForAnimation during the sequence
+      (view as any)._waitForAnimation = jest.fn(function (
+        element: HTMLElement,
+      ) {
+        // If we're waiting for animation on a card with a stance class, animations are firing
+        if (
+          (element.id === "reveal-player" ||
+            element.id === "reveal-computer") &&
+          Array.from(element.classList).some((cls) => cls.startsWith("stance-"))
+        ) {
+          stanceAnimationsTriggered = true;
+        }
+        return Promise.resolve();
+      });
+
+      await view.playRoundSequence(data);
+
+      expect(stanceAnimationsTriggered).toBe(true);
+    });
+
+    it("should trigger arena-shake when rock is played", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+        winner: "computer" as const,
+        isDoubleKO: false,
+        announcementMessage: "TEST",
+      };
+
+      let arenaShakeTriggered = false;
+
+      (view as any)._waitForAnimation = jest.fn(function (
+        element: HTMLElement,
+      ) {
+        if (
+          element.id === "move-reveal" &&
+          element.classList.contains("arena-shake")
+        ) {
+          arenaShakeTriggered = true;
+        }
+        return Promise.resolve();
+      });
+
+      await view.playRoundSequence(data);
+
+      expect(arenaShakeTriggered).toBe(true);
+    });
+
+    it("should not trigger arena-shake when neither player plays rock", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "paper" as Move,
+        computerMoveId: "scissors" as Move,
+        winner: "computer" as const,
+        isDoubleKO: false,
+        announcementMessage: "TEST",
+      };
+
+      let arenaShakeTriggered = false;
+
+      (view as any)._waitForAnimation = jest.fn(function (
+        element: HTMLElement,
+      ) {
+        if (
+          element.id === "move-reveal" &&
+          element.classList.contains("arena-shake")
+        ) {
+          arenaShakeTriggered = true;
+        }
+        return Promise.resolve();
+      });
+
+      await view.playRoundSequence(data);
+
+      expect(arenaShakeTriggered).toBe(false);
+    });
+  });
 });

@@ -23,6 +23,10 @@ export default class ArenaView
     const positionClass = isFullyRevealed ? "slide-in" : "";
     const flipClass = isFullyRevealed ? "is-flipped" : "";
 
+    const getStanceClass = (moveId: string | null | undefined): string => {
+      return phase === "combat" && moveId ? `stance-${moveId}` : "";
+    };
+
     const getCardContent = (moveId: string | null | undefined) => {
       if (!moveId) {
         return `<div class="icon">❓</div><div class="label">Waiting...</div>`;
@@ -38,6 +42,9 @@ export default class ArenaView
   `;
     };
 
+    const playerStanceClass = getStanceClass(playerMoveId);
+    const computerStanceClass = getStanceClass(computerMoveId);
+
     return `
       <div class="arena-content">
         <div id="announcement-container" aria-live="polite" aria-atomic="true">
@@ -45,7 +52,7 @@ export default class ArenaView
         </div>
         
         <div id="move-reveal">
-          <div id="reveal-player" class="card entering-player ${positionClass}" style="--facing: 1;">
+          <div id="reveal-player" class="card entering-player ${positionClass} ${playerStanceClass}" style="--facing: 1;">
             <div class="card-inner ${flipClass}">
               <div class="card-back player-theme"></div>
               <div class="card-front">
@@ -56,7 +63,7 @@ export default class ArenaView
 
           <div class="vs-label">VS</div>
 
-          <div id="reveal-computer" class="card entering-computer ${positionClass}" style="--facing: -1;">
+          <div id="reveal-computer" class="card entering-computer ${positionClass} ${computerStanceClass}" style="--facing: -1;">
             <div class="card-inner ${flipClass}">
               <div class="card-back computer-theme"></div>
               <div class="card-front">
@@ -94,11 +101,30 @@ export default class ArenaView
       pCard.querySelector(".card-inner") as HTMLElement,
     );
 
-    // 4. Stances
+    // 4. Stances (stance classes now part of markup when phase === "combat")
     this.update({ ...data, phase: "combat", announcementMessage: "" });
+
+    // Get fresh card references after DOM update
+    const pCardUpdated = this._getElement("reveal-player");
+    const cCardUpdated = this._getElement("reveal-computer");
+
+    // Add arena shake for rock moves
     if (data.playerMoveId === "rock" || data.computerMoveId === "rock") {
       moveRevealContainer.classList.add("arena-shake");
-      await this._waitForAnimation(moveRevealContainer);
+    }
+
+    // Wait for stance animations to complete
+    const stancePromises: Promise<void>[] = [];
+    if (data.playerMoveId)
+      stancePromises.push(this._waitForAnimation(pCardUpdated));
+    if (data.computerMoveId)
+      stancePromises.push(this._waitForAnimation(cCardUpdated));
+    if (data.playerMoveId === "rock" || data.computerMoveId === "rock") {
+      stancePromises.push(this._waitForAnimation(moveRevealContainer));
+    }
+
+    if (stancePromises.length > 0) {
+      await Promise.all(stancePromises);
       moveRevealContainer.classList.remove("arena-shake");
     }
 
