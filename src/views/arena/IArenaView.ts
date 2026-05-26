@@ -14,6 +14,9 @@ export interface ArenaViewData {
 export interface IArenaView {
   render(data: ArenaViewData): void;
   update(data: ArenaViewData): void;
-  playRoundSequence(data: ArenaViewData): Promise<void>;
+  playRoundSequence(
+    data: ArenaViewData,
+    onOutcomeStart?: () => void,
+  ): Promise<void>;
   clear(): void;
 }

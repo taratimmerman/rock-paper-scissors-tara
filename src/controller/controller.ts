@@ -170,20 +170,21 @@ export class Controller {
       `You played ${MOVE_DISPLAY_NAMES[move]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`,
     );
 
-    await this.arenaView.playRoundSequence({
-      phase: "waiting",
-      playerMoveId: move,
-      computerMoveId: computerMove,
-      winner: roundResult.winner,
-      isDoubleKO: roundResult.isDoubleKO,
-      announcementMessage: roundResult.isDoubleKO
-        ? "MUTUAL DESTRUCTION!"
-        : roundResult.winner !== "tie"
-          ? `${roundResult.winner.toUpperCase()} LANDS A BLOW!`
-          : "IT'S A TIE!",
-    });
-
-    this.updateStatsView();
+    await this.arenaView.playRoundSequence(
+      {
+        phase: "waiting",
+        playerMoveId: move,
+        computerMoveId: computerMove,
+        winner: roundResult.winner,
+        isDoubleKO: roundResult.isDoubleKO,
+        announcementMessage: roundResult.isDoubleKO
+          ? "MUTUAL DESTRUCTION!"
+          : roundResult.winner !== "tie"
+            ? `${roundResult.winner.toUpperCase()} LANDS A BLOW!`
+            : "IT'S A TIE!",
+      },
+      () => this.updateStatsView(),
+    );
     this.endRound();
   }
 
