@@ -64,11 +64,7 @@ export class Controller {
       roundNumber: this.model.getRoundNumber(),
     };
 
-    if (!this.statsView.hasData) {
-      this.statsView.render(data);
-    } else {
-      this.statsView.update(data);
-    }
+    this.statsView.update(data);
   }
 
   private async startGame(): Promise<void> {

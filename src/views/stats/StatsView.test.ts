@@ -32,8 +32,8 @@ describe("StatsView", () => {
 
   describe("toggleGameStatsVisibility()", () => {
     test("adds or removes the hidden class on the main stats container", () => {
-      // Must render first so the parent element is cached
-      view.render(defaultData);
+      // Must update first so the parent element is cached
+      view.update(defaultData);
       const statsContainer = document.getElementById("game-stats")!;
 
       view.toggleGameStatsVisibility(false);
@@ -44,9 +44,9 @@ describe("StatsView", () => {
     });
   });
 
-  describe("render()", () => {
-    test("generates and injects the full markup based on state", () => {
-      view.render(defaultData);
+  describe("update()", () => {
+    test("generates and injects the full markup on first call (initial render)", () => {
+      view.update(defaultData);
 
       expect(document.getElementById("player-health")!.style.width).toBe(
         "100%",
@@ -64,24 +64,20 @@ describe("StatsView", () => {
     });
 
     test("formats null common moves as '–'", () => {
-      view.render(defaultData);
+      view.update(defaultData);
       // Fix: target the last span
       expect(
         document.querySelector("#player-stats small span:last-child")!
           .textContent,
       ).toBe("–");
     });
-  });
 
-  describe("update()", () => {
-    beforeEach(() => {
-      // Render initial state to set up DOM for diffing
-      view.render(defaultData);
-    });
-
-    test("updates health bar width attributes without replacing elements", () => {
+    test("updates health bar width attributes without replacing elements (diff on subsequent calls)", () => {
+      // First call does initial render
+      view.update(defaultData);
       const oldPlayerHealthBar = document.getElementById("player-health")!;
 
+      // Second call uses diff update
       const newData = { ...defaultData, playerHealth: 45, computerHealth: 12 };
       view.update(newData);
 
@@ -97,6 +93,10 @@ describe("StatsView", () => {
     });
 
     test("updates scores and pads them correctly", () => {
+      // First call does initial render
+      view.update(defaultData);
+
+      // Second call uses diff update
       const newData = { ...defaultData, playerScore: 5, computerScore: 12 };
       view.update(newData);
 
@@ -111,6 +111,10 @@ describe("StatsView", () => {
     });
 
     test("updates most common moves", () => {
+      // First call does initial render
+      view.update(defaultData);
+
+      // Second call uses diff update
       const newData = {
         ...defaultData,
         playerMostCommonMove: MOVES.ROCK,

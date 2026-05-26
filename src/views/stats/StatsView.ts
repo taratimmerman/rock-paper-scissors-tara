@@ -13,9 +13,14 @@ export default class StatsView
     }
   }
 
-  public render(data: StatsViewData): void {
+  public update(data: StatsViewData): void {
     this._ensureParentElement();
-    super.render(data);
+
+    if (!this.hasData) {
+      super.render(data);
+    } else {
+      super.update(data);
+    }
   }
 
   public toggleGameStatsVisibility(show: boolean): void {
