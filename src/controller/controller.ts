@@ -102,8 +102,6 @@ export class Controller {
 
     // --- ROUND CONTINUES ---
     this.model.increaseRoundNumber();
-
-    // It's safe to update full stats here because we want the user to see the new round number
     this.updateStatsView();
 
     setTimeout(() => {

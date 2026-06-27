@@ -32,7 +32,7 @@ describe("ArenaView Interpretation Logic", () => {
       expect(event.type).toBe("DOUBLE_KO");
     });
 
-    it("returns PLAYER_WIN event when player wins the round", () => {
+    it("returns ROUND_WIN event when player wins the round", () => {
       const roundResult: RoundResult = {
         winner: "player",
         isDoubleKO: false,
@@ -41,11 +41,11 @@ describe("ArenaView Interpretation Logic", () => {
 
       const event = (view as any).determineRoundAnnouncement(roundResult);
 
-      expect(event.type).toBe("PLAYER_WIN");
+      expect(event.type).toBe("ROUND_WIN");
       expect((event as any).payload.winner).toBe("player");
     });
 
-    it("returns PLAYER_WIN event when computer wins the round", () => {
+    it("returns ROUND_WIN event when computer wins the round", () => {
       const roundResult: RoundResult = {
         winner: "computer",
         isDoubleKO: false,
@@ -54,7 +54,7 @@ describe("ArenaView Interpretation Logic", () => {
 
       const event = (view as any).determineRoundAnnouncement(roundResult);
 
-      expect(event.type).toBe("PLAYER_WIN");
+      expect(event.type).toBe("ROUND_WIN");
       expect((event as any).payload.winner).toBe("computer");
     });
 
@@ -92,17 +92,17 @@ describe("ArenaView Interpretation Logic", () => {
       expect(event.type).toBe("MATCH_DOUBLE_KO");
     });
 
-    it("returns MATCH_WINNER with winner=player when player wins", () => {
+    it("returns MATCH_WIN with winner=player when player wins", () => {
       const event = (view as any).determineMatchAnnouncement("player", false);
 
-      expect(event.type).toBe("MATCH_WINNER");
+      expect(event.type).toBe("MATCH_WIN");
       expect((event as any).payload.winner).toBe("player");
     });
 
-    it("returns MATCH_WINNER with winner=computer when computer wins", () => {
+    it("returns MATCH_WIN with winner=computer when computer wins", () => {
       const event = (view as any).determineMatchAnnouncement("computer", false);
 
-      expect(event.type).toBe("MATCH_WINNER");
+      expect(event.type).toBe("MATCH_WIN");
       expect((event as any).payload.winner).toBe("computer");
     });
 
@@ -135,7 +135,7 @@ describe("ArenaView Interpretation Logic", () => {
       view.playRoundResult(roundResult);
 
       expect(setAnnouncementSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "PLAYER_WIN" }),
+        expect.objectContaining({ type: "ROUND_WIN" }),
       );
     });
 
@@ -146,7 +146,7 @@ describe("ArenaView Interpretation Logic", () => {
 
       expect(setAnnouncementSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "MATCH_WINNER",
+          type: "MATCH_WIN",
           payload: { winner: "computer" },
         }),
       );

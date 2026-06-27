@@ -11,10 +11,10 @@ export type ArenaPhase = "waiting" | "revealing" | "combat" | "result";
  */
 export type ArenaAnnouncementEvent =
   | { type: "DOUBLE_KO" }
-  | { type: "PLAYER_WIN"; payload: { winner: Participant } }
+  | { type: "ROUND_WIN"; payload: { winner: Participant } }
   | { type: "TIE" }
   | { type: "MATCH_DOUBLE_KO" }
-  | { type: "MATCH_WINNER"; payload: { winner: Participant } }
+  | { type: "MATCH_WIN"; payload: { winner: Participant } }
   | { type: "CUSTOM"; message: string };
 
 export interface ArenaViewData {

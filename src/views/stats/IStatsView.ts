@@ -1,4 +1,4 @@
-import { Health, Move, Participant } from "../../utils/dataObjectUtils";
+import { Health, Move } from "../../utils/dataObjectUtils";
 
 export interface StatsViewData {
   playerHealth: Health;

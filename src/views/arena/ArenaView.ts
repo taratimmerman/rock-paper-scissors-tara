@@ -178,7 +178,7 @@ export default class ArenaView
    *
    * Decision logic:
    * 1. If both took mutual damage (double KO) → DOUBLE_KO event
-   * 2. If there's a winner → PLAYER_WIN with winner name
+   * 2. If there's a winner → ROUND_WIN with winner name
    * 3. If neither won → TIE event
    *
    * This demonstrates the data-driven pattern: the view receives semantic game state
@@ -213,7 +213,10 @@ export default class ArenaView
     }
 
     if (roundResult.winner !== "tie") {
-      return { type: "PLAYER_WIN", payload: { winner: roundResult.winner } };
+      return {
+        type: "ROUND_WIN",
+        payload: { winner: roundResult.winner },
+      };
     }
 
     return { type: "TIE" };
@@ -229,7 +232,7 @@ export default class ArenaView
   ): ArenaAnnouncementEvent {
     return isDoubleKO
       ? { type: "MATCH_DOUBLE_KO" }
-      : { type: "MATCH_WINNER", payload: { winner } };
+      : { type: "MATCH_WIN", payload: { winner } };
   }
 
   public setAnnouncement(event: ArenaAnnouncementEvent): void {
@@ -239,8 +242,8 @@ export default class ArenaView
       case "DOUBLE_KO":
         announcementMessage = t("arena_doubleKo");
         break;
-      case "PLAYER_WIN":
-        announcementMessage = t("arena_playerWin", {
+      case "ROUND_WIN":
+        announcementMessage = t("arena_roundWin", {
           winner: event.payload.winner.toUpperCase(),
         });
         break;
@@ -250,7 +253,7 @@ export default class ArenaView
       case "MATCH_DOUBLE_KO":
         announcementMessage = t("arena_matchDoubleKo");
         break;
-      case "MATCH_WINNER":
+      case "MATCH_WIN":
         announcementMessage = t("arena_matchWinner", {
           winner: event.payload.winner.toUpperCase(),
         });

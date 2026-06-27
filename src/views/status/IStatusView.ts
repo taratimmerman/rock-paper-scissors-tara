@@ -15,13 +15,6 @@ export interface StatusViewData {
 
 /**
  * Status View displays game state messages (status bar text).
- *
- * ## Data-Driven Announcements
- *
- * The `announceRound()` method demonstrates the data-driven pattern:
- * the Controller passes raw move names, and the View translates them
- * to a localized announcement message. This keeps the Controller focused
- * on game logic rather than UI text.
  */
 export interface IStatusView {
   render(data: StatusViewData): void;
