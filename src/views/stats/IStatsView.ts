@@ -1,4 +1,4 @@
-import { Health, Move, Participant } from "../../utils/dataObjectUtils";
+import { Health, Move } from "../../utils/dataObjectUtils";
 
 export interface StatsViewData {
   playerHealth: Health;
@@ -15,5 +15,6 @@ export interface StatsViewData {
 
 export interface IStatsView {
   update(data: StatsViewData): void;
+  updateHealth(playerHealth: number, computerHealth: number): void;
   toggleGameStatsVisibility(show: boolean): void;
 }

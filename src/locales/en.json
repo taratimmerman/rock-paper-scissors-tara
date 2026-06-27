@@ -1,0 +1,12 @@
+{
+  "arena_doubleKo": "MUTUAL DESTRUCTION!",
+  "arena_matchDoubleKo": "DOUBLE KO! NOBODY WINS!",
+  "arena_matchWinner": "{{winner}} WON THE MATCH!",
+  "arena_roundWin": "{{winner}} LANDS A BLOW!",
+  "arena_tie": "IT'S A TIE!",
+  "status_choose": "Choose your attack!",
+  "status_lockIn": "Locking in move...",
+  "status_prepare": "Prepare your next move...",
+  "status_ready": "Get ready...",
+  "status_roundResult": "You played {{playerMove}}. Computer played {{computerMove}}."
+}

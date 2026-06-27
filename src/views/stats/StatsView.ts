@@ -28,6 +28,27 @@ export default class StatsView
     this._toggleVisibility(this._parentElement, show);
   }
 
+  /**
+   * Performs a targeted DOM update specifically for health bars.
+   * This preserves CSS transitions by preventing a full innerHTML wipe,
+   * and allows health to drop instantly at impact without spoiling match scores.
+   */
+  public updateHealth(playerHealth: number, computerHealth: number): void {
+    const playerBar = this._parentElement?.querySelector(
+      "#player-health",
+    ) as HTMLElement;
+    const computerBar = this._parentElement?.querySelector(
+      "#computer-health",
+    ) as HTMLElement;
+
+    if (playerBar) playerBar.style.width = `${playerHealth}%`;
+    if (computerBar) computerBar.style.width = `${computerHealth}%`;
+
+    // Keep internal data model in sync so subsequent full renders don't revert the health
+    this._data.playerHealth = playerHealth;
+    this._data.computerHealth = computerHealth;
+  }
+
   protected _generateMarkup(): string {
     const {
       playerHealth,

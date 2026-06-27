@@ -1,8 +1,13 @@
 // ArenaView.ts
 import View from "../View";
-import { IArenaView, ArenaViewData } from "./IArenaView";
+import {
+  IArenaView,
+  ArenaViewData,
+  ArenaAnnouncementEvent,
+} from "./IArenaView";
 import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
-import { Participant } from "../../utils/dataObjectUtils";
+import { Participant, RoundResult } from "../../utils/dataObjectUtils";
+import { t } from "../../utils/i18n";
 
 export default class ArenaView
   extends View<ArenaViewData>
@@ -168,6 +173,106 @@ export default class ArenaView
     this.render({ phase: "waiting" });
   }
 
+  /**
+   * Interprets round outcome and emits the corresponding announcement.
+   *
+   * Decision logic:
+   * 1. If both took mutual damage (double KO) → DOUBLE_KO event
+   * 2. If there's a winner → ROUND_WIN with winner name
+   * 3. If neither won → TIE event
+   *
+   * This demonstrates the data-driven pattern: the view receives semantic game state
+   * and decides what UI event to emit, rather than the controller deciding.
+   */
+  public playRoundResult(roundResult: RoundResult): void {
+    const event = this.determineRoundAnnouncement(roundResult);
+    this.setAnnouncement(event);
+  }
+
+  /**
+   * Interprets match outcome, manages the cinematic delay, and emits the announcement.
+   */
+  public playMatchResult(winner: Participant, isDoubleKO: boolean): void {
+    // 1. Announce the match winner
+    const event = this.determineMatchAnnouncement(winner, isDoubleKO);
+    this.setAnnouncement(event);
+
+    // 2. Re-enforce the winner styles (in case of a tie-breaker or double KO context)
+    this.applyWinnerStyles(winner);
+  }
+
+  /**
+   * Helper: Determines which round announcement event to emit based on game state.
+   * @private
+   */
+  private determineRoundAnnouncement(
+    roundResult: RoundResult,
+  ): ArenaAnnouncementEvent {
+    if (roundResult.isDoubleKO) {
+      return { type: "DOUBLE_KO" };
+    }
+
+    if (roundResult.winner !== "tie") {
+      return {
+        type: "ROUND_WIN",
+        payload: { winner: roundResult.winner },
+      };
+    }
+
+    return { type: "TIE" };
+  }
+
+  /**
+   * Helper: Determines which match announcement event to emit based on game outcome.
+   * @private
+   */
+  private determineMatchAnnouncement(
+    winner: Participant,
+    isDoubleKO: boolean,
+  ): ArenaAnnouncementEvent {
+    return isDoubleKO
+      ? { type: "MATCH_DOUBLE_KO" }
+      : { type: "MATCH_WIN", payload: { winner } };
+  }
+
+  public setAnnouncement(event: ArenaAnnouncementEvent): void {
+    let announcementMessage: string;
+
+    switch (event.type) {
+      case "DOUBLE_KO":
+        announcementMessage = t("arena_doubleKo");
+        break;
+      case "ROUND_WIN":
+        announcementMessage = t("arena_roundWin", {
+          winner: event.payload.winner.toUpperCase(),
+        });
+        break;
+      case "TIE":
+        announcementMessage = t("arena_tie");
+        break;
+      case "MATCH_DOUBLE_KO":
+        announcementMessage = t("arena_matchDoubleKo");
+        break;
+      case "MATCH_WIN":
+        announcementMessage = t("arena_matchWinner", {
+          winner: event.payload.winner.toUpperCase(),
+        });
+        break;
+      case "CUSTOM":
+        announcementMessage = event.message;
+        break;
+      default:
+        const _exhaustive: never = event;
+        throw new Error(`Unhandled event type: ${_exhaustive}`);
+    }
+
+    this._data = { ...this._data, announcementMessage };
+
+    // Update only the announcement container to preserve animation classes on cards
+    const announcementContainer = this._getElement("announcement-container");
+    announcementContainer.innerHTML = `<h2>${announcementMessage}</h2>`;
+  }
+
   public update(data: ArenaViewData): void {
     this._data = { ...this._data, ...data };
     this._parentElement.innerHTML = this._generateMarkup();
@@ -181,17 +286,15 @@ export default class ArenaView
   private applyWinnerStyles(winner: Participant | "tie"): void {
     if (winner === "tie") return;
 
-    const pCard = document.getElementById("reveal-player");
-    const cCard = document.getElementById("reveal-computer");
-
-    if (!pCard || !cCard) return;
+    const playerCard = this._getElement("reveal-player");
+    const computerCard = this._getElement("reveal-computer");
 
     if (winner === "player") {
-      pCard.classList.add("winner-highlight");
-      cCard.classList.add("card-defeated");
+      playerCard.classList.add("winner-highlight");
+      computerCard.classList.add("card-defeated");
     } else if (winner === "computer") {
-      cCard.classList.add("winner-highlight");
-      pCard.classList.add("card-defeated");
+      computerCard.classList.add("winner-highlight");
+      playerCard.classList.add("card-defeated");
     }
   }
 }
