@@ -119,6 +119,10 @@ describe("ArenaView Interpretation Logic", () => {
    * Integration test: Verifies that public methods use the helper methods correctly
    */
   describe("Integration: Public methods call helpers", () => {
+    beforeEach(() => {
+      view.render({ phase: "result" });
+    });
+
     it("playRoundResult calls determineRoundAnnouncement and setAnnouncement", () => {
       const setAnnouncementSpy = jest.spyOn(view, "setAnnouncement");
 
