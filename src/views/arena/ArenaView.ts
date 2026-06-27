@@ -266,12 +266,8 @@ export default class ArenaView
     this._data = { ...this._data, announcementMessage };
 
     // Update only the announcement container to preserve animation classes on cards
-    const announcementContainer = this._parentElement.querySelector(
-      "#announcement-container",
-    );
-    if (announcementContainer) {
-      announcementContainer.innerHTML = `<h2>${announcementMessage}</h2>`;
-    }
+    const announcementContainer = this._getElement("announcement-container");
+    announcementContainer.innerHTML = `<h2>${announcementMessage}</h2>`;
   }
 
   public update(data: ArenaViewData): void {
@@ -287,17 +283,15 @@ export default class ArenaView
   private applyWinnerStyles(winner: Participant | "tie"): void {
     if (winner === "tie") return;
 
-    const pCard = document.getElementById("reveal-player");
-    const cCard = document.getElementById("reveal-computer");
-
-    if (!pCard || !cCard) return;
+    const playerCard = this._getElement("reveal-player");
+    const computerCard = this._getElement("reveal-computer");
 
     if (winner === "player") {
-      pCard.classList.add("winner-highlight");
-      cCard.classList.add("card-defeated");
+      playerCard.classList.add("winner-highlight");
+      computerCard.classList.add("card-defeated");
     } else if (winner === "computer") {
-      cCard.classList.add("winner-highlight");
-      pCard.classList.add("card-defeated");
+      computerCard.classList.add("winner-highlight");
+      playerCard.classList.add("card-defeated");
     }
   }
 }
