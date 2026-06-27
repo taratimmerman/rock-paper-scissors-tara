@@ -15,5 +15,6 @@ export interface StatsViewData {
 
 export interface IStatsView {
   update(data: StatsViewData): void;
+  updateHealth(playerHealth: number, computerHealth: number): void;
   toggleGameStatsVisibility(show: boolean): void;
 }

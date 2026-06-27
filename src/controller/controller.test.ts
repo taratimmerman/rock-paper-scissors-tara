@@ -62,6 +62,9 @@ describe("Controller", () => {
         clear: jest.fn(),
         playRoundSequence: jest.fn(),
         update: jest.fn(),
+        setAnnouncement: jest.fn(),
+        playRoundResult: jest.fn(),
+        playMatchResult: jest.fn(),
       } as any,
       controlsView: {
         render: jest.fn(),
@@ -84,7 +87,12 @@ describe("Controller", () => {
         update: jest.fn(),
         toggleGameStatsVisibility: jest.fn(),
       } as any,
-      statusView: { render: jest.fn(), setMessage: jest.fn() } as any,
+      statusView: {
+        render: jest.fn(),
+        setMessage: jest.fn(),
+        handleEvent: jest.fn(),
+        announceRound: jest.fn(),
+      } as any,
     };
 
     controller = new Controller(mockModel, mockViews);
@@ -107,7 +115,7 @@ describe("Controller", () => {
       mockModel.handleMatchWin.mockReturnValue("player");
 
       // @ts-ignore
-      controller.endRound("player wins round");
+      controller.endRound();
 
       expect(mockModel.handleMatchWin).toHaveBeenCalled();
 
@@ -126,7 +134,7 @@ describe("Controller", () => {
       mockModel.isMatchOver.mockReturnValue(false);
 
       // @ts-ignore
-      controller.endRound("draw");
+      controller.endRound();
 
       expect(mockModel.increaseRoundNumber).toHaveBeenCalled();
 

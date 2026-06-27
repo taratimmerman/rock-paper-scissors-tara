@@ -72,7 +72,7 @@ export class Controller {
     this.updateStatsView();
 
     this.resetArenaVisuals();
-    this.statusView.setMessage("Get ready...");
+    this.statusView.handleEvent({ type: "READY" });
 
     this.menuView.toggleMenuVisibility(false);
     this.gameView.toggleVisibility(true);
@@ -82,28 +82,15 @@ export class Controller {
     await this.handleNextRound();
   }
 
-  private endRound(): void {
-    const matchActuallyEnded = this.model.isMatchOver();
+  private async endRound(): Promise<void> {
+    const matchOver = this.model.isMatchOver();
     const isDoubleKO = this.model.isDoubleKO();
 
-    this.updateStatsView();
-
     // --- MATCH END ---
-    if (matchActuallyEnded) {
+    if (matchOver) {
       const result = this.model.handleMatchWin();
 
-      const resultMessage = isDoubleKO
-        ? "DOUBLE KO! NOBODY WINS!"
-        : `${result.toUpperCase()} WON THE MATCH!`;
-
-      // Update the arena view to show the final match message, keeping cards visible
-      this.arenaView.update({
-        phase: "result",
-        playerMoveId: this.model.getPlayerMove(),
-        computerMoveId: this.model.getComputerMove(),
-        announcementMessage: resultMessage,
-        winner: result as Participant,
-      });
+      this.arenaView.playMatchResult(result as Participant, isDoubleKO);
 
       this.updateStatsView();
       this.updateControlsView();
@@ -114,16 +101,18 @@ export class Controller {
     }
 
     // --- ROUND CONTINUES ---
-    this.updateStatsView();
     this.model.increaseRoundNumber();
+
+    // It's safe to update full stats here because we want the user to see the new round number
+    this.updateStatsView();
 
     setTimeout(() => {
       this.handleNextRound();
-    }, 2000);
+    }, 250);
   }
 
   private async handleNextRound(): Promise<void> {
-    this.statusView.setMessage("Prepare your next move...");
+    this.statusView.handleEvent({ type: "PREPARE" });
 
     this.model.resetMoves();
 
@@ -132,7 +121,7 @@ export class Controller {
     this.updateStatsView();
 
     await this.controlsView.flipAll(true);
-    this.statusView.setMessage("Choose your attack!");
+    this.statusView.handleEvent({ type: "CHOOSE" });
   }
 
   async resetGameState(): Promise<void> {
@@ -152,24 +141,22 @@ export class Controller {
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
-    this.statusView.setMessage("Locking in move...");
+    this.statusView.handleEvent({ type: "LOCK_IN" });
     await this.controlsView.flipAll(false);
 
-    // 1. Get the computer's move purely based on historical state
     const computerMove = this.model.getCalculatedComputerMove();
-
-    // 2. Explicitly commit both moves to state (this triggers the metric counters)
     this.model.registerPlayerMove(move);
     this.model.registerComputerMove(computerMove);
 
-    // 3. Evaluate the rules deterministically
     const roundResult = this.model.evaluateRound();
 
-    // 4. Update UI using the plain variables we have right here
-    this.statusView.setMessage(
-      `You played ${MOVE_DISPLAY_NAMES[move]}. Computer played ${MOVE_DISPLAY_NAMES[computerMove]}.`,
+    // 1. Status bar updates: "You played X. Computer played Y."
+    this.statusView.announceRound(
+      MOVE_DISPLAY_NAMES[move],
+      MOVE_DISPLAY_NAMES[computerMove],
     );
 
+    // 2. Play the visual sequence
     await this.arenaView.playRoundSequence(
       {
         phase: "waiting",
@@ -177,15 +164,23 @@ export class Controller {
         computerMoveId: computerMove,
         winner: roundResult.winner,
         isDoubleKO: roundResult.isDoubleKO,
-        announcementMessage: roundResult.isDoubleKO
-          ? "MUTUAL DESTRUCTION!"
-          : roundResult.winner !== "tie"
-            ? `${roundResult.winner.toUpperCase()} LANDS A BLOW!`
-            : "IT'S A TIE!",
       },
-      () => this.updateStatsView(),
+      () => {
+        // 💥 IMPACT FRAME 💥
+
+        // Smoothly drop health bars
+        this.statsView.updateHealth(
+          this.model.getHealth(PARTICIPANTS.PLAYER) ?? 100,
+          this.model.getHealth(PARTICIPANTS.COMPUTER) ?? 100,
+        );
+
+        // Flash the round outcome text (e.g., "PLAYER LANDS A BLOW!")
+        this.arenaView.playRoundResult(roundResult);
+      },
     );
-    this.endRound();
+
+    // 3. Resolve the round once all drama and delays are finished
+    await this.endRound();
   }
 
   async initialize(): Promise<void> {
