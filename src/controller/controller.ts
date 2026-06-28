@@ -162,6 +162,7 @@ export class Controller {
         computerMoveId: computerMove,
         winner: roundResult.winner,
         isDoubleKO: roundResult.isDoubleKO,
+        damage: roundResult.damageCalculated,
       },
       () => {
         // 💥 IMPACT FRAME 💥

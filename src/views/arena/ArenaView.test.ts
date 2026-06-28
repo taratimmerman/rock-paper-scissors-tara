@@ -322,4 +322,100 @@ describe("ArenaView", () => {
       expect(arenaShakeTriggered).toBe(false);
     });
   });
+
+  describe("Combat Text (Floating Damage)", () => {
+    beforeEach(() => {
+      // Inject the required DOM structure that ArenaView expects
+      document.body.innerHTML = `
+        <div id="arena">
+          <div id="move-reveal">
+            <div id="reveal-player"></div>
+            <div id="reveal-computer"></div>
+          </div>
+        </div>
+      `;
+
+      // Helper to mock card geometry
+      const setupCardMock = (id: string) => {
+        const card = document.getElementById(id);
+        if (card) {
+          card.getBoundingClientRect = () =>
+            ({
+              top: 10,
+              left: 10,
+              width: 100,
+              height: 100,
+              bottom: 110,
+              right: 110,
+              x: 10,
+              y: 10,
+              toJSON: () => {},
+            }) as DOMRect;
+        }
+      };
+
+      setupCardMock("reveal-player");
+      setupCardMock("reveal-computer");
+    });
+
+    it("should spawn a floating damage element containing the calculated damage", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "paper" as Move,
+        computerMoveId: "rock" as Move,
+        winner: "player" as const,
+        isDoubleKO: false,
+        announcementMessage: "PLAYER WINS!",
+        damage: 25,
+      };
+
+      await view.playRoundSequence(data);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const floatingTexts = document.querySelectorAll(".floating-damage");
+      expect(floatingTexts.length).toBe(1);
+      expect(floatingTexts[0].textContent).toBe("-25");
+    });
+
+    it("should spawn two floating damage elements during a double KO", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "rock" as Move,
+        computerMoveId: "paper" as Move,
+        winner: "tie" as const,
+        isDoubleKO: true,
+        announcementMessage: "DOUBLE KO!",
+        damage: 50,
+      };
+
+      await view.playRoundSequence(data);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const floatingTexts = document.querySelectorAll(".floating-damage");
+      expect(floatingTexts.length).toBe(2);
+      expect(floatingTexts[0].textContent).toBe("-50");
+      expect(floatingTexts[1].textContent).toBe("-50");
+    });
+
+    it("should clean up floating damage elements after the animation ends", async () => {
+      const data = {
+        phase: "result" as const,
+        playerMoveId: "paper" as Move,
+        computerMoveId: "rock" as Move,
+        winner: "player" as const,
+        isDoubleKO: false,
+        announcementMessage: "PLAYER WINS!",
+        damage: 25,
+      };
+
+      await view.playRoundSequence(data);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const floater = document.querySelector(".floating-damage");
+      floater?.dispatchEvent(new Event("animationend"));
+
+      const floatingTexts = document.querySelectorAll(".floating-damage");
+      expect(floatingTexts.length).toBe(0);
+    });
+  });
 });
