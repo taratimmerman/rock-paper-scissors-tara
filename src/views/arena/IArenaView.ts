@@ -24,6 +24,7 @@ export interface ArenaViewData {
   winner?: Participant | "tie" | null;
   isDoubleKO?: boolean;
   announcementMessage?: string;
+  damage?: number;
 }
 
 /**

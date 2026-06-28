@@ -143,28 +143,52 @@ export default class ArenaView
     await this.executeOutcomeDrama(data);
   }
 
+  private spawnDamageText(targetCard: HTMLElement, damageValue: number): void {
+    const rect = targetCard.getBoundingClientRect();
+    const floater = document.createElement("div");
+
+    floater.textContent = `-${damageValue}`;
+    floater.classList.add("floating-damage");
+
+    floater.style.position = "fixed";
+    floater.style.left = `${rect.left + rect.width / 2}px`;
+    floater.style.top = `${rect.top + rect.height / 2}px`;
+
+    document.body.appendChild(floater);
+    floater.addEventListener("animationend", () => floater.remove());
+  }
+
   private async executeOutcomeDrama(data: ArenaViewData): Promise<void> {
-    // Get fresh element references after DOM update
-    const pCard = this._getElement("reveal-player");
-    const cCard = this._getElement("reveal-computer");
+    const playerCard = this._getElement("reveal-player");
+    const computerCard = this._getElement("reveal-computer");
     const container = this._getElement("move-reveal");
+    const damage = data.damage || 0;
+
+    // Helper to spawn damage
+    const hit = (card: HTMLElement) => {
+      if (damage > 0) this.spawnDamageText(card, damage);
+      card.classList.add("card-impact", "card-defeated");
+    };
 
     if (data.isDoubleKO || data.winner === "tie") {
-      pCard.classList.add("card-impact", "card-defeated");
-      cCard.classList.add("card-impact", "card-defeated");
+      // Both take damage in a tie/double KO
+      hit(playerCard);
+      hit(computerCard);
       container.classList.add("arena-shake");
-      await this._waitForAnimation(pCard);
+      await this._waitForAnimation(playerCard);
       return;
     }
 
-    const winningCard = data.winner === PARTICIPANTS.PLAYER ? pCard : cCard;
-    const losingCard = data.winner === PARTICIPANTS.PLAYER ? cCard : pCard;
-
-    losingCard.classList.add("card-impact", "card-defeated");
+    // Standard Win/Loss
+    const losingCard =
+      data.winner === PARTICIPANTS.PLAYER ? computerCard : playerCard;
+    hit(losingCard);
     container.classList.add("arena-shake");
-
     await this._waitForAnimation(losingCard);
 
+    // Winner gets highlight
+    const winningCard =
+      data.winner === PARTICIPANTS.PLAYER ? playerCard : computerCard;
     winningCard.classList.add("winner-highlight");
     await this._waitForAnimation(winningCard);
   }
