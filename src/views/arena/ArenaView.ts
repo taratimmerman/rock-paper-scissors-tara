@@ -7,6 +7,7 @@ import {
 } from "./IArenaView";
 import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
 import { Participant, RoundResult } from "../../utils/dataObjectUtils";
+import { renderIcon } from "../../utils/imageUtils";
 import { t } from "../../utils/i18n";
 
 export default class ArenaView
@@ -42,7 +43,7 @@ export default class ArenaView
       const label = moveData ? moveData.text : moveId;
 
       return `
-    <div class="icon">${icon}</div>
+    <div class="icon">${renderIcon(icon)}</div>
     <div class="label">${label}</div>
   `;
     };

@@ -76,6 +76,20 @@ describe("ControlsView", () => {
     expect(document.getElementById("play-again")).toBeFalsy();
   });
 
+  test("renders Tara with an image icon when provided by move data", () => {
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: PLAYER_MOVES_DATA,
+    });
+
+    const taraButton = document.getElementById(MOVES.TARA);
+    const taraImage = taraButton?.querySelector('img[src*="test-file-stub"]');
+
+    expect(taraImage).toBeTruthy();
+  });
+
   test("disables Tara button when taraIsEnabled is false", () => {
     view.render({
       playerMove: null,

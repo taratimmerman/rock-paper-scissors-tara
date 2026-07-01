@@ -6,6 +6,7 @@
 // from the MOVES_DATABASE to ensure data consistency.
 // =============================================================================
 
+import taraImage from "url:../../public/images/tara.png";
 import { Match, MoveData } from "./dataObjectUtils";
 
 // -----------------------------------------------------------------------------
@@ -41,7 +42,7 @@ const MOVES_DATABASE = {
     beats: ["rock", "paper", "scissors"],
     isStandard: false,
     text: "Tara",
-    icon: "⭐",
+    icon: taraImage,
   },
 } as const;
 
