@@ -1,6 +1,7 @@
 import View from "../View";
 import { Move } from "../../utils/dataObjectUtils";
 import { ControlsViewData, IControlsView } from "./IControlsView";
+import { renderIcon } from "../../utils/imageUtils";
 
 export default class ControlsView
   extends View<ControlsViewData>
@@ -67,7 +68,7 @@ export default class ControlsView
               <div class="card-inner ${flipClass}">
                 <div class="card-back player-theme"></div>
                 <div class="card-front">
-                  <span class="icon" aria-hidden="true">${move.icon}</span>
+                  <span class="icon" aria-hidden="true">${renderIcon(move.icon)}</span>
                   <span class="label">${move.text}</span>
                 </div>
               </div>
