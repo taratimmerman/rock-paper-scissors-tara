@@ -5,7 +5,11 @@ import {
   ArenaViewData,
   ArenaAnnouncementEvent,
 } from "./IArenaView";
-import { PLAYER_MOVES_DATA, PARTICIPANTS } from "../../utils/dataUtils";
+import {
+  PLAYER_MOVES_DATA,
+  PARTICIPANTS,
+  CARD_BACKS_DATABASE,
+} from "../../utils/dataUtils";
 import { Participant, RoundResult } from "../../utils/dataObjectUtils";
 import { renderIcon } from "../../utils/imageUtils";
 import { t } from "../../utils/i18n";
@@ -60,7 +64,14 @@ export default class ArenaView
         <div id="move-reveal">
           <div id="reveal-player" class="card entering-player ${positionClass} ${playerStanceClass}" style="--facing: 1;">
             <div class="card-inner ${flipClass}">
-              <div class="card-back player-theme"></div>
+              <div class="card-back player-theme">
+                <img
+                  src="${CARD_BACKS_DATABASE.PLAYER.image}"
+                  alt=""
+                  class="card-back-image"
+                  aria-hidden="true"
+                />
+              </div>
               <div class="card-front">
                 ${getCardContent(playerMoveId)}
               </div>
@@ -71,7 +82,14 @@ export default class ArenaView
 
           <div id="reveal-computer" class="card entering-computer ${positionClass} ${computerStanceClass}" style="--facing: -1;">
             <div class="card-inner ${flipClass}">
-              <div class="card-back computer-theme"></div>
+              <div class="card-back computer-theme">
+                <img
+                  src="${CARD_BACKS_DATABASE.COMPUTER.image}"
+                  alt=""
+                  class="card-back-image"
+                  aria-hidden="true"
+                />
+              </div>
               <div class="card-front">
                  ${getCardContent(computerMoveId)}
               </div>

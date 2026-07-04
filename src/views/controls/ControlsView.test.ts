@@ -76,6 +76,18 @@ describe("ControlsView", () => {
     expect(document.getElementById("play-again")).toBeFalsy();
   });
 
+  test("renders image-backed card backs for player choices", () => {
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    const cardBackImages = document.querySelectorAll(".card-back-image");
+    expect(cardBackImages.length).toBeGreaterThan(0);
+  });
+
   test("renders Tara with an image icon when provided by move data", () => {
     view.render({
       playerMove: null,

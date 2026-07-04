@@ -72,6 +72,16 @@ describe("ArenaView", () => {
       const rockData = PLAYER_MOVES_DATA.find((m) => m.id === "rock");
       expect(playerCard?.innerHTML).toContain(rockData?.icon);
     });
+
+    it("should render image-backed card backs for player and computer cards", () => {
+      view.render({
+        phase: "result",
+        playerMoveId: "rock",
+        computerMoveId: "scissors",
+      });
+
+      expect(document.querySelectorAll(".card-back-image").length).toBe(2);
+    });
   });
 
   describe("Play Sequence (Async)", () => {
