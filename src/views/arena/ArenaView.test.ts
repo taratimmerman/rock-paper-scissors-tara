@@ -82,6 +82,17 @@ describe("ArenaView", () => {
 
       expect(document.querySelectorAll(".card-back-image").length).toBe(2);
     });
+
+    it("should attach a fallback hook to card-back images", () => {
+      view.render({
+        phase: "result",
+        playerMoveId: "rock",
+        computerMoveId: "scissors",
+      });
+
+      const cardBackImage = document.querySelector(".card-back-image");
+      expect(cardBackImage?.outerHTML).toContain("onerror=");
+    });
   });
 
   describe("Play Sequence (Async)", () => {
