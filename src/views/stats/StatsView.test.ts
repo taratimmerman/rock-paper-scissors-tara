@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { MOVES } from "../../utils/dataUtils";
+import { MOVES, MOVES_DATABASE } from "../../utils/dataUtils";
 import StatsView from "./StatsView";
 import { StatsViewData } from "./IStatsView";
 
@@ -130,6 +130,17 @@ describe("StatsView", () => {
         document.querySelector("#computer-stats small span:last-child")!
           .textContent,
       ).toBe(MOVES.PAPER);
+    });
+
+    test("renders tara icons using the shared move definition", () => {
+      view.update(defaultData);
+
+      const taraIcon = document.querySelector(
+        ".tara-icon-wrapper img",
+      ) as HTMLImageElement | null;
+
+      expect(taraIcon).not.toBeNull();
+      expect(taraIcon?.getAttribute("src")).toBe(MOVES_DATABASE.TARA.icon);
     });
   });
 });
