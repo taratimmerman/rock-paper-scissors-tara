@@ -7,6 +7,8 @@
 // =============================================================================
 
 import taraImage from "url:../../public/images/tara.png";
+import cardBlueImage from "url:../../public/images/card-blue.png";
+import cardRedImage from "url:../../public/images/card-red.png";
 import { Match, MoveData } from "./dataObjectUtils";
 
 // -----------------------------------------------------------------------------
@@ -49,7 +51,26 @@ export const MOVES_DATABASE = {
 type DbType = typeof MOVES_DATABASE;
 
 // -----------------------------------------------------------------------------
-// SECTION 2: DYNAMIC TYPES (Derived from the Database)
+// SECTION 2: CARD BACK IMAGE DATABASE
+//
+// This mirrors the move database pattern for visual card-back assets.
+// -----------------------------------------------------------------------------
+export const CARD_BACKS_DATABASE = {
+  PLAYER: {
+    id: "player",
+    image: cardBlueImage,
+  },
+  COMPUTER: {
+    id: "computer",
+    image: cardRedImage,
+  },
+} as const;
+
+export type CardBackId =
+  (typeof CARD_BACKS_DATABASE)[keyof typeof CARD_BACKS_DATABASE]["id"];
+
+// -----------------------------------------------------------------------------
+// SECTION 3: DYNAMIC TYPES (Derived from the Database)
 //
 // These types prevent manual errors. They update automatically when MOVES_DATABASE
 // changes.
@@ -77,7 +98,7 @@ export type StandardMove = {
 }[keyof DbType];
 
 // -----------------------------------------------------------------------------
-// SECTION 3: DYNAMIC CONSTANTS (Runtime Data Structures)
+// SECTION 4: DYNAMIC CONSTANTS (Runtime Data Structures)
 //
 // Generated at runtime by mapping over the MOVES_DATABASE.
 // -----------------------------------------------------------------------------
@@ -139,7 +160,7 @@ export const MOVE_DISPLAY_NAMES: Record<Move, string> = Object.fromEntries(
 ) as Record<Move, string>;
 
 // -----------------------------------------------------------------------------
-// SECTION 4: BASIC GAME CONSTANTS
+// SECTION 5: BASIC GAME CONSTANTS
 // -----------------------------------------------------------------------------
 
 export const PARTICIPANTS = {

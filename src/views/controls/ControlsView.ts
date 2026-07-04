@@ -1,5 +1,6 @@
 import View from "../View";
 import { Move } from "../../utils/dataObjectUtils";
+import { CARD_BACKS_DATABASE } from "../../utils/dataUtils";
 import { ControlsViewData, IControlsView } from "./IControlsView";
 import { renderIcon } from "../../utils/imageUtils";
 
@@ -63,7 +64,14 @@ export default class ControlsView
               ${isRuleDisabled ? "disabled" : ""}
             >
               <div class="card-inner ${flipClass}">
-                <div class="card-back player-theme"></div>
+                <div class="card-back player-theme">
+                  <img
+                    src="${CARD_BACKS_DATABASE.PLAYER.image}"
+                    alt=""
+                    class="card-back-image"
+                    aria-hidden="true"
+                  />
+                </div>
                 <div class="card-front">
                   <span class="icon" aria-hidden="true">${renderIcon(move.icon)}</span>
                   <span class="label">${move.text}</span>
