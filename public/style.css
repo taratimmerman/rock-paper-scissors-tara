@@ -882,3 +882,72 @@ button:focus-visible {
     font-size: 2.5rem;
   }
 }
+
+/* =============================================================================
+   10. TARA COUNTER UI (PARTICIPANT STATS)
+   ============================================================================= */
+
+.tara-container {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  align-items: center;
+}
+
+/*
+  Player drains left-to-right.
+  DOM: [Active, Active, Inactive] renders as Active(Left) -> Inactive(Right)
+*/
+.player-tara-container {
+  flex-direction: row;
+}
+
+/*
+  Computer drains right-to-left.
+  DOM: [Active, Active, Inactive] renders as Inactive(Left) <- Active(Right)
+*/
+.computer-tara-container {
+  flex-direction: row-reverse;
+}
+
+.tara-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.tara-icon-wrapper .icon-image,
+.tara-icon-wrapper .icon-emoji {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  line-height: 1;
+}
+
+/* Greyed out state for consumed/unavailable moves */
+.tara-inactive {
+  filter: grayscale(100%) opacity(0.25);
+  transform: scale(0.85);
+}
+
+/* Full color and slightly elevated for available moves */
+.tara-active {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transform: scale(1);
+}
+
+/* Desktop sizing */
+@media (min-width: 768px) {
+  .tara-container {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .tara-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+}
