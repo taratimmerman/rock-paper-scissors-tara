@@ -28,9 +28,6 @@ export default class ControlsView
 
     this._parentElement.classList.toggle("interaction-locked", !faceUp);
 
-    // Force reflow to ensure transition runs correctly
-    const _forceReflow = (cards[0] as HTMLElement).offsetHeight;
-
     cards.forEach((card) => {
       faceUp
         ? card.classList.add("is-flipped")

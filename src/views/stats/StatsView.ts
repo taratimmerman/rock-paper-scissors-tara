@@ -1,5 +1,7 @@
 import View from "../View";
 import { IStatsView, StatsViewData } from "./IStatsView";
+import { renderIcon } from "../../utils/imageUtils";
+import { MAX_TARA, MOVES_DATABASE } from "../../utils/dataUtils";
 
 export default class StatsView
   extends View<StatsViewData>
@@ -28,11 +30,6 @@ export default class StatsView
     this._toggleVisibility(this._parentElement, show);
   }
 
-  /**
-   * Performs a targeted DOM update specifically for health bars.
-   * This preserves CSS transitions by preventing a full innerHTML wipe,
-   * and allows health to drop instantly at impact without spoiling match scores.
-   */
   public updateHealth(playerHealth: number, computerHealth: number): void {
     const playerBar = this._parentElement?.querySelector(
       "#player-health",
@@ -44,9 +41,25 @@ export default class StatsView
     if (playerBar) playerBar.style.width = `${playerHealth}%`;
     if (computerBar) computerBar.style.width = `${computerHealth}%`;
 
-    // Keep internal data model in sync so subsequent full renders don't revert the health
     this._data.playerHealth = playerHealth;
     this._data.computerHealth = computerHealth;
+  }
+
+  private _generateTaraIcons(availableCount: number): string {
+    let iconsMarkup = "";
+
+    for (let i = 0; i < MAX_TARA; i++) {
+      // If the current index is less than the available count, it's active
+      const statusClass = i < availableCount ? "tara-active" : "tara-inactive";
+
+      iconsMarkup += `
+        <div class="tara-icon-wrapper ${statusClass}">
+          ${renderIcon(MOVES_DATABASE.TARA.icon)}
+        </div>
+      `;
+    }
+
+    return iconsMarkup;
   }
 
   protected _generateMarkup(): string {
@@ -66,11 +79,16 @@ export default class StatsView
     return `
       <aside id="player-stats" class="stats">
         <div class="score-row"><span>${playerScore.toString().padStart(2, "0")}</span> <span>WINS</span></div>
+
         <div class="bar-wrapper">
           <div class="bar" id="player-health" style="width: ${playerHealth}%"></div>
           <span class="bar-text">PLAYER</span>
         </div>
-        <p><span>Tara x</span><span>${playerTara}</span></p>
+
+        <div class="tara-container player-tara-container">
+          ${this._generateTaraIcons(playerTara)}
+        </div>
+
         <p><small><span>Common: </span><span>${playerMostCommonMove ?? "–"}</span></small></p>
       </aside>
 
@@ -81,11 +99,16 @@ export default class StatsView
 
       <aside id="computer-stats" class="stats">
         <div class="score-row"><span>WINS</span> <span>${computerScore.toString().padStart(2, "0")}</span></div>
+
         <div class="bar-wrapper">
           <div class="bar" id="computer-health" style="width: ${computerHealth}%"></div>
           <span class="bar-text">COMPUTER</span>
         </div>
-        <p><span>Tara x</span><span>${computerTara}</span></p>
+
+        <div class="tara-container computer-tara-container">
+          ${this._generateTaraIcons(computerTara)}
+        </div>
+
         <p><small><span>Common: </span><span>${computerMostCommonMove ?? "–"}</span></small></p>
       </aside>
     `;

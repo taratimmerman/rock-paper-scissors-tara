@@ -15,7 +15,7 @@ import { Match, MoveData } from "./dataObjectUtils";
 // This is the only place where a move's definition should be edited.
 // 'as const' ensures TypeScript treats values strictly (e.g., "rock" vs. string).
 // -----------------------------------------------------------------------------
-const MOVES_DATABASE = {
+export const MOVES_DATABASE = {
   ROCK: {
     id: "rock",
     beats: ["scissors"],
@@ -154,6 +154,7 @@ export const DAMAGE_PER_TARA_LOSS = 70;
 export const DAMAGE_PER_TARA_TIE = 20;
 export const DAMAGE_PER_TIE = 10;
 export const DEFAULT_MATCH_NUMBER = 1;
+export const MAX_TARA = 3;
 
 export const DEFAULT_MATCH: Match = {
   matchRoundNumber: INITIAL_ROUND_NUMBER,
