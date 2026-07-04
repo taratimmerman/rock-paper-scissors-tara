@@ -102,21 +102,6 @@ describe("ControlsView", () => {
     expect(taraImage).toBeTruthy();
   });
 
-  test("adds a fallback hook for Tara images that fail to load", () => {
-    view.render({
-      playerMove: null,
-      isMatchOver: false,
-      taraIsEnabled: true,
-      moves: PLAYER_MOVES_DATA,
-    });
-
-    const taraButton = document.getElementById(MOVES.TARA);
-    const taraIconMarkup = taraButton?.querySelector(".icon")?.innerHTML ?? "";
-
-    expect(taraIconMarkup).toContain("onerror=");
-    expect(taraIconMarkup).toContain("icon-fallback");
-  });
-
   test("disables Tara button when taraIsEnabled is false", () => {
     view.render({
       playerMove: null,

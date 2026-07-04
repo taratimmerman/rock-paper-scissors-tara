@@ -70,7 +70,6 @@ export default class ArenaView
                   alt=""
                   class="card-back-image"
                   aria-hidden="true"
-                  onerror="this.onerror=null; this.style.display='none';"
                 />
               </div>
               <div class="card-front">
@@ -89,7 +88,6 @@ export default class ArenaView
                   alt=""
                   class="card-back-image"
                   aria-hidden="true"
-                  onerror="this.onerror=null; this.style.display='none';"
                 />
               </div>
               <div class="card-front">
