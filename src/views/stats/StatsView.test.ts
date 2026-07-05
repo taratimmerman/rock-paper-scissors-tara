@@ -63,13 +63,20 @@ describe("StatsView", () => {
       ).toBe("Match 1");
     });
 
-    test("formats null common moves as '–'", () => {
-      view.update(defaultData);
-      // Fix: target the last span
-      expect(
-        document.querySelector("#player-stats small span:last-child")!
-          .textContent,
-      ).toBe("–");
+    test("hides all signature move icons when common move is null", () => {
+      view.update(defaultData); // defaultData has null for most common moves
+
+      // Query for any signature slots that DO NOT have the 'hidden' class
+      const playerVisibleIcons = document.querySelectorAll(
+        "#player-stats .signature-icon-slot:not(.hidden)",
+      );
+      const computerVisibleIcons = document.querySelectorAll(
+        "#computer-stats .signature-icon-slot:not(.hidden)",
+      );
+
+      // Since the move is null, no icons should be visible (length of 0)
+      expect(playerVisibleIcons.length).toBe(0);
+      expect(computerVisibleIcons.length).toBe(0);
     });
 
     test("updates health bar width attributes without replacing elements (diff on subsequent calls)", () => {
@@ -110,7 +117,7 @@ describe("StatsView", () => {
       ).toBe("12");
     });
 
-    test("updates most common moves", () => {
+    test("updates most common moves by toggling the hidden class on the correct icon slot", () => {
       // First call does initial render
       view.update(defaultData);
 
@@ -122,14 +129,28 @@ describe("StatsView", () => {
       };
       view.update(newData);
 
-      expect(
-        document.querySelector("#player-stats small span:last-child")!
-          .textContent,
-      ).toBe(MOVES.ROCK);
-      expect(
-        document.querySelector("#computer-stats small span:last-child")!
-          .textContent,
-      ).toBe(MOVES.PAPER);
+      // Select specific move slots for both players based on the data-move attribute
+      const playerRockSlot = document.querySelector(
+        '#player-stats .common-icon-slot[data-move="rock"]',
+      )!;
+      const playerPaperSlot = document.querySelector(
+        '#player-stats .common-icon-slot[data-move="paper"]',
+      )!;
+
+      const computerPaperSlot = document.querySelector(
+        '#computer-stats .common-icon-slot[data-move="paper"]',
+      )!;
+      const computerRockSlot = document.querySelector(
+        '#computer-stats .common-icon-slot[data-move="rock"]',
+      )!;
+
+      // Player checks: Rock should be visible, Paper should be hidden
+      expect(playerRockSlot.classList.contains("hidden")).toBe(false);
+      expect(playerPaperSlot.classList.contains("hidden")).toBe(true);
+
+      // Computer checks: Paper should be visible, Rock should be hidden
+      expect(computerPaperSlot.classList.contains("hidden")).toBe(false);
+      expect(computerRockSlot.classList.contains("hidden")).toBe(true);
     });
 
     test("renders tara icons using the shared move definition", () => {

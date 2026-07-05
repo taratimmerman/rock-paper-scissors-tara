@@ -961,3 +961,84 @@ button:focus-visible {
     height: 32px;
   }
 }
+
+/* =============================================================================
+   11. COMMON MOVE SLOT
+   ============================================================================= */
+
+.common-move-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+  gap: 0.25rem;
+}
+
+/* Modifier classes for alignment */
+.common-move-wrapper.left-aligned {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.common-move-wrapper.right-aligned {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* Match the styling of your card labels for visual consistency */
+.common-move-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* The actual "slot" placeholder */
+.common-move-slot {
+  /* Match tara-icon-wrapper sizing */
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Creates the "empty slot" look */
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.common-icon-slot {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.common-icon-slot .icon-image,
+.common-icon-slot .icon-emoji {
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
+  line-height: 1;
+  filter: opacity(0.85);
+}
+
+/* Desktop sizing */
+@media (min-width: 768px) {
+  .common-move-wrapper {
+    margin-top: 0.75rem;
+  }
+
+  .common-move-label {
+    font-size: 0.75rem;
+  }
+
+  .common-move-slot {
+    width: 32px;
+    height: 32px;
+  }
+}

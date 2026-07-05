@@ -4,6 +4,7 @@ import {
   Move,
   Participant,
   RoundResult,
+  StandardMove,
 } from "../utils/dataObjectUtils";
 
 export interface IModel {
@@ -29,8 +30,8 @@ export interface IModel {
   taraIsEnabled(): boolean;
 
   // Most common moves
-  getPlayerMostCommonMove(): Move | null;
-  getComputerMostCommonMove(): Move | null;
+  getPlayerMostCommonMove(): StandardMove | null;
+  getComputerMostCommonMove(): StandardMove | null;
   showMostCommonMove(): boolean;
 
   // Match & round

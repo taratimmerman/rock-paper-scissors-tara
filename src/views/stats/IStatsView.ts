@@ -1,4 +1,4 @@
-import { Health, Move } from "../../utils/dataObjectUtils";
+import { Health, StandardMove } from "../../utils/dataObjectUtils";
 
 export interface StatsViewData {
   playerHealth: Health;
@@ -7,8 +7,8 @@ export interface StatsViewData {
   computerScore: number;
   playerTara: number;
   computerTara: number;
-  playerMostCommonMove: Move | null;
-  computerMostCommonMove: Move | null;
+  playerMostCommonMove: StandardMove | null;
+  computerMostCommonMove: StandardMove | null;
   matchNumber: number;
   roundNumber: number;
 }
