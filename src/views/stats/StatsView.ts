@@ -1,7 +1,13 @@
 import View from "../View";
 import { IStatsView, StatsViewData } from "./IStatsView";
 import { renderIcon } from "../../utils/imageUtils";
-import { MAX_TARA, MOVES_DATABASE } from "../../utils/dataUtils";
+import {
+  MAX_TARA,
+  MOVES_DATABASE,
+  PLAYER_MOVES_DATA,
+  STANDARD_MOVE_NAMES,
+  StandardMove,
+} from "../../utils/dataUtils";
 
 export default class StatsView
   extends View<StatsViewData>
@@ -62,6 +68,38 @@ export default class StatsView
     return iconsMarkup;
   }
 
+  private _generateCommonMoveSlot(
+    moveId: StandardMove | null | undefined,
+    alignment: "left" | "right",
+  ): string {
+    let allIconsMarkup = "";
+
+    STANDARD_MOVE_NAMES.forEach((standardMove) => {
+      const moveObj = PLAYER_MOVES_DATA.find((m) => m.id === standardMove);
+
+      if (moveObj) {
+        // Only remove the hidden class if it matches the current moveId
+        const isCurrentMove = moveId === standardMove;
+        const hiddenClass = isCurrentMove ? "" : "hidden";
+
+        allIconsMarkup += `
+          <div class="common-icon-slot ${hiddenClass}" data-move="${standardMove}">
+            ${renderIcon(moveObj.icon)}
+          </div>
+        `;
+      }
+    });
+
+    return `
+      <div class="common-move-wrapper ${alignment}-aligned">
+        <span class="common-move-label">COMMON MOVE</span>
+        <div class="common-move-slot">
+          ${allIconsMarkup}
+        </div>
+      </div>
+    `;
+  }
+
   protected _generateMarkup(): string {
     const {
       playerHealth,
@@ -89,7 +127,7 @@ export default class StatsView
           ${this._generateTaraIcons(playerTara)}
         </div>
 
-        <p><small><span>Common: </span><span>${playerMostCommonMove ?? "–"}</span></small></p>
+        ${this._generateCommonMoveSlot(playerMostCommonMove, "left")}
       </aside>
 
       <section id="game-progress-container">
@@ -109,7 +147,7 @@ export default class StatsView
           ${this._generateTaraIcons(computerTara)}
         </div>
 
-        <p><small><span>Common: </span><span>${computerMostCommonMove ?? "–"}</span></small></p>
+        ${this._generateCommonMoveSlot(computerMostCommonMove, "right")}
       </aside>
     `;
   }
