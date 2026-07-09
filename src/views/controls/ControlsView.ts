@@ -113,6 +113,8 @@ export default class ControlsView
 
       const moveBtn = target.closest(".card-button") as HTMLButtonElement;
       if (moveBtn && !moveBtn.disabled && this._moveHandler) {
+        moveBtn.classList.add("is-hidden");
+        moveBtn.disabled = true;
         this._moveHandler(moveBtn.id as Move);
       }
     };

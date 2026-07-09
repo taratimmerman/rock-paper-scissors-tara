@@ -352,6 +352,12 @@ main {
   cursor: not-allowed;
 }
 
+.card-button.is-hidden,
+.card-button.is-hidden:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .card-button:disabled .card-front {
   filter: grayscale(0.9) contrast(0.9);
   opacity: 0.7;
