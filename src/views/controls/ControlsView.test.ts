@@ -133,6 +133,26 @@ describe("ControlsView", () => {
     expect(handler).toHaveBeenCalledWith(MOVES.PAPER);
   });
 
+  test("hides and disables the clicked move card after selection", async () => {
+    const handler = jest.fn();
+    view.bindPlayerMove(handler);
+    view.render({
+      playerMove: null,
+      isMatchOver: false,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    await view.flipAll(true);
+    const rockButton = document.getElementById(MOVES.ROCK) as HTMLButtonElement;
+
+    rockButton.click();
+
+    expect(handler).toHaveBeenCalledWith(MOVES.ROCK);
+    expect(rockButton.classList.contains("is-hidden")).toBe(true);
+    expect(rockButton.disabled).toBe(true);
+  });
+
   test("renders move buttons when match is NOT over", () => {
     view.render({
       playerMove: null,
