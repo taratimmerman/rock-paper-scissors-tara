@@ -7,8 +7,8 @@ on:
     branches: ["main"]
 
 jobs:
-  test:
-    name: Run Jest Unit Tests
+  test-and-build:
+    name: CI Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -26,3 +26,13 @@ jobs:
 
       - name: Execute Tests
         run: npm run test
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Upload Build Artifacts
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
