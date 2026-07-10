@@ -36,3 +36,23 @@ jobs:
         with:
           name: dist-artifacts
           path: dist/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: test-and-build
+    # Executes ONLY on main AND if the commit message DOES NOT contain [skip deploy]
+    if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip deploy]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
