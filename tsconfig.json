@@ -5,15 +5,20 @@
     "moduleResolution": "bundler",
     "lib": ["ES2022", "DOM"],
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["jest"],
+    "types": ["jest", "node"],
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src", "**/*.test.ts", "**/*.test.tsx"]
+  "include": [
+    "src",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "playwright.config.ts",
+    "tests/**/*.ts"
+  ]
 }
