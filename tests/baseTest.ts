@@ -1,13 +1,22 @@
 import { test as base } from "@playwright/test";
+import { LandingPage } from "./models/LandingPage";
+import { GamePage } from "./models/GamePage";
 
-// Extend the base test to automatically navigate to '/'
-export const test = base.extend({
+type Page = {
+  landingPage: LandingPage;
+  gamePage: GamePage;
+};
+
+export const test = base.extend<Page>({
   page: async ({ page }, use) => {
-    // This code runs before each test that uses this custom 'test'
     await page.goto("/");
-
-    // Pass the page to the test
     await use(page);
+  },
+  landingPage: async ({ page }, use) => {
+    await use(new LandingPage(page));
+  },
+  gamePage: async ({ page }, use) => {
+    await use(new GamePage(page));
   },
 });
 

@@ -1,15 +1,14 @@
 import { test } from "../baseTest";
-import { GamePage, Move } from "../models/GamePage";
-import { LandingPage } from "../models/LandingPage";
+import { Move } from "../models/GamePage";
 
 test.describe("Core Gameplay", () => {
-  test.beforeEach(async ({ page }) => {
-    const landingPage = new LandingPage(page);
+  test.beforeEach(async ({ landingPage }) => {
     await landingPage.startMatch();
   });
 
-  test("should update UI when the player selects Rock", async ({ page }) => {
-    const gamePage = new GamePage(page);
+  test("should update UI when the player selects Rock", async ({
+    gamePage,
+  }) => {
     const playerMove = Move.ROCK;
 
     await gamePage.choosePlayerAction(playerMove);
