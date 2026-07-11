@@ -2,36 +2,29 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
-
-  /* Run tests in files in parallel */
   fullyParallel: true,
 
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  /* Prevent merging skipped test suites with test.only active */
   forbidOnly: !!process.env.CI,
 
-  /* Retry flakiness in CI, but never locally (forces devs to fix their tests) */
+  /* Retry failures on CI to mitigate network or infrastructure flakiness */
   retries: process.env.CI ? 2 : 0,
 
-  /* CI runners often choke on CPU-heavy browser processes. Limit workers in CI. */
+  /* Limit resource consumption on single-core CI runners */
   workers: process.env.CI ? 1 : undefined,
 
-  /*
-   * QoL: Use 'list' for a clean terminal output.
-   * Generate an 'html' report, but don't auto-open it every time a test fails locally.
-   */
+  /* Output test status to stdout and generate an HTML report without auto-opening */
   reporter: [["list"], ["html", { open: "never" }]],
 
   use: {
-    /* Points to your Parcel dev server. Simplifies navigation: await page.goto('/') */
     baseURL: "http://localhost:1234",
 
-    /* SDET Best Practice: Capture full debugging context ONLY when tests fail to save CI disk space */
+    /* Capture debugging contexts only on failure to optimize CI artifact storage */
     trace: "retain-on-failure",
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },
 
-  /* Configure projects for major browsers */
   projects: [
     {
       name: "chromium",
@@ -47,12 +40,11 @@ export default defineConfig({
     },
   ],
 
-  /* Automatically manage the Parcel server lifecycle */
+  /* Automate the local Parcel server lifecycle during execution */
   webServer: {
     command: "npm run start",
     url: "http://localhost:1234",
     reuseExistingServer: !process.env.CI,
-    /* 2 minutes: gives Parcel plenty of time for initial caching/bundling on a cold start */
-    timeout: 120 * 1000,
+    timeout: 120 * 1000 /* Allow sufficient time for cold start bundling */,
   },
 });
