@@ -14,9 +14,9 @@ export class GamePage {
     this.page = page;
   }
 
-  // ============================================================================
+  // ====================================================
   // DYNAMIC LOCATORS
-  // ============================================================================
+  // ====================================================
 
   playerAction(action: Move): Locator {
     return this.page.getByRole("button", { name: new RegExp(action, "i") });
@@ -27,17 +27,17 @@ export class GamePage {
     return this.page.getByText(regex);
   }
 
-  // ============================================================================
+  // ====================================================
   // ACTIONS
-  // ============================================================================
+  // ====================================================
 
   async choosePlayerAction(action: Move): Promise<void> {
     await this.playerAction(action).click();
   }
 
-  // ============================================================================
+  // ====================================================
   // VERIFICATION
-  // ============================================================================
+  // ====================================================
 
   async verifyPlayerActionAnnouncement(playerAction: Move): Promise<void> {
     await expect(this.playerActionAnnouncement(playerAction)).toBeVisible();
