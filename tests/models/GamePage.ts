@@ -10,8 +10,11 @@ export enum Move {
 export class GamePage {
   readonly page: Page;
 
+  readonly statusContainer: Locator;
+
   constructor(page: Page) {
     this.page = page;
+    this.statusContainer = this.page.locator("#status");
   }
 
   // ====================================================
@@ -20,11 +23,6 @@ export class GamePage {
 
   playerAction(action: Move): Locator {
     return this.page.getByRole("button", { name: new RegExp(action, "i") });
-  }
-
-  playerActionAnnouncement(playerAction: Move): Locator {
-    const regex = new RegExp(`you played ${playerAction}`, "i");
-    return this.page.getByText(regex);
   }
 
   // ====================================================
@@ -40,7 +38,8 @@ export class GamePage {
   // ====================================================
 
   async verifyPlayerActionAnnouncement(playerAction: Move): Promise<void> {
-    await expect(this.playerActionAnnouncement(playerAction)).toBeVisible();
+    const regex = new RegExp(`you played ${playerAction}`, "i");
+    await expect(this.statusContainer).toContainText(regex);
   }
 
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {
@@ -49,6 +48,10 @@ export class GamePage {
         visible: isVisible,
       });
     }
+  }
+
+  async verifyStatusVisible(isVisible = true): Promise<void> {
+    await expect(this.statusContainer).toBeVisible({ visible: isVisible });
   }
 
   async verifyTaraEnabled(isEnabled = true): Promise<void> {
