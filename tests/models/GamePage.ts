@@ -14,6 +14,10 @@ export class GamePage {
     this.page = page;
   }
 
+  // ============================================================================
+  // DYNAMIC LOCATORS
+  // ============================================================================
+
   playerAction(action: Move): Locator {
     return this.page.getByRole("button", { name: new RegExp(action, "i") });
   }
@@ -22,6 +26,18 @@ export class GamePage {
     const regex = new RegExp(`you played ${playerAction}`, "i");
     return this.page.getByText(regex);
   }
+
+  // ============================================================================
+  // ACTIONS
+  // ============================================================================
+
+  async choosePlayerAction(action: Move): Promise<void> {
+    await this.playerAction(action).click();
+  }
+
+  // ============================================================================
+  // VERIFICATION
+  // ============================================================================
 
   async verifyPlayerActionAnnouncement(playerAction: Move): Promise<void> {
     await expect(this.playerActionAnnouncement(playerAction)).toBeVisible();
@@ -33,10 +49,6 @@ export class GamePage {
         visible: isVisible,
       });
     }
-  }
-
-  async choosePlayerAction(action: Move): Promise<void> {
-    await this.playerAction(action).click();
   }
 
   async verifyTaraEnabled(isEnabled = true): Promise<void> {

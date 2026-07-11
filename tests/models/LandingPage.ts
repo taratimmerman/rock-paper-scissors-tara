@@ -15,11 +15,19 @@ export class LandingPage {
     this.startButton = page.getByRole("button", { name: /start match/i });
   }
 
-  async verifyHeadingVisible(isVisible = true): Promise<void> {
-    await expect(this.heading).toBeVisible({ visible: isVisible });
-  }
+  // ============================================================================
+  // ACTIONS
+  // ============================================================================
 
   async startMatch(): Promise<void> {
     await this.startButton.click();
+  }
+
+  // ============================================================================
+  // VERIFICATION
+  // ============================================================================
+
+  async verifyHeadingVisible(isVisible = true): Promise<void> {
+    await expect(this.heading).toBeVisible({ visible: isVisible });
   }
 }
