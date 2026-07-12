@@ -69,10 +69,19 @@ export class LocalStorageGameStorage implements IGameStorage {
     const key = this.formatKey(participant, KEY_SUFFIX_MOVE_COUNTS);
     try {
       const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : DEFAULT_MOVE_COUNTS;
+      if (!raw) {
+        return { ...DEFAULT_MOVE_COUNTS };
+      }
+
+      const parsed = JSON.parse(raw) as MoveCount;
+      return {
+        rock: parsed.rock ?? 0,
+        paper: parsed.paper ?? 0,
+        scissors: parsed.scissors ?? 0,
+      };
     } catch (e) {
       console.warn(`LocalStorage Error: Failed to parse "${key}".`, e);
-      return DEFAULT_MOVE_COUNTS;
+      return { ...DEFAULT_MOVE_COUNTS };
     }
   }
 

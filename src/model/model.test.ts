@@ -112,6 +112,20 @@ describe("Model", () => {
     model = new Model(mockGameStorage);
   });
 
+  test("uses independent default move counts for each participant after a fresh load", () => {
+    localStorage.clear();
+
+    const freshModel = new Model();
+
+    freshModel.registerPlayerMove(MOVES.ROCK);
+
+    expect(freshModel["state"].moveCounts.player.rock).toBe(1);
+    expect(freshModel["state"].moveCounts.computer.rock).toBe(0);
+    expect(freshModel["state"].moveCounts.player).not.toBe(
+      freshModel["state"].moveCounts.computer,
+    );
+  });
+
   describe("Scores", () => {
     test("getScore returns 0 when no score is set", () => {
       expect(model.getPlayerScore()).toBe(0);
