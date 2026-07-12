@@ -1,12 +1,12 @@
 import { test as base } from "@playwright/test";
 import { LandingPage } from "./models/LandingPage";
 import { GamePage } from "./models/GamePage";
-import { GameStateSeed, seedStorage } from "./utils/localStorageSeed";
+import { SeedPayload, seedStorage } from "./utils/localStorageSeed";
 
 type Page = {
   landingPage: LandingPage;
   gamePage: GamePage;
-  seed: (data: GameStateSeed) => Promise<void>;
+  seed: (data: SeedPayload) => Promise<void>;
 };
 
 export const test = base.extend<Page>({
@@ -21,7 +21,7 @@ export const test = base.extend<Page>({
     await use(new GamePage(page));
   },
   seed: async ({ page }, use) => {
-    await use(async (data: GameStateSeed) => {
+    await use(async (data: SeedPayload) => {
       await seedStorage(page, data);
     });
   },

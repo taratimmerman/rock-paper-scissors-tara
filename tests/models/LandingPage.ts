@@ -3,12 +3,14 @@ import { expect, Locator, Page } from "@playwright/test";
 export class LandingPage {
   readonly page: Page;
 
+  readonly continueButton: Locator;
   readonly heading: Locator;
   readonly startButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
+    this.continueButton = page.getByRole("button", { name: /continue match/i });
     this.heading = page.getByRole("heading", {
       name: /rock paper scissors tara/i,
     });
@@ -18,6 +20,10 @@ export class LandingPage {
   // ====================================================
   // ACTIONS
   // ====================================================
+
+  async continueMatch(): Promise<void> {
+    await this.continueButton.click();
+  }
 
   async startMatch(): Promise<void> {
     await this.startButton.click();

@@ -21,9 +21,9 @@ export interface Progress {
 
 export interface Stats {
   availableTaraMoves: number;
-  commonMove: Move | null;
+  commonMove: Exclude<Move, Move.TARA> | null;
   health: number;
-  wins: string;
+  wins: number;
 }
 
 export class GamePage {
@@ -104,7 +104,6 @@ export class GamePage {
   }
 
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {
-    // Replaced for...of loop with parallel map
     await Promise.all(
       Object.values(Move).map((action) =>
         expect(this.playerAction(action)).toBeVisible({ visible: isVisible }),
@@ -203,13 +202,16 @@ export class GamePage {
 
   private async verifyStatsWins(
     participant: Participant,
-    expectedWins: string,
+    expectedWins: number,
   ): Promise<void> {
     const statsWins = this.statsWins(participant);
 
+    // Formats 1 -> "01", 0 -> "00", but leaves 10 -> "10"
+    const formattedWins = expectedWins.toString().padStart(2, "0");
+
     await Promise.all([
       expect(statsWins).toContainText("WINS"),
-      expect(statsWins).toContainText(expectedWins),
+      expect(statsWins).toContainText(formattedWins),
     ]);
   }
 }
