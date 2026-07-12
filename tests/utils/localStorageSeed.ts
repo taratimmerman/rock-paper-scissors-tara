@@ -1,4 +1,3 @@
-// tests/utils/storageSeed.ts
 import { Page } from "@playwright/test";
 import { Move, Progress, Stats } from "../models/GamePage";
 

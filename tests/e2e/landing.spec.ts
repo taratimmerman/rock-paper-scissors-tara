@@ -34,7 +34,7 @@ test("loads default match UI with no saved game state", async ({
   });
 });
 
-test("loads custom UI with seeded game state", async ({
+test("loads custom match UI with seeded game state", async ({
   gamePage,
   landingPage,
   seed,
