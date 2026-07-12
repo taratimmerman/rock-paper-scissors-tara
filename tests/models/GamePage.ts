@@ -94,6 +94,12 @@ export class GamePage {
     await this.playerAction(action).click();
   }
 
+  async setComputerMove(move: Move): Promise<void> {
+    await this.page.evaluate((m) => {
+      sessionStorage.setItem("__E2E_NEXT_COMPUTER_MOVE__", m);
+    }, move);
+  }
+
   // ====================================================
   // VERIFICATION MISCELLANEOUS
   // ====================================================
