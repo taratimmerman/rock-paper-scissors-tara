@@ -5,12 +5,31 @@ import { getAvailableMoves } from "../gameRules";
 
 export class AdaptiveComputer implements IComputerBrain {
   calculateNextMove(state: GameState): Move {
+    // E2E Test Boundary
+    if (process.env.NODE_ENV !== "production") {
+      const forcedMove = this.checkForTestSetMove();
+      if (forcedMove) return forcedMove;
+    }
+
     const hasTara = state.taras.computer > 0;
     const availableMoves = getAvailableMoves(hasTara);
     const weights = this.getComputerMoveWeights(state, availableMoves);
-    const move = this.chooseWeightedRandomMove(availableMoves, weights);
 
-    return move;
+    return this.chooseWeightedRandomMove(availableMoves, weights);
+  }
+
+  /**
+   * Checks for a forced deterministic move set by an E2E test.
+   * If found, removes it from sessionStorage and returns the move.
+   */
+  private checkForTestSetMove(): Move | null {
+    const key = "__E2E_NEXT_COMPUTER_MOVE__";
+    const e2eForcedMove = sessionStorage.getItem(key);
+    if (e2eForcedMove) {
+      sessionStorage.removeItem(key);
+      return e2eForcedMove as Move;
+    }
+    return null;
   }
 
   private getBaseWeights(): Record<Move, number> {
