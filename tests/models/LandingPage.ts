@@ -5,6 +5,7 @@ export class LandingPage {
 
   readonly continueButton: Locator;
   readonly heading: Locator;
+  readonly resetGameButton: Locator;
   readonly startButton: Locator;
 
   constructor(page: Page) {
@@ -14,7 +15,10 @@ export class LandingPage {
     this.heading = page.getByRole("heading", {
       name: /rock paper scissors tara/i,
     });
-    this.startButton = page.getByRole("button", { name: /start match/i });
+    this.resetGameButton = page.getByRole("button", { name: /reset game/i });
+    this.startButton = page.getByRole("button", {
+      name: /start match/i,
+    });
   }
 
   // ====================================================
@@ -25,6 +29,10 @@ export class LandingPage {
     await this.continueButton.click();
   }
 
+  async resetGame(): Promise<void> {
+    await this.resetGameButton.click();
+  }
+
   async startMatch(): Promise<void> {
     await this.startButton.click();
   }
@@ -33,7 +41,19 @@ export class LandingPage {
   // VERIFICATION
   // ====================================================
 
+  async verifyContinueButtonVisible(isVisible = true): Promise<void> {
+    await expect(this.continueButton).toBeVisible({ visible: isVisible });
+  }
+
   async verifyHeadingVisible(isVisible = true): Promise<void> {
     await expect(this.heading).toBeVisible({ visible: isVisible });
+  }
+
+  async verifyResetButtonVisible(isVisible = true): Promise<void> {
+    await expect(this.resetGameButton).toBeVisible({ visible: isVisible });
+  }
+
+  async verifyStartButtonVisible(isVisible = true): Promise<void> {
+    await expect(this.startButton).toBeVisible({ visible: isVisible });
   }
 }
