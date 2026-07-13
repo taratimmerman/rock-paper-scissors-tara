@@ -6,7 +6,6 @@ import {
   Progress,
   Stats,
 } from "../utils/data";
-import { verifyIsVisible } from "../utils/verification";
 
 export class GamePage {
   readonly page: Page;
@@ -99,7 +98,7 @@ export class GamePage {
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {
     await Promise.all(
       Object.values(Move).map((action) =>
-        verifyIsVisible(this.playerAction(action), isVisible),
+        expect(this.playerAction(action)).toBeVisible({ visible: isVisible }),
       ),
     );
   }
@@ -120,7 +119,7 @@ export class GamePage {
   }
 
   async verifyStatusVisible(isVisible = true): Promise<void> {
-    await verifyIsVisible(this.statusContainer, isVisible);
+    await expect(this.statusContainer).toBeVisible({ visible: isVisible });
   }
 
   async verifyTaraEnabled(isEnabled = true): Promise<void> {

@@ -1,5 +1,4 @@
 import { expect, Locator, Page } from "@playwright/test";
-import { verifyIsVisible } from "../utils/verification";
 
 export class LandingPage {
   readonly page: Page;
@@ -43,18 +42,18 @@ export class LandingPage {
   // ====================================================
 
   async verifyContinueButtonVisible(isVisible = true): Promise<void> {
-    await verifyIsVisible(this.continueButton, isVisible);
+    await expect(this.continueButton).toBeVisible({ visible: isVisible });
   }
 
   async verifyHeadingVisible(isVisible = true): Promise<void> {
-    await verifyIsVisible(this.heading, isVisible);
+    await expect(this.heading).toBeVisible({ visible: isVisible });
   }
 
   async verifyResetButtonVisible(isVisible = true): Promise<void> {
-    await verifyIsVisible(this.resetGameButton, isVisible);
+    await expect(this.resetGameButton).toBeVisible({ visible: isVisible });
   }
 
   async verifyStartButtonVisible(isVisible = true): Promise<void> {
-    await verifyIsVisible(this.startButton, isVisible);
+    await expect(this.startButton).toBeVisible({ visible: isVisible });
   }
 }
