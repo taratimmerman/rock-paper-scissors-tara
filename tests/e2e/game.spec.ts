@@ -1,5 +1,12 @@
 import { test } from "../baseTest";
-import { Move, Participant, Progress, Stats } from "../models/GamePage";
+import {
+  defaultProgress,
+  defaultStats,
+  Move,
+  Participant,
+  Progress,
+  Stats,
+} from "../utils/data";
 
 type StandardMove = NonNullable<Stats["commonMove"]>;
 
@@ -9,18 +16,6 @@ interface RoundTestCase {
   moveComputer: StandardMove;
   expectedWinner: Participant;
 }
-
-const defaultStats: Stats = {
-  availableTaraMoves: 0,
-  commonMove: null,
-  health: 100,
-  wins: 0,
-};
-
-const defaultProgress: Progress = {
-  match: 1,
-  round: 1,
-};
 
 const roundTestCases: RoundTestCase[] = [
   {

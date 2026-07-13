@@ -1,30 +1,11 @@
 import { expect, Locator, Page } from "@playwright/test";
-
-const MAX_TARA_MOVES = 3;
-
-export enum Move {
-  PAPER = "paper",
-  ROCK = "rock",
-  SCISSORS = "scissors",
-  TARA = "tara",
-}
-
-export enum Participant {
-  COMPUTER = "computer",
-  PLAYER = "player",
-}
-
-export interface Progress {
-  match: number;
-  round: number;
-}
-
-export interface Stats {
-  availableTaraMoves: number;
-  commonMove: Exclude<Move, Move.TARA> | null;
-  health: number;
-  wins: number;
-}
+import {
+  MAX_TARA_MOVES,
+  Move,
+  Participant,
+  Progress,
+  Stats,
+} from "../utils/data";
 
 export class GamePage {
   readonly page: Page;

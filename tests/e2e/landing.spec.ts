@@ -1,22 +1,17 @@
 import { test } from "../baseTest";
-import { Move, Participant, Progress, Stats } from "../models/GamePage";
+import {
+  defaultProgress,
+  defaultStats,
+  Move,
+  Participant,
+  Progress,
+  Stats,
+} from "../utils/data";
 
 test("loads default match UI with no saved game state", async ({
   gamePage,
   landingPage,
 }) => {
-  const defaultStats: Stats = {
-    availableTaraMoves: 0,
-    commonMove: null,
-    health: 100,
-    wins: 0,
-  };
-
-  const defaultProgress: Progress = {
-    match: 1,
-    round: 1,
-  };
-
   await test.step("Start match from landing page", async () => {
     await landingPage.verifyHeadingVisible();
     await landingPage.startMatch();
