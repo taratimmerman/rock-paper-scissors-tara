@@ -29,6 +29,7 @@ export interface Stats {
 export class GamePage {
   readonly page: Page;
 
+  readonly announcementContainer: Locator;
   readonly progressContainer: Locator;
   readonly progressMatchHeading: Locator;
   readonly progressRoundHeading: Locator;
@@ -37,6 +38,7 @@ export class GamePage {
   constructor(page: Page) {
     this.page = page;
 
+    this.announcementContainer = page.locator("#announcement-container");
     this.progressContainer = page.locator("#game-progress-container");
     this.progressMatchHeading = this.progressContainer.locator("h2");
     this.progressRoundHeading = this.progressContainer.locator("h3");
@@ -104,9 +106,12 @@ export class GamePage {
   // VERIFICATION MISCELLANEOUS
   // ====================================================
 
-  async verifyPlayerActionAnnouncement(playerAction: Move): Promise<void> {
-    const regex = new RegExp(`you played ${playerAction}`, "i");
-    await expect(this.statusContainer).toContainText(regex);
+  async verifyAnnouncement(
+    expectedAnnouncement: RegExp | string,
+  ): Promise<void> {
+    await expect(this.announcementContainer).toContainText(
+      expectedAnnouncement,
+    );
   }
 
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {
@@ -126,6 +131,10 @@ export class GamePage {
         new RegExp(`round ${progress.round}`, "i"),
       ),
     ]);
+  }
+
+  async verifyStatus(expectedStatus: RegExp | string): Promise<void> {
+    await expect(this.statusContainer).toContainText(expectedStatus);
   }
 
   async verifyStatusVisible(isVisible = true): Promise<void> {
