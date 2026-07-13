@@ -6,6 +6,8 @@ import {
   Progress,
   Stats,
 } from "../utils/data";
+import { verifyIsVisible } from "../utils/verification";
+import { verify } from "node:crypto";
 
 export class GamePage {
   readonly page: Page;
@@ -98,7 +100,7 @@ export class GamePage {
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {
     await Promise.all(
       Object.values(Move).map((action) =>
-        expect(this.playerAction(action)).toBeVisible({ visible: isVisible }),
+        verifyIsVisible(this.playerAction(action), isVisible),
       ),
     );
   }
@@ -119,7 +121,7 @@ export class GamePage {
   }
 
   async verifyStatusVisible(isVisible = true): Promise<void> {
-    await expect(this.statusContainer).toBeVisible({ visible: isVisible });
+    await verifyIsVisible(this.statusContainer, isVisible);
   }
 
   async verifyTaraEnabled(isEnabled = true): Promise<void> {

@@ -1,10 +1,12 @@
 import { expect, Locator, Page } from "@playwright/test";
+import { verifyIsVisible } from "../utils/verification";
 
 export class LandingPage {
   readonly page: Page;
 
   readonly continueButton: Locator;
   readonly heading: Locator;
+  readonly resetGameButton: Locator;
   readonly startButton: Locator;
 
   constructor(page: Page) {
@@ -14,7 +16,10 @@ export class LandingPage {
     this.heading = page.getByRole("heading", {
       name: /rock paper scissors tara/i,
     });
-    this.startButton = page.getByRole("button", { name: /start match/i });
+    this.resetGameButton = page.getByRole("button", { name: /reset game/i });
+    this.startButton = page.getByRole("button", {
+      name: /start match/i,
+    });
   }
 
   // ====================================================
@@ -25,6 +30,10 @@ export class LandingPage {
     await this.continueButton.click();
   }
 
+  async resetGame(): Promise<void> {
+    await this.resetGameButton.click();
+  }
+
   async startMatch(): Promise<void> {
     await this.startButton.click();
   }
@@ -33,7 +42,19 @@ export class LandingPage {
   // VERIFICATION
   // ====================================================
 
+  async verifyContinueButtonVisible(isVisible = true): Promise<void> {
+    await verifyIsVisible(this.continueButton, isVisible);
+  }
+
   async verifyHeadingVisible(isVisible = true): Promise<void> {
-    await expect(this.heading).toBeVisible({ visible: isVisible });
+    await verifyIsVisible(this.heading, isVisible);
+  }
+
+  async verifyResetButtonVisible(isVisible = true): Promise<void> {
+    await verifyIsVisible(this.resetGameButton, isVisible);
+  }
+
+  async verifyStartButtonVisible(isVisible = true): Promise<void> {
+    await verifyIsVisible(this.startButton, isVisible);
   }
 }
