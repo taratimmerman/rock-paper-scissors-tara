@@ -7,7 +7,6 @@ import {
   Stats,
 } from "../utils/data";
 import { verifyIsVisible } from "../utils/verification";
-import { verify } from "node:crypto";
 
 export class GamePage {
   readonly page: Page;

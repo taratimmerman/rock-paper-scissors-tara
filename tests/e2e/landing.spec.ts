@@ -76,20 +76,20 @@ test("loads custom match UI with seeded game state", async ({
   });
 });
 
-test("resets game state", async ({ gamePage, landingPage, page, seed }) => {
-  const initialProgress: Progress = {
-    match: 4,
-    round: 5,
-  };
-
-  const initialPlayerStats: Stats = {
+test("resets an active game to default state", async ({
+  gamePage,
+  landingPage,
+  page,
+  seed,
+}) => {
+  const customProgress: Progress = { match: 4, round: 5 };
+  const customPlayerStats: Stats = {
     availableTaraMoves: 2,
     commonMove: null,
     health: 90,
     wins: 3,
   };
-
-  const initialComputerStats: Stats = {
+  const customComputerStats: Stats = {
     availableTaraMoves: 1,
     commonMove: Move.ROCK,
     health: 30,
@@ -97,26 +97,22 @@ test("resets game state", async ({ gamePage, landingPage, page, seed }) => {
   };
 
   await seed({
-    progress: initialProgress,
-    playerStats: initialPlayerStats,
-    computerStats: initialComputerStats,
+    progress: customProgress,
+    playerStats: customPlayerStats,
+    computerStats: customComputerStats,
   });
 
-  await test.step("Verify initial UI", async () => {
-    await Promise.all([
-      landingPage.verifyStartButtonVisible(false),
-      landingPage.verifyContinueButtonVisible(),
-      landingPage.verifyResetButtonVisible(),
-    ]);
+  await test.step("Verify seeded game allows continuation", async () => {
+    await landingPage.verifyStartButtonVisible(false);
+    await landingPage.verifyContinueButtonVisible(true);
+    await landingPage.verifyResetButtonVisible(true);
 
     await landingPage.continueMatch();
 
-    await Promise.all([
-      gamePage.verifyStats(Participant.PLAYER, initialPlayerStats),
-      gamePage.verifyProgress(initialProgress),
-      gamePage.verifyStats(Participant.COMPUTER, initialComputerStats),
-      gamePage.verifyTaraEnabled(),
-    ]);
+    await gamePage.verifyProgress(customProgress);
+    await gamePage.verifyStats(Participant.PLAYER, customPlayerStats);
+    await gamePage.verifyStats(Participant.COMPUTER, customComputerStats);
+    await gamePage.verifyTaraEnabled(true);
   });
 
   await test.step("Reset game state", async () => {
@@ -124,19 +120,15 @@ test("resets game state", async ({ gamePage, landingPage, page, seed }) => {
     await landingPage.resetGame();
   });
 
-  await test.step("Verify game state was reset", async () => {
-    await Promise.all([
-      await landingPage.verifyContinueButtonVisible(false),
-      await landingPage.verifyResetButtonVisible(),
-    ]);
+  await test.step("Verify game defaults are restored", async () => {
+    await landingPage.verifyContinueButtonVisible(false);
+    await landingPage.verifyResetButtonVisible();
 
     await landingPage.startMatch();
 
-    await Promise.all([
-      gamePage.verifyStats(Participant.PLAYER, defaultStats),
-      gamePage.verifyProgress(defaultProgress),
-      gamePage.verifyStats(Participant.COMPUTER, defaultStats),
-      gamePage.verifyTaraEnabled(false),
-    ]);
+    await gamePage.verifyProgress(defaultProgress);
+    await gamePage.verifyStats(Participant.PLAYER, defaultStats);
+    await gamePage.verifyStats(Participant.COMPUTER, defaultStats);
+    await gamePage.verifyTaraEnabled(false);
   });
 });
