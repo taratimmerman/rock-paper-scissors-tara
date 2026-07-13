@@ -1,5 +1,5 @@
 import { Page } from "@playwright/test";
-import { Move, Progress, Stats } from "../models/GamePage";
+import { Move, Progress, Stats } from "../utils/data";
 
 export interface SeedPayload {
   progress?: Partial<Progress>;
