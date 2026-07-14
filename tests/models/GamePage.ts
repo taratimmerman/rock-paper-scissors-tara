@@ -11,6 +11,7 @@ export class GamePage {
   readonly page: Page;
 
   readonly announcementContainer: Locator;
+  readonly newMatchButton: Locator;
   readonly progressContainer: Locator;
   readonly progressMatchHeading: Locator;
   readonly progressRoundHeading: Locator;
@@ -20,6 +21,9 @@ export class GamePage {
     this.page = page;
 
     this.announcementContainer = page.locator("#announcement-container");
+    this.newMatchButton = page.getByRole("button", {
+      name: /start new match/i,
+    });
     this.progressContainer = page.locator("#game-progress-container");
     this.progressMatchHeading = this.progressContainer.locator("h2");
     this.progressRoundHeading = this.progressContainer.locator("h3");
@@ -93,6 +97,10 @@ export class GamePage {
     await expect(this.announcementContainer).toContainText(
       expectedAnnouncement,
     );
+  }
+
+  async verifyNewMatchButtonVisible(isVisible = true): Promise<void> {
+    await expect(this.newMatchButton).toBeVisible({ visible: isVisible });
   }
 
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {

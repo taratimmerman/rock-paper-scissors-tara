@@ -12,12 +12,89 @@ type StandardMove = NonNullable<Stats["commonMove"]>;
 
 interface RoundTestCase {
   description: string;
-  movePlayer: StandardMove;
-  moveComputer: StandardMove;
+  movePlayer: Move;
+  moveComputer: Move;
   expectedWinner: Participant;
 }
 
-const roundTestCases: RoundTestCase[] = [
+// ==========================================
+// 1. STATE FACTORIES
+// ==========================================
+
+// 1. Add a tiny helper to enforce the business rule
+function getNextCommonMove(
+  previousCommon: StandardMove,
+  newMove: Move,
+): StandardMove {
+  // If they played TARA, their common move stays whatever it was previously
+  return newMove === Move.TARA ? previousCommon : (newMove as StandardMove);
+}
+
+// 2. Update the factories to use it
+function getRound1ExpectedStats(
+  winner: Participant,
+  playerMove: Move,
+  computerMove: Move,
+) {
+  const playerWon = winner === Participant.PLAYER;
+  return {
+    playerStats: {
+      availableTaraMoves: playerWon ? 1 : 0,
+      // Assuming defaultStats.commonMove is something like Move.ROCK or null
+      commonMove: getNextCommonMove(
+        defaultStats.commonMove as StandardMove,
+        playerMove,
+      ),
+      health: playerWon ? 100 : 50,
+      wins: 0,
+    },
+    computerStats: {
+      availableTaraMoves: playerWon ? 0 : 1,
+      commonMove: getNextCommonMove(
+        defaultStats.commonMove as StandardMove,
+        computerMove,
+      ),
+      health: playerWon ? 50 : 100,
+      wins: 0,
+    },
+  };
+}
+
+function getRound2ExpectedStats(
+  winner: Participant,
+  playerMove: Move,
+  computerMove: Move,
+  initialPlayerStats: Stats,
+  initialComputerStats: Stats,
+) {
+  const playerWon = winner === Participant.PLAYER;
+  return {
+    playerStats: {
+      availableTaraMoves: playerWon ? 0 : 1,
+      commonMove: getNextCommonMove(
+        initialPlayerStats.commonMove as StandardMove,
+        playerMove,
+      ),
+      health: playerWon ? 100 : 30,
+      wins: playerWon ? 2 : 1,
+    },
+    computerStats: {
+      availableTaraMoves: playerWon ? 1 : 0,
+      commonMove: getNextCommonMove(
+        initialComputerStats.commonMove as StandardMove,
+        computerMove,
+      ),
+      health: playerWon ? 0 : 50,
+      wins: 1,
+    },
+  };
+}
+
+// ==========================================
+// ROUND 1 TESTS
+// ==========================================
+
+const round1TestCases: RoundTestCase[] = [
   {
     description: "Player PAPER engulfs Computer ROCK",
     movePlayer: Move.PAPER,
@@ -54,71 +131,163 @@ test.describe("Round 1", () => {
     movePlayer,
     moveComputer,
     expectedWinner,
-  } of roundTestCases) {
+  } of round1TestCases) {
     test(description, async ({ gamePage }) => {
-      // 1. Dynamic State Derivation
-      // Calculates the symmetrical outcomes based purely on who won.
       const isPlayerWinner = expectedWinner === Participant.PLAYER;
-
-      const expectedPlayerStats: Stats = {
-        availableTaraMoves: isPlayerWinner ? 1 : 0,
-        commonMove: movePlayer,
-        health: isPlayerWinner ? 100 : 50,
-        wins: 0,
-      };
-
-      const expectedComputerStats: Stats = {
-        availableTaraMoves: !isPlayerWinner ? 1 : 0,
-        commonMove: moveComputer,
-        health: !isPlayerWinner ? 100 : 50,
-        wins: 0,
-      };
-
-      const expectedProgress: Progress = {
-        match: 1,
-        round: 2,
-      };
-
-      // Status text expectations
-      const expectedAnnouncement = new RegExp(
-        `${expectedWinner} lands a blow`,
-        "i",
+      const { playerStats, computerStats } = getRound1ExpectedStats(
+        expectedWinner,
+        movePlayer,
+        moveComputer,
       );
-      const expectedStatus1 = "Choose your attack!";
-      const expectedStatus2 = new RegExp(
-        `you played ${movePlayer}. computer played ${moveComputer}.`,
-        "i",
-      );
-      const expectedStatus3 = "Prepare your next move...";
+      const expectedProgress: Progress = { match: 1, round: 2 };
 
-      // 2. Execution & Symmetrical Verification
       await test.step("Verify default initial game state", async () => {
         await Promise.all([
           gamePage.verifyStats(Participant.PLAYER, defaultStats),
           gamePage.verifyProgress(defaultProgress),
           gamePage.verifyStats(Participant.COMPUTER, defaultStats),
-          gamePage.verifyStatus(expectedStatus1),
+          gamePage.verifyStatus("Choose your attack!"),
         ]);
       });
 
       await test.step(`Participant moves: Player (${movePlayer}) vs Computer (${moveComputer})`, async () => {
         await gamePage.setComputerMove(moveComputer);
         await gamePage.choosePlayerAction(movePlayer);
-        await gamePage.verifyStatus(expectedStatus2);
+        await gamePage.verifyStatus(
+          new RegExp(
+            `you played ${movePlayer}. computer played ${moveComputer}.`,
+            "i",
+          ),
+        );
       });
 
       await test.step("Verify updated game state", async () => {
-        // Sequential checks for transient UI states
-        await gamePage.verifyAnnouncement(expectedAnnouncement);
-        await gamePage.verifyStatus(expectedStatus3);
-        await gamePage.verifyStatus(expectedStatus1);
+        await gamePage.verifyAnnouncement(
+          new RegExp(`${expectedWinner} lands a blow`, "i"),
+        );
+        await gamePage.verifyStatus("Prepare your next move...");
+        await gamePage.verifyStatus("Choose your attack!");
+
         if (isPlayerWinner) await gamePage.verifyTaraEnabled();
 
-        // Concurrent symmetrical checks for structural state
         await Promise.all([
-          gamePage.verifyStats(Participant.PLAYER, expectedPlayerStats),
+          gamePage.verifyStats(Participant.PLAYER, playerStats),
           gamePage.verifyProgress(expectedProgress),
-          gamePage.verifyStats(Participant.COMPUTER, expectedComputerStats),
+          gamePage.verifyStats(Participant.COMPUTER, computerStats),
+        ]);
+      });
+    });
+  }
+});
+
+// ==========================================
+// ROUND 2 TESTS
+// ==========================================
+
+const round2TestCases: RoundTestCase[] = [
+  {
+    description: "Player TARA obliterates Computer ROCK",
+    movePlayer: Move.TARA,
+    moveComputer: Move.ROCK,
+    expectedWinner: Participant.PLAYER,
+  },
+  {
+    description: "Player TARA obliterates Computer PAPER",
+    movePlayer: Move.TARA,
+    moveComputer: Move.PAPER,
+    expectedWinner: Participant.PLAYER,
+  },
+  {
+    description: "Player TARA obliterates Computer SCISSORS",
+    movePlayer: Move.TARA,
+    moveComputer: Move.ROCK,
+    expectedWinner: Participant.PLAYER,
+  },
+  {
+    description: "Computer TARA obliterates Player ROCK",
+    movePlayer: Move.ROCK,
+    moveComputer: Move.TARA,
+    expectedWinner: Participant.COMPUTER,
+  },
+];
+
+test.describe("Round 2", () => {
+  const round2Progress: Progress = { match: 3, round: 2 };
+  const initialPlayerStats: Stats = {
+    availableTaraMoves: 1,
+    commonMove: Move.PAPER,
+    health: 100,
+    wins: 1,
+  };
+  const initialComputerStats: Stats = {
+    availableTaraMoves: 1,
+    commonMove: Move.ROCK,
+    health: 50,
+    wins: 1,
+  };
+
+  test.beforeEach(async ({ landingPage, seed }) => {
+    await seed({
+      progress: round2Progress,
+      playerStats: initialPlayerStats,
+      computerStats: initialComputerStats,
+    });
+    await landingPage.continueMatch();
+  });
+
+  for (const {
+    description,
+    movePlayer,
+    moveComputer,
+    expectedWinner,
+  } of round2TestCases) {
+    test(description, async ({ gamePage }) => {
+      const isPlayerWinner = expectedWinner === Participant.PLAYER;
+      const { playerStats, computerStats } = getRound2ExpectedStats(
+        expectedWinner,
+        movePlayer,
+        moveComputer,
+        initialPlayerStats,
+        initialComputerStats,
+      );
+
+      await test.step("Verify default initial game state", async () => {
+        await Promise.all([
+          gamePage.verifyStats(Participant.PLAYER, initialPlayerStats),
+          gamePage.verifyProgress(round2Progress),
+          gamePage.verifyStats(Participant.COMPUTER, initialComputerStats),
+          gamePage.verifyStatus("Choose your attack!"),
+          gamePage.verifyNewMatchButtonVisible(false),
+        ]);
+      });
+
+      await test.step(`Participant moves: Player (${movePlayer}) vs Computer (${moveComputer})`, async () => {
+        await gamePage.setComputerMove(moveComputer);
+        await gamePage.choosePlayerAction(movePlayer);
+        await gamePage.verifyStatus(
+          new RegExp(
+            `you played ${movePlayer}. computer played ${moveComputer}.`,
+            "i",
+          ),
+        );
+      });
+
+      await test.step("Verify updated game state", async () => {
+        await gamePage.verifyAnnouncement(
+          new RegExp(`${expectedWinner} lands a blow`, "i"),
+        );
+
+        if (isPlayerWinner) {
+          await gamePage.verifyAnnouncement(
+            new RegExp(`${expectedWinner} won the match`, "i"),
+          );
+        }
+
+        await Promise.all([
+          gamePage.verifyStats(Participant.PLAYER, playerStats),
+          gamePage.verifyProgress(round2Progress),
+          gamePage.verifyStats(Participant.COMPUTER, computerStats),
+          gamePage.verifyNewMatchButtonVisible(isPlayerWinner),
         ]);
       });
     });
