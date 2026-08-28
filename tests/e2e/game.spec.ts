@@ -21,16 +21,6 @@ interface RoundTestCase {
 // 1. STATE FACTORIES
 // ==========================================
 
-// 1. Add a tiny helper to enforce the business rule
-function getNextCommonMove(
-  previousCommon: StandardMove,
-  newMove: Move,
-): StandardMove {
-  // If they played TARA, their common move stays whatever it was previously
-  return newMove === Move.TARA ? previousCommon : (newMove as StandardMove);
-}
-
-// 2. Update the factories to use it
 function getRound1ExpectedStats(
   winner: Participant,
   playerMove: Move,
@@ -40,20 +30,13 @@ function getRound1ExpectedStats(
   return {
     playerStats: {
       availableTaraMoves: playerWon ? 1 : 0,
-      // Assuming defaultStats.commonMove is something like Move.ROCK or null
-      commonMove: getNextCommonMove(
-        defaultStats.commonMove as StandardMove,
-        playerMove,
-      ),
+      commonMove: playerMove as StandardMove,
       health: playerWon ? 100 : 50,
       wins: 0,
     },
     computerStats: {
       availableTaraMoves: playerWon ? 0 : 1,
-      commonMove: getNextCommonMove(
-        defaultStats.commonMove as StandardMove,
-        computerMove,
-      ),
+      commonMove: computerMove as StandardMove,
       health: playerWon ? 50 : 100,
       wins: 0,
     },
@@ -62,8 +45,6 @@ function getRound1ExpectedStats(
 
 function getRound2ExpectedStats(
   winner: Participant,
-  playerMove: Move,
-  computerMove: Move,
   initialPlayerStats: Stats,
   initialComputerStats: Stats,
 ) {
@@ -71,19 +52,13 @@ function getRound2ExpectedStats(
   return {
     playerStats: {
       availableTaraMoves: playerWon ? 0 : 1,
-      commonMove: getNextCommonMove(
-        initialPlayerStats.commonMove as StandardMove,
-        playerMove,
-      ),
+      commonMove: initialPlayerStats.commonMove,
       health: playerWon ? 100 : 30,
       wins: playerWon ? 2 : 1,
     },
     computerStats: {
       availableTaraMoves: playerWon ? 1 : 0,
-      commonMove: getNextCommonMove(
-        initialComputerStats.commonMove as StandardMove,
-        computerMove,
-      ),
+      commonMove: initialComputerStats.commonMove,
       health: playerWon ? 0 : 50,
       wins: 1,
     },
@@ -245,8 +220,6 @@ test.describe("Round 2", () => {
       const isPlayerWinner = expectedWinner === Participant.PLAYER;
       const { playerStats, computerStats } = getRound2ExpectedStats(
         expectedWinner,
-        movePlayer,
-        moveComputer,
         initialPlayerStats,
         initialComputerStats,
       );
