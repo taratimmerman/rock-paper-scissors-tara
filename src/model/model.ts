@@ -15,6 +15,7 @@ import {
   DEFAULT_MATCH,
   HEALTH_KEYS,
   INITIAL_HEALTH,
+  MAX_PROGRESS,
   MOVES,
   MOVE_DATA_MAP,
   PARTICIPANTS,
@@ -487,7 +488,14 @@ export class Model {
   }
 
   incrementMatchNumber(): void {
-    this.setMatchNumber(this.getMatchNumber() + 1);
+    const matchNumber = this.getMatchNumber();
+
+    if (matchNumber >= MAX_PROGRESS) {
+      this.setMatchNumber(1);
+      return;
+    }
+
+    this.setMatchNumber(matchNumber + 1);
   }
 
   private _loadMatchState(): void {

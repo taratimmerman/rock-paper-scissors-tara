@@ -87,6 +87,10 @@ export class GamePage {
     }, move);
   }
 
+  async startNewMatch(): Promise<void> {
+    await this.newMatchButton.click();
+  }
+
   // ====================================================
   // VERIFICATION MISCELLANEOUS
   // ====================================================
