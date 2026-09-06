@@ -82,21 +82,25 @@ export class Controller {
     await this.handleNextRound();
   }
 
+  private async endMatch(isDoubleKO: boolean): Promise<void> {
+    const result = this.model.handleMatchWin();
+
+    this.arenaView.playMatchResult(result as Participant, isDoubleKO);
+
+    this.updateStatsView();
+    this.updateControlsView();
+
+    this.model.incrementMatchNumber();
+    this.model.setMatch(null);
+  }
+
   private async endRound(): Promise<void> {
     const matchOver = this.model.isMatchOver();
     const isDoubleKO = this.model.isDoubleKO();
 
     // --- MATCH END ---
     if (matchOver) {
-      const result = this.model.handleMatchWin();
-
-      this.arenaView.playMatchResult(result as Participant, isDoubleKO);
-
-      this.updateStatsView();
-      this.updateControlsView();
-
-      this.model.incrementMatchNumber();
-      this.model.setMatch(null);
+      await this.endMatch(isDoubleKO);
       return;
     }
 
