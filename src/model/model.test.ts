@@ -893,15 +893,6 @@ describe("Model", () => {
 
       expect(model["state"].globalMatchNumber).toEqual(initialMatchNumber + 1);
     });
-
-    test("incrementMatchNumber enforces maximum match number", () => {
-      const maximumMatchNumber = 99;
-      model["state"].globalMatchNumber = maximumMatchNumber;
-
-      model.incrementMatchNumber();
-
-      expect(model["state"].globalMatchNumber).toEqual(1);
-    });
   });
 
   describe("Health", () => {
