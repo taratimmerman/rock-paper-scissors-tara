@@ -266,3 +266,51 @@ test.describe("Round 2", () => {
     });
   }
 });
+
+test("Match ends with a double KO", async ({ gamePage, landingPage, seed }) => {
+  const sameMove = Move.PAPER;
+
+  const initialStats: Stats = {
+    availableTaraMoves: 1,
+    commonMove: Move.PAPER,
+    health: 10,
+    wins: 1,
+  };
+
+  const initialProgress: Progress = {
+    match: 2,
+    round: 2,
+  };
+
+  await seed({
+    progress: initialProgress,
+    playerStats: initialStats,
+    computerStats: initialStats,
+  });
+
+  await landingPage.continueMatch();
+
+  await test.step("Verify match initially 2", async () => {
+    await Promise.all([
+      gamePage.verifyStats(Participant.PLAYER, initialStats),
+      gamePage.verifyProgress(initialProgress),
+      gamePage.verifyStats(Participant.COMPUTER, initialStats),
+      gamePage.verifyNewMatchButtonVisible(false),
+    ]);
+  });
+
+  await test.step(`Participant moves: Player (${sameMove}) vs Computer (${sameMove})`, async () => {
+    await gamePage.setComputerMove(sameMove);
+    await gamePage.choosePlayerAction(sameMove);
+    await gamePage.verifyStatus(
+      new RegExp(`you played ${sameMove}. computer played ${sameMove}.`, "i"),
+    );
+  });
+
+  await test.step("Verify match results in a double KO", async () => {
+    const doubleKOText = new RegExp(`double ko`, "i");
+
+    await gamePage.verifyAnnouncement(doubleKOText);
+    await gamePage.verifyNewMatchButtonVisible();
+  });
+});
