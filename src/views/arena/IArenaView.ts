@@ -1,4 +1,9 @@
-import { Move, Participant, RoundResult } from "../../utils/dataObjectUtils";
+import {
+  GameOutcome,
+  Move,
+  Participant,
+  RoundResult,
+} from "../../utils/dataObjectUtils";
 
 export type ArenaPhase = "waiting" | "revealing" | "combat" | "result";
 
@@ -15,6 +20,7 @@ export type ArenaAnnouncementEvent =
   | { type: "TIE" }
   | { type: "MATCH_DOUBLE_KO" }
   | { type: "MATCH_WIN"; payload: { winner: Participant } }
+  | { type: "GAME_OVER"; outcome: GameOutcome }
   | { type: "CUSTOM"; message: string };
 
 export interface ArenaViewData {

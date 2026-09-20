@@ -1,4 +1,4 @@
-import { MOVES, PARTICIPANTS } from "./dataUtils";
+import { GAME_OUTCOME, MOVES, PARTICIPANTS } from "./dataUtils";
 
 export type Move = (typeof MOVES)[keyof typeof MOVES];
 export type StandardMove = Exclude<Move, "tara">;
@@ -59,3 +59,5 @@ export interface MoveCard {
   text: string;
   icon: string;
 }
+
+export type GameOutcome = (typeof GAME_OUTCOME)[keyof typeof GAME_OUTCOME];

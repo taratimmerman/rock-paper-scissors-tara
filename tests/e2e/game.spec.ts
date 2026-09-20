@@ -1,4 +1,4 @@
-import { test } from "../baseTest";
+import { expect, test } from "../baseTest";
 import {
   defaultProgress,
   defaultStats,
@@ -313,4 +313,102 @@ test("Match ends with a double KO", async ({ gamePage, landingPage, seed }) => {
     await gamePage.verifyAnnouncement(doubleKOText);
     await gamePage.verifyNewMatchButtonVisible();
   });
+});
+
+interface GameOutcomeTestCase {
+  description: string;
+  playerHealth: number;
+  computerHealth: number;
+  movePlayer: Move;
+  moveComputer: Move;
+  expectedAnnouncement: string;
+}
+
+const gameOutcomeTestCases: GameOutcomeTestCase[] = [
+  {
+    description: "player wins the game",
+    playerHealth: 100,
+    computerHealth: 1,
+    movePlayer: Move.PAPER,
+    moveComputer: Move.ROCK,
+    expectedAnnouncement: "GAME OVER! YOU WIN!",
+  },
+  {
+    description: "computer wins the game",
+    playerHealth: 1,
+    computerHealth: 100,
+    movePlayer: Move.SCISSORS,
+    moveComputer: Move.ROCK,
+    expectedAnnouncement: "GAME OVER! YOU LOSE!",
+  },
+  {
+    description: "the game ends in a draw",
+    playerHealth: 10,
+    computerHealth: 10,
+    movePlayer: Move.PAPER,
+    moveComputer: Move.PAPER,
+    expectedAnnouncement: "GAME OVER! IT'S A DRAW!",
+  },
+];
+
+for (const {
+  description,
+  playerHealth,
+  computerHealth,
+  movePlayer,
+  moveComputer,
+  expectedAnnouncement,
+} of gameOutcomeTestCases) {
+  test(`Final game outcome: ${description}`, async ({
+    gamePage,
+    landingPage,
+    seed,
+  }) => {
+    const baseStats: Omit<Stats, "health"> = {
+      availableTaraMoves: 0,
+      commonMove: null,
+      wins: 0,
+    };
+
+    await seed({
+      progress: { match: 99, round: 2 },
+      playerStats: { ...baseStats, health: playerHealth },
+      computerStats: { ...baseStats, health: computerHealth },
+    });
+    await landingPage.continueMatch();
+
+    await gamePage.setComputerMove(moveComputer);
+    await gamePage.choosePlayerAction(movePlayer);
+
+    await expect(gamePage.announcementContainer).toContainText(
+      expectedAnnouncement,
+      {
+        timeout: 15000,
+      },
+    );
+  });
+}
+
+test("Starting a new match after game over resets progress to Match 1", async ({
+  gamePage,
+  landingPage,
+  seed,
+}) => {
+  await seed({
+    progress: { match: 99, round: 2 },
+    playerStats: { health: 100, wins: 0 },
+    computerStats: { health: 1, wins: 0 },
+  });
+  await landingPage.continueMatch();
+
+  await gamePage.setComputerMove(Move.ROCK);
+  await gamePage.choosePlayerAction(Move.PAPER);
+  await expect(gamePage.announcementContainer).toContainText(
+    "GAME OVER! YOU WIN!",
+    { timeout: 15000 },
+  );
+
+  await gamePage.startNewMatch();
+
+  await gamePage.verifyProgress({ match: 1, round: 1 });
 });

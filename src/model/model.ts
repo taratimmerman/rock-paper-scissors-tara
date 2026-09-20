@@ -1,4 +1,5 @@
 import {
+  GameOutcome,
   GameState,
   Health,
   Match,
@@ -13,6 +14,7 @@ import {
   DAMAGE_PER_TARA_TIE,
   DAMAGE_PER_TIE,
   DEFAULT_MATCH,
+  GAME_OUTCOME,
   HEALTH_KEYS,
   INITIAL_HEALTH,
   MOVES,
@@ -484,6 +486,19 @@ export class Model {
     if (playerDefeated) return PARTICIPANTS.COMPUTER;
     if (computerDefeated) return PARTICIPANTS.PLAYER;
     return "draw";
+  }
+
+  determineGameOutcome(): GameOutcome {
+    const playerScore = this.getPlayerScore();
+    const computerScore = this.getComputerScore();
+
+    if (playerScore > computerScore) {
+      return GAME_OUTCOME.PLAYER_WIN;
+    } else if (computerScore > playerScore) {
+      return GAME_OUTCOME.PLAYER_LOSE;
+    } else {
+      return GAME_OUTCOME.DRAW;
+    }
   }
 
   incrementMatchNumber(): void {

@@ -7,6 +7,7 @@ import { IStatsView, StatsViewData } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { Move, Participant } from "../utils/dataObjectUtils";
 import {
+  MAX_PROGRESS,
   MOVE_DISPLAY_NAMES,
   PARTICIPANTS,
   PLAYER_MOVES_DATA,
@@ -89,11 +90,24 @@ export class Controller {
     // --- MATCH END ---
     if (matchOver) {
       const result = this.model.handleMatchWin();
+      const matchNumber = this.model.getMatchNumber();
 
       this.arenaView.playMatchResult(result as Participant, isDoubleKO);
 
       this.updateStatsView();
       this.updateControlsView();
+
+      if (matchNumber >= MAX_PROGRESS) {
+        const gameOutcome = this.model.determineGameOutcome();
+        this.arenaView.setAnnouncement({
+          type: "GAME_OVER",
+          outcome: gameOutcome,
+        });
+        // Do not persist a defeated final match; the next start creates Match 1.
+        this.model.setMatch(null);
+        this.model.setMatchNumber(null);
+        return;
+      }
 
       this.model.incrementMatchNumber();
       this.model.setMatch(null);

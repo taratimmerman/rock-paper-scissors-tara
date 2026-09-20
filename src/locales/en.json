@@ -1,5 +1,8 @@
 {
   "arena_doubleKo": "MUTUAL DESTRUCTION!",
+  "arena_gameDraw": "GAME OVER! IT'S A DRAW!",
+  "arena_gameLose": "GAME OVER! YOU LOSE!",
+  "arena_gameWin": "GAME OVER! YOU WIN!",
   "arena_matchDoubleKo": "DOUBLE KO! NOBODY WINS!",
   "arena_matchWinner": "{{winner}} WON THE MATCH!",
   "arena_roundWin": "{{winner}} LANDS A BLOW!",
