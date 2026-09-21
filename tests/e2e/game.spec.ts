@@ -410,5 +410,10 @@ test("Starting a new match after game over resets progress to Match 1", async ({
 
   await gamePage.startNewMatch();
 
-  await gamePage.verifyProgress({ match: 1, round: 1 });
+  await Promise.all([
+    gamePage.verifyProgress({ match: 1, round: 1 }),
+    gamePage.verifyStats(Participant.PLAYER, defaultStats),
+    gamePage.verifyStats(Participant.COMPUTER, defaultStats),
+    gamePage.verifyStatus("Choose your attack!"),
+  ]);
 });

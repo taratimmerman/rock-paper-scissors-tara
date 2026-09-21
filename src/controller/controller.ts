@@ -83,34 +83,40 @@ export class Controller {
     await this.handleNextRound();
   }
 
+  private handleGameOver(): void {
+    const gameOutcome = this.model.determineGameOutcome();
+    this.arenaView.setAnnouncement({
+      type: "GAME_OVER",
+      outcome: gameOutcome,
+    });
+    this.model.resetGame();
+  }
+
+  private handleMatchOver(): void {
+    const result = this.model.handleMatchWin();
+    const matchNumber = this.model.getMatchNumber();
+    const isDoubleKO = this.model.isDoubleKO();
+
+    this.arenaView.playMatchResult(result as Participant, isDoubleKO);
+
+    this.updateStatsView();
+    this.updateControlsView();
+
+    if (matchNumber >= MAX_PROGRESS) {
+      this.handleGameOver();
+      return;
+    }
+
+    this.model.incrementMatchNumber();
+    this.model.setMatch(null);
+  }
+
   private async endRound(): Promise<void> {
     const matchOver = this.model.isMatchOver();
-    const isDoubleKO = this.model.isDoubleKO();
 
     // --- MATCH END ---
     if (matchOver) {
-      const result = this.model.handleMatchWin();
-      const matchNumber = this.model.getMatchNumber();
-
-      this.arenaView.playMatchResult(result as Participant, isDoubleKO);
-
-      this.updateStatsView();
-      this.updateControlsView();
-
-      if (matchNumber >= MAX_PROGRESS) {
-        const gameOutcome = this.model.determineGameOutcome();
-        this.arenaView.setAnnouncement({
-          type: "GAME_OVER",
-          outcome: gameOutcome,
-        });
-        // Do not persist a defeated final match; the next start creates Match 1.
-        this.model.setMatch(null);
-        this.model.setMatchNumber(null);
-        return;
-      }
-
-      this.model.incrementMatchNumber();
-      this.model.setMatch(null);
+      this.handleMatchOver();
       return;
     }
 
