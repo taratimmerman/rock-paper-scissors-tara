@@ -10,9 +10,32 @@ import {
   PARTICIPANTS,
   CARD_BACKS_DATABASE,
 } from "../../utils/dataUtils";
-import { Participant, RoundResult } from "../../utils/dataObjectUtils";
+import {
+  GameOutcome,
+  Participant,
+  RoundResult,
+} from "../../utils/dataObjectUtils";
 import { renderIcon } from "../../utils/imageUtils";
-import { t } from "../../utils/i18n";
+import { t, TranslationKey } from "../../utils/i18n";
+
+const ARENA_ANNOUNCEMENT_TRANSLATION_KEYS = {
+  DOUBLE_KO: "arena_doubleKo",
+  TIE: "arena_tie",
+  MATCH_DOUBLE_KO: "arena_matchDoubleKo",
+} satisfies Record<
+  // Payload-bearing events use their own translation logic below.
+  Exclude<
+    ArenaAnnouncementEvent,
+    { type: "ROUND_WIN" | "MATCH_WIN" | "GAME_OVER" | "CUSTOM" }
+  >["type"],
+  TranslationKey
+>;
+
+const GAME_OUTCOME_TRANSLATION_KEYS: Record<GameOutcome, TranslationKey> = {
+  gameDraw: "arena_gameDraw",
+  gameLose: "arena_gameLose",
+  gameWin: "arena_gameWin",
+};
 
 export default class ArenaView
   extends View<ArenaViewData>
@@ -281,32 +304,25 @@ export default class ArenaView
   public setAnnouncement(event: ArenaAnnouncementEvent): void {
     let announcementMessage: string;
 
-    switch (event.type) {
-      case "DOUBLE_KO":
-        announcementMessage = t("arena_doubleKo");
-        break;
-      case "ROUND_WIN":
-        announcementMessage = t("arena_roundWin", {
-          winner: event.payload.winner.toUpperCase(),
-        });
-        break;
-      case "TIE":
-        announcementMessage = t("arena_tie");
-        break;
-      case "MATCH_DOUBLE_KO":
-        announcementMessage = t("arena_matchDoubleKo");
-        break;
-      case "MATCH_WIN":
-        announcementMessage = t("arena_matchWinner", {
-          winner: event.payload.winner.toUpperCase(),
-        });
-        break;
-      case "CUSTOM":
-        announcementMessage = event.message;
-        break;
-      default:
-        const _exhaustive: never = event;
-        throw new Error(`Unhandled event type: ${_exhaustive}`);
+    if (event.type === "CUSTOM") {
+      announcementMessage = event.message;
+    } else if (event.type === "ROUND_WIN") {
+      announcementMessage = t("arena_roundWin", {
+        winner: event.payload.winner.toUpperCase(),
+      });
+    } else if (event.type === "MATCH_WIN") {
+      announcementMessage = t("arena_matchWinner", {
+        winner: event.payload.winner.toUpperCase(),
+      });
+    } else if (event.type === "GAME_OVER") {
+      announcementMessage = t(GAME_OUTCOME_TRANSLATION_KEYS[event.outcome]);
+    } else {
+      const translationKey = ARENA_ANNOUNCEMENT_TRANSLATION_KEYS[event.type];
+      if (!translationKey) {
+        throw new Error(`Unhandled event type: ${event.type}`);
+      }
+
+      announcementMessage = t(translationKey);
     }
 
     this._data = { ...this._data, announcementMessage };

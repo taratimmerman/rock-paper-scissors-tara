@@ -1,4 +1,5 @@
 import {
+  GameOutcome,
   Health,
   Match,
   Move,
@@ -35,11 +36,13 @@ export interface IModel {
   showMostCommonMove(): boolean;
 
   // Match & round
+  determineGameOutcome(): GameOutcome;
   isDoubleKO(): boolean;
   isMatchActive(): boolean;
   isMatchOver(): boolean;
   handleMatchWin(): Participant;
   incrementMatchNumber(): void;
+  setMatchNumber(matchNumber: number | null): void;
   increaseRoundNumber(): void;
   getRoundNumber(): number;
   getMatchNumber(): number;

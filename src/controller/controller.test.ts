@@ -52,6 +52,7 @@ describe("Controller", () => {
       doesMoveBeat: jest.fn().mockReturnValue(true),
       setMatch: jest.fn(),
       isMatchActive: jest.fn().mockReturnValue(false),
+      determineGameOutcome: jest.fn().mockReturnValue("gameWin"),
       resetGame: jest.fn(),
     } as any;
 
@@ -141,6 +142,23 @@ describe("Controller", () => {
       jest.advanceTimersByTime(2000);
       expect(mockModel.resetMoves).toHaveBeenCalled();
       jest.useRealTimers();
+    });
+
+    test("announces game over and resets the model after the final match", async () => {
+      mockModel.isMatchOver.mockReturnValue(true);
+      mockModel.getMatchNumber.mockReturnValue(99);
+      mockModel.handleMatchWin.mockReturnValue("player");
+
+      await (
+        controller as unknown as { endRound: () => Promise<void> }
+      ).endRound();
+
+      expect(mockViews.arenaView.setAnnouncement).toHaveBeenCalledWith({
+        type: "GAME_OVER",
+        outcome: "gameWin",
+      });
+      expect(mockModel.resetGame).toHaveBeenCalled();
+      expect(mockModel.setMatch).not.toHaveBeenCalledWith(null);
     });
   });
 

@@ -175,6 +175,7 @@ export const DAMAGE_PER_TARA_LOSS = 70;
 export const DAMAGE_PER_TARA_TIE = 20;
 export const DAMAGE_PER_TIE = 10;
 export const DEFAULT_MATCH_NUMBER = 1;
+export const MAX_PROGRESS = 99;
 export const MAX_TARA = 3;
 
 export const DEFAULT_MATCH: Match = {
@@ -186,4 +187,10 @@ export const DEFAULT_MATCH: Match = {
 export const HEALTH_KEYS = {
   player: "playerHealth",
   computer: "computerHealth",
+} as const;
+
+export const GAME_OUTCOME = {
+  DRAW: "gameDraw",
+  PLAYER_LOSE: "gameLose",
+  PLAYER_WIN: "gameWin",
 } as const;

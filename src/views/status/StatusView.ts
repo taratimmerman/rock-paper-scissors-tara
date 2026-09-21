@@ -1,6 +1,16 @@
 import View from "../View";
 import { IStatusView, StatusViewData, StatusViewEvent } from "./IStatusView";
-import { t } from "../../utils/i18n";
+import { t, TranslationKey } from "../../utils/i18n";
+
+const STATUS_EVENT_TRANSLATION_KEYS = {
+  READY: "status_ready",
+  LOCK_IN: "status_lockIn",
+  PREPARE: "status_prepare",
+  CHOOSE: "status_choose",
+} satisfies Record<
+  Exclude<StatusViewEvent, { type: "CUSTOM" }>["type"],
+  TranslationKey
+>;
 
 /**
  * Status View displays game state messages to the player.
@@ -72,20 +82,15 @@ export default class StatusView
    * @private
    */
   private translateEvent(event: StatusViewEvent): string {
-    switch (event.type) {
-      case "READY":
-        return t("status_ready");
-      case "LOCK_IN":
-        return t("status_lockIn");
-      case "PREPARE":
-        return t("status_prepare");
-      case "CHOOSE":
-        return t("status_choose");
-      case "CUSTOM":
-        return event.message;
-      default:
-        const _exhaustive: never = event;
-        throw new Error(`Unhandled event type: ${_exhaustive}`);
+    if (event.type === "CUSTOM") {
+      return event.message;
     }
+
+    const translationKey = STATUS_EVENT_TRANSLATION_KEYS[event.type];
+    if (!translationKey) {
+      throw new Error(`Unhandled event type: ${event.type}`);
+    }
+
+    return t(translationKey);
   }
 }

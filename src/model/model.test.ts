@@ -6,6 +6,7 @@ import {
   DAMAGE_PER_TIE,
   DEFAULT_MATCH,
   DEFAULT_MATCH_NUMBER,
+  GAME_OUTCOME,
   INITIAL_HEALTH,
   INITIAL_ROUND_NUMBER,
   MOVES,
@@ -157,6 +158,22 @@ describe("Model", () => {
       expect(model.getPlayerScore()).toBe(0);
       expect(model.getComputerScore()).toBe(0);
     });
+  });
+
+  describe("Game outcome", () => {
+    test.each([
+      [5, 3, GAME_OUTCOME.PLAYER_WIN],
+      [3, 5, GAME_OUTCOME.PLAYER_LOSE],
+      [4, 4, GAME_OUTCOME.DRAW],
+    ])(
+      "determines the outcome for scores %s-%s",
+      (playerScore, computerScore, expectedOutcome) => {
+        model.setPlayerScore(playerScore);
+        model.setComputerScore(computerScore);
+
+        expect(model.determineGameOutcome()).toBe(expectedOutcome);
+      },
+    );
   });
 
   describe("Moves", () => {
