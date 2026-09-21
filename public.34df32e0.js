@@ -1097,6 +1097,13 @@ class Model {
         if (computerDefeated) return (0, _dataUtils.PARTICIPANTS).PLAYER;
         return "draw";
     }
+    determineGameOutcome() {
+        const playerScore = this.getPlayerScore();
+        const computerScore = this.getComputerScore();
+        if (playerScore > computerScore) return (0, _dataUtils.GAME_OUTCOME).PLAYER_WIN;
+        else if (computerScore > playerScore) return (0, _dataUtils.GAME_OUTCOME).PLAYER_LOSE;
+        else return (0, _dataUtils.GAME_OUTCOME).DRAW;
+    }
     incrementMatchNumber() {
         this.setMatchNumber(this.getMatchNumber() + 1);
     }
@@ -1162,9 +1169,11 @@ parcelHelpers.export(exports, "DAMAGE_PER_TARA_LOSS", ()=>DAMAGE_PER_TARA_LOSS);
 parcelHelpers.export(exports, "DAMAGE_PER_TARA_TIE", ()=>DAMAGE_PER_TARA_TIE);
 parcelHelpers.export(exports, "DAMAGE_PER_TIE", ()=>DAMAGE_PER_TIE);
 parcelHelpers.export(exports, "DEFAULT_MATCH_NUMBER", ()=>DEFAULT_MATCH_NUMBER);
+parcelHelpers.export(exports, "MAX_PROGRESS", ()=>MAX_PROGRESS);
 parcelHelpers.export(exports, "MAX_TARA", ()=>MAX_TARA);
 parcelHelpers.export(exports, "DEFAULT_MATCH", ()=>DEFAULT_MATCH);
 parcelHelpers.export(exports, "HEALTH_KEYS", ()=>HEALTH_KEYS);
+parcelHelpers.export(exports, "GAME_OUTCOME", ()=>GAME_OUTCOME);
 var _taraPng = require("url:../../public/images/tara.png");
 var _taraPngDefault = parcelHelpers.interopDefault(_taraPng);
 var _cardBluePng = require("url:../../public/images/card-blue.png");
@@ -1267,6 +1276,7 @@ const DAMAGE_PER_TARA_LOSS = 70;
 const DAMAGE_PER_TARA_TIE = 20;
 const DAMAGE_PER_TIE = 10;
 const DEFAULT_MATCH_NUMBER = 1;
+const MAX_PROGRESS = 99;
 const MAX_TARA = 3;
 const DEFAULT_MATCH = {
     matchRoundNumber: INITIAL_ROUND_NUMBER,
@@ -1276,6 +1286,11 @@ const DEFAULT_MATCH = {
 const HEALTH_KEYS = {
     player: "playerHealth",
     computer: "computerHealth"
+};
+const GAME_OUTCOME = {
+    DRAW: "gameDraw",
+    PLAYER_LOSE: "gameLose",
+    PLAYER_WIN: "gameWin"
 };
 
 },{"url:../../public/images/tara.png":"7LenK","url:../../public/images/card-blue.png":"hBpbE","url:../../public/images/card-red.png":"38ONL","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"7LenK":[function(require,module,exports,__globalThis) {
@@ -1325,11 +1340,26 @@ var _dataUtils = require("../dataUtils");
 var _gameRules = require("../gameRules");
 class AdaptiveComputer {
     calculateNextMove(state) {
+        {
+            const forcedMove = this.checkForTestSetMove();
+            if (forcedMove) return forcedMove;
+        }
         const hasTara = state.taras.computer > 0;
         const availableMoves = (0, _gameRules.getAvailableMoves)(hasTara);
         const weights = this.getComputerMoveWeights(state, availableMoves);
-        const move = this.chooseWeightedRandomMove(availableMoves, weights);
-        return move;
+        return this.chooseWeightedRandomMove(availableMoves, weights);
+    }
+    /**
+     * Checks for a forced deterministic move set by an E2E test.
+     * If found, removes it from sessionStorage and returns the move.
+     */ checkForTestSetMove() {
+        const key = "__E2E_NEXT_COMPUTER_MOVE__";
+        const e2eForcedMove = sessionStorage.getItem(key);
+        if (e2eForcedMove) {
+            sessionStorage.removeItem(key);
+            return e2eForcedMove;
+        }
+        return null;
     }
     getBaseWeights() {
         return {
@@ -1585,17 +1615,33 @@ class Controller {
         this.controlsView.toggleVisibility(true);
         await this.handleNextRound();
     }
+    handleGameOver() {
+        const gameOutcome = this.model.determineGameOutcome();
+        this.arenaView.setAnnouncement({
+            type: "GAME_OVER",
+            outcome: gameOutcome
+        });
+        this.model.resetGame();
+    }
+    handleMatchOver() {
+        const result = this.model.handleMatchWin();
+        const matchNumber = this.model.getMatchNumber();
+        const isDoubleKO = this.model.isDoubleKO();
+        this.arenaView.playMatchResult(result, isDoubleKO);
+        this.updateStatsView();
+        this.updateControlsView();
+        if (matchNumber >= (0, _dataUtils.MAX_PROGRESS)) {
+            this.handleGameOver();
+            return;
+        }
+        this.model.incrementMatchNumber();
+        this.model.setMatch(null);
+    }
     async endRound() {
         const matchOver = this.model.isMatchOver();
-        const isDoubleKO = this.model.isDoubleKO();
         // --- MATCH END ---
         if (matchOver) {
-            const result = this.model.handleMatchWin();
-            this.arenaView.playMatchResult(result, isDoubleKO);
-            this.updateStatsView();
-            this.updateControlsView();
-            this.model.incrementMatchNumber();
-            this.model.setMatch(null);
+            this.handleMatchOver();
             return;
         }
         // --- ROUND CONTINUES ---
@@ -1693,6 +1739,16 @@ var _viewDefault = parcelHelpers.interopDefault(_view);
 var _dataUtils = require("../../utils/dataUtils");
 var _imageUtils = require("../../utils/imageUtils");
 var _i18N = require("../../utils/i18n");
+const ARENA_ANNOUNCEMENT_TRANSLATION_KEYS = {
+    DOUBLE_KO: "arena_doubleKo",
+    TIE: "arena_tie",
+    MATCH_DOUBLE_KO: "arena_matchDoubleKo"
+};
+const GAME_OUTCOME_TRANSLATION_KEYS = {
+    gameDraw: "arena_gameDraw",
+    gameLose: "arena_gameLose",
+    gameWin: "arena_gameWin"
+};
 class ArenaView extends (0, _viewDefault.default) {
     _parentElement = document.getElementById("arena");
     _generateMarkup() {
@@ -1909,32 +1965,18 @@ class ArenaView extends (0, _viewDefault.default) {
     }
     setAnnouncement(event) {
         let announcementMessage;
-        switch(event.type){
-            case "DOUBLE_KO":
-                announcementMessage = (0, _i18N.t)("arena_doubleKo");
-                break;
-            case "ROUND_WIN":
-                announcementMessage = (0, _i18N.t)("arena_roundWin", {
-                    winner: event.payload.winner.toUpperCase()
-                });
-                break;
-            case "TIE":
-                announcementMessage = (0, _i18N.t)("arena_tie");
-                break;
-            case "MATCH_DOUBLE_KO":
-                announcementMessage = (0, _i18N.t)("arena_matchDoubleKo");
-                break;
-            case "MATCH_WIN":
-                announcementMessage = (0, _i18N.t)("arena_matchWinner", {
-                    winner: event.payload.winner.toUpperCase()
-                });
-                break;
-            case "CUSTOM":
-                announcementMessage = event.message;
-                break;
-            default:
-                const _exhaustive = event;
-                throw new Error(`Unhandled event type: ${_exhaustive}`);
+        if (event.type === "CUSTOM") announcementMessage = event.message;
+        else if (event.type === "ROUND_WIN") announcementMessage = (0, _i18N.t)("arena_roundWin", {
+            winner: event.payload.winner.toUpperCase()
+        });
+        else if (event.type === "MATCH_WIN") announcementMessage = (0, _i18N.t)("arena_matchWinner", {
+            winner: event.payload.winner.toUpperCase()
+        });
+        else if (event.type === "GAME_OVER") announcementMessage = (0, _i18N.t)(GAME_OUTCOME_TRANSLATION_KEYS[event.outcome]);
+        else {
+            const translationKey = ARENA_ANNOUNCEMENT_TRANSLATION_KEYS[event.type];
+            if (!translationKey) throw new Error(`Unhandled event type: ${event.type}`);
+            announcementMessage = (0, _i18N.t)(translationKey);
         }
         this._data = {
             ...this._data,
@@ -2115,7 +2157,7 @@ function t(key, variables) {
 }
 
 },{"../locales/en.json":"6L9RB","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"6L9RB":[function(require,module,exports,__globalThis) {
-module.exports = JSON.parse("{\"arena_doubleKo\":\"MUTUAL DESTRUCTION!\",\"arena_matchDoubleKo\":\"DOUBLE KO! NOBODY WINS!\",\"arena_matchWinner\":\"{{winner}} WON THE MATCH!\",\"arena_roundWin\":\"{{winner}} LANDS A BLOW!\",\"arena_tie\":\"IT'S A TIE!\",\"status_choose\":\"Choose your attack!\",\"status_lockIn\":\"Locking in move...\",\"status_prepare\":\"Prepare your next move...\",\"status_ready\":\"Get ready...\",\"status_roundResult\":\"You played {{playerMove}}. Computer played {{computerMove}}.\"}");
+module.exports = JSON.parse("{\"arena_doubleKo\":\"MUTUAL DESTRUCTION!\",\"arena_gameDraw\":\"GAME OVER! IT'S A DRAW!\",\"arena_gameLose\":\"GAME OVER! YOU LOSE!\",\"arena_gameWin\":\"GAME OVER! YOU WIN!\",\"arena_matchDoubleKo\":\"DOUBLE KO! NOBODY WINS!\",\"arena_matchWinner\":\"{{winner}} WON THE MATCH!\",\"arena_roundWin\":\"{{winner}} LANDS A BLOW!\",\"arena_tie\":\"IT'S A TIE!\",\"status_choose\":\"Choose your attack!\",\"status_lockIn\":\"Locking in move...\",\"status_prepare\":\"Prepare your next move...\",\"status_ready\":\"Get ready...\",\"status_roundResult\":\"You played {{playerMove}}. Computer played {{computerMove}}.\"}");
 
 },{}],"h40xR":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -2406,6 +2448,12 @@ parcelHelpers.defineInteropFlag(exports);
 var _view = require("../View");
 var _viewDefault = parcelHelpers.interopDefault(_view);
 var _i18N = require("../../utils/i18n");
+const STATUS_EVENT_TRANSLATION_KEYS = {
+    READY: "status_ready",
+    LOCK_IN: "status_lockIn",
+    PREPARE: "status_prepare",
+    CHOOSE: "status_choose"
+};
 class StatusView extends (0, _viewDefault.default) {
     _messageElement = null;
     render(data) {
@@ -2451,21 +2499,10 @@ class StatusView extends (0, _viewDefault.default) {
      * Extracted for clarity and testability.
      * @private
      */ translateEvent(event) {
-        switch(event.type){
-            case "READY":
-                return (0, _i18N.t)("status_ready");
-            case "LOCK_IN":
-                return (0, _i18N.t)("status_lockIn");
-            case "PREPARE":
-                return (0, _i18N.t)("status_prepare");
-            case "CHOOSE":
-                return (0, _i18N.t)("status_choose");
-            case "CUSTOM":
-                return event.message;
-            default:
-                const _exhaustive = event;
-                throw new Error(`Unhandled event type: ${_exhaustive}`);
-        }
+        if (event.type === "CUSTOM") return event.message;
+        const translationKey = STATUS_EVENT_TRANSLATION_KEYS[event.type];
+        if (!translationKey) throw new Error(`Unhandled event type: ${event.type}`);
+        return (0, _i18N.t)(translationKey);
     }
 }
 exports.default = StatusView;
