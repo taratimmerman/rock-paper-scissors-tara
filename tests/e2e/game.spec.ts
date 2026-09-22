@@ -339,7 +339,13 @@ test("Match resolves by health when the round limit is reached", async ({
   await gamePage.choosePlayerAction(Move.PAPER);
 
   await test.step("Verify the higher-health participant wins the match", async () => {
-    await gamePage.verifyAnnouncement(/player won the match/i);
+    await expect(gamePage.announcementContainer).toContainText(
+      /player won the match/i,
+      { timeout: 15000 },
+    );
+    await gamePage.verifyStatus(
+      "Round limit reached. Match resolved by remaining health.",
+    );
     await gamePage.verifyProgress(initialProgress);
     await gamePage.verifyStats(Participant.PLAYER, {
       ...initialStats,
@@ -350,7 +356,70 @@ test("Match resolves by health when the round limit is reached", async ({
       ...initialStats,
       health: 40,
     });
+    await gamePage.verifyNewMatchButtonVisible();
   });
+});
+
+test("Forced draw ends the match without awarding a win", async ({
+  gamePage,
+  landingPage,
+  seed,
+}) => {
+  const initialStats: Stats = {
+    availableTaraMoves: 0,
+    commonMove: Move.PAPER,
+    health: 70,
+    wins: 0,
+  };
+
+  await seed({
+    progress: { match: 1, round: 99 },
+    playerStats: initialStats,
+    computerStats: initialStats,
+  });
+  await landingPage.continueMatch();
+
+  await gamePage.setComputerMove(Move.PAPER);
+  await gamePage.choosePlayerAction(Move.PAPER);
+
+  await expect(gamePage.announcementContainer).toContainText(
+    /it's a draw! nobody wins!/i,
+    { timeout: 15000 },
+  );
+  await gamePage.verifyStatus(
+    "Round limit reached. Match resolved by remaining health.",
+  );
+  await gamePage.verifyNewMatchButtonVisible();
+  await Promise.all([
+    gamePage.verifyStats(Participant.PLAYER, { ...initialStats, health: 60 }),
+    gamePage.verifyStats(Participant.COMPUTER, {
+      ...initialStats,
+      health: 60,
+    }),
+  ]);
+});
+
+test("Final match resolves at the round limit and shows game over", async ({
+  gamePage,
+  landingPage,
+  seed,
+}) => {
+  await seed({
+    progress: { match: 99, round: 99 },
+    playerStats: { health: 100, wins: 0 },
+    computerStats: { health: 50, wins: 0 },
+  });
+  await landingPage.continueMatch();
+
+  await gamePage.setComputerMove(Move.PAPER);
+  await gamePage.choosePlayerAction(Move.PAPER);
+
+  await expect(gamePage.announcementContainer).toContainText(
+    "GAME OVER! YOU WIN!",
+    { timeout: 15000 },
+  );
+  await gamePage.verifyStatus("Match limit reached. Game over.");
+  await gamePage.verifyNewMatchButtonVisible();
 });
 
 interface GameOutcomeTestCase {

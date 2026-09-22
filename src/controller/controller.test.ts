@@ -154,7 +154,15 @@ describe("Controller", () => {
       controller.endRound();
 
       expect(mockModel.forceMatchWinner).toHaveBeenCalled();
+      expect(mockViews.statusView.handleEvent).toHaveBeenCalledWith({
+        type: "ROUND_LIMIT_REACHED",
+      });
       expect(mockModel.incrementWinnerScore).toHaveBeenCalledWith("player");
+      expect(mockViews.controlsView.render).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isMatchOver: true,
+        }),
+      );
       expect(mockModel.increaseRoundNumber).not.toHaveBeenCalled();
     });
 
@@ -168,6 +176,11 @@ describe("Controller", () => {
 
       expect(mockModel.forceMatchWinner).toHaveBeenCalled();
       expect(mockModel.incrementWinnerScore).not.toHaveBeenCalled();
+      expect(mockViews.controlsView.render).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isMatchOver: true,
+        }),
+      );
       expect(mockModel.setMatch).toHaveBeenCalledWith(null);
     });
 

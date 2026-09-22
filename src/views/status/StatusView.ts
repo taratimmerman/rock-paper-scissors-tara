@@ -7,6 +7,8 @@ const STATUS_EVENT_TRANSLATION_KEYS = {
   LOCK_IN: "status_lockIn",
   PREPARE: "status_prepare",
   CHOOSE: "status_choose",
+  ROUND_LIMIT_REACHED: "status_roundLimitReached",
+  MATCH_LIMIT_REACHED: "status_matchLimitReached",
 } satisfies Record<
   Exclude<StatusViewEvent, { type: "CUSTOM" }>["type"],
   TranslationKey

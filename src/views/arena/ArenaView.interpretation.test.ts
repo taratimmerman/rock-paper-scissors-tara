@@ -106,6 +106,12 @@ describe("ArenaView Interpretation Logic", () => {
       expect((event as any).payload.winner).toBe("computer");
     });
 
+    it("returns MATCH_DRAW when health forces a draw", () => {
+      const event = (view as any).determineMatchAnnouncement("draw", false);
+
+      expect(event.type).toBe("MATCH_DRAW");
+    });
+
     it("ignores winner parameter when isDoubleKO is true", () => {
       // Even though player is passed, should emit MATCH_DOUBLE_KO
       const event = (view as any).determineMatchAnnouncement("player", true);
@@ -150,6 +156,14 @@ describe("ArenaView Interpretation Logic", () => {
           payload: { winner: "computer" },
         }),
       );
+    });
+
+    it("announces a forced draw without treating draw as a participant", () => {
+      view.playMatchResult("draw", false);
+
+      expect(
+        document.querySelector("#announcement-container")?.textContent,
+      ).toContain("IT'S A DRAW! NOBODY WINS!");
     });
   });
 });

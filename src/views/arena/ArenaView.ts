@@ -22,6 +22,7 @@ const ARENA_ANNOUNCEMENT_TRANSLATION_KEYS = {
   DOUBLE_KO: "arena_doubleKo",
   TIE: "arena_tie",
   MATCH_DOUBLE_KO: "arena_matchDoubleKo",
+  MATCH_DRAW: "arena_matchDraw",
 } satisfies Record<
   // Payload-bearing events use their own translation logic below.
   Exclude<
@@ -258,7 +259,10 @@ export default class ArenaView
   /**
    * Interprets match outcome, manages the cinematic delay, and emits the announcement.
    */
-  public playMatchResult(winner: Participant, isDoubleKO: boolean): void {
+  public playMatchResult(
+    winner: Participant | "draw",
+    isDoubleKO: boolean,
+  ): void {
     // 1. Announce the match winner
     const event = this.determineMatchAnnouncement(winner, isDoubleKO);
     this.setAnnouncement(event);
@@ -293,12 +297,12 @@ export default class ArenaView
    * @private
    */
   private determineMatchAnnouncement(
-    winner: Participant,
+    winner: Participant | "draw",
     isDoubleKO: boolean,
   ): ArenaAnnouncementEvent {
-    return isDoubleKO
-      ? { type: "MATCH_DOUBLE_KO" }
-      : { type: "MATCH_WIN", payload: { winner } };
+    if (isDoubleKO) return { type: "MATCH_DOUBLE_KO" };
+    if (winner === "draw") return { type: "MATCH_DRAW" };
+    return { type: "MATCH_WIN", payload: { winner } };
   }
 
   public setAnnouncement(event: ArenaAnnouncementEvent): void {
@@ -342,8 +346,8 @@ export default class ArenaView
     }
   }
 
-  private applyWinnerStyles(winner: Participant | "tie"): void {
-    if (winner === "tie") return;
+  private applyWinnerStyles(winner: Participant | "tie" | "draw"): void {
+    if (winner === "tie" || winner === "draw") return;
 
     const playerCard = this._getElement("reveal-player");
     const computerCard = this._getElement("reveal-computer");
