@@ -1057,13 +1057,19 @@ class Model {
         return this.getTaraCount((0, _dataUtils.PARTICIPANTS).PLAYER) > 0;
     }
     // ===== Match Methods =====
-    handleMatchWin() {
-        const result = this.getMatchWinner();
-        if (result !== "draw") this.setScore(result, this.getScore(result) + 1);
-        return result;
+    forceMatchWinner() {
+        const playerHealth = this.getHealth((0, _dataUtils.PARTICIPANTS).PLAYER);
+        const computerHealth = this.getHealth((0, _dataUtils.PARTICIPANTS).COMPUTER);
+        if (playerHealth === null || computerHealth === null) throw new Error("Cannot force match win without valid health values.");
+        if (playerHealth > computerHealth) return (0, _dataUtils.PARTICIPANTS).PLAYER;
+        else if (computerHealth > playerHealth) return (0, _dataUtils.PARTICIPANTS).COMPUTER;
+        else return "draw";
+    }
+    incrementWinnerScore(winner) {
+        this.setScore(winner, this.getScore(winner) + 1);
     }
     isDoubleKO() {
-        return this.isMatchOver() && this.getHealth((0, _dataUtils.PARTICIPANTS).PLAYER) === 0 && this.getHealth((0, _dataUtils.PARTICIPANTS).COMPUTER) === 0;
+        return this.getHealth((0, _dataUtils.PARTICIPANTS).PLAYER) === 0 && this.getHealth((0, _dataUtils.PARTICIPANTS).COMPUTER) === 0;
     }
     setMatch(match) {
         this.state.currentMatch = match;
@@ -1579,10 +1585,10 @@ class Controller {
         this.statsView = views.statsView;
         this.statusView = views.statusView;
     }
-    updateControlsView() {
+    updateControlsView(isMatchOver = this.model.isMatchOver()) {
         this.controlsView.render({
             playerMove: this.model.getPlayerMove(),
-            isMatchOver: this.model.isMatchOver(),
+            isMatchOver,
             taraIsEnabled: this.model.taraIsEnabled(),
             moves: (0, _dataUtils.PLAYER_MOVES_DATA)
         });
@@ -1623,14 +1629,17 @@ class Controller {
         });
         this.model.resetGame();
     }
-    handleMatchOver() {
-        const result = this.model.handleMatchWin();
+    handleMatchOver(result) {
         const matchNumber = this.model.getMatchNumber();
         const isDoubleKO = this.model.isDoubleKO();
         this.arenaView.playMatchResult(result, isDoubleKO);
+        if (result !== "draw") this.model.incrementWinnerScore(result);
         this.updateStatsView();
-        this.updateControlsView();
+        this.updateControlsView(true);
         if (matchNumber >= (0, _dataUtils.MAX_PROGRESS)) {
+            this.statusView.handleEvent({
+                type: "MATCH_LIMIT_REACHED"
+            });
             this.handleGameOver();
             return;
         }
@@ -1641,10 +1650,21 @@ class Controller {
         const matchOver = this.model.isMatchOver();
         // --- MATCH END ---
         if (matchOver) {
-            this.handleMatchOver();
+            const result = this.model.getMatchWinner();
+            this.handleMatchOver(result);
             return;
         }
-        // --- ROUND CONTINUES ---
+        // --- MAYBE FORCE MATCH END ---
+        const roundNumber = this.model.getRoundNumber();
+        if (roundNumber >= (0, _dataUtils.MAX_PROGRESS)) {
+            this.statusView.handleEvent({
+                type: "ROUND_LIMIT_REACHED"
+            });
+            const result = this.model.forceMatchWinner();
+            this.handleMatchOver(result);
+            return;
+        }
+        // --- NEXT ROUND ---
         this.model.increaseRoundNumber();
         this.updateStatsView();
         setTimeout(()=>{
@@ -1742,7 +1762,8 @@ var _i18N = require("../../utils/i18n");
 const ARENA_ANNOUNCEMENT_TRANSLATION_KEYS = {
     DOUBLE_KO: "arena_doubleKo",
     TIE: "arena_tie",
-    MATCH_DOUBLE_KO: "arena_matchDoubleKo"
+    MATCH_DOUBLE_KO: "arena_matchDoubleKo",
+    MATCH_DRAW: "arena_matchDraw"
 };
 const GAME_OUTCOME_TRANSLATION_KEYS = {
     gameDraw: "arena_gameDraw",
@@ -1954,9 +1975,13 @@ class ArenaView extends (0, _viewDefault.default) {
      * Helper: Determines which match announcement event to emit based on game outcome.
      * @private
      */ determineMatchAnnouncement(winner, isDoubleKO) {
-        return isDoubleKO ? {
+        if (isDoubleKO) return {
             type: "MATCH_DOUBLE_KO"
-        } : {
+        };
+        if (winner === "draw") return {
+            type: "MATCH_DRAW"
+        };
+        return {
             type: "MATCH_WIN",
             payload: {
                 winner
@@ -1996,7 +2021,7 @@ class ArenaView extends (0, _viewDefault.default) {
         if (data.phase === "result" && data.winner) this.applyWinnerStyles(data.winner);
     }
     applyWinnerStyles(winner) {
-        if (winner === "tie") return;
+        if (winner === "tie" || winner === "draw") return;
         const playerCard = this._getElement("reveal-player");
         const computerCard = this._getElement("reveal-computer");
         if (winner === "player") {
@@ -2157,7 +2182,7 @@ function t(key, variables) {
 }
 
 },{"../locales/en.json":"6L9RB","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"6L9RB":[function(require,module,exports,__globalThis) {
-module.exports = JSON.parse("{\"arena_doubleKo\":\"MUTUAL DESTRUCTION!\",\"arena_gameDraw\":\"GAME OVER! IT'S A DRAW!\",\"arena_gameLose\":\"GAME OVER! YOU LOSE!\",\"arena_gameWin\":\"GAME OVER! YOU WIN!\",\"arena_matchDoubleKo\":\"DOUBLE KO! NOBODY WINS!\",\"arena_matchWinner\":\"{{winner}} WON THE MATCH!\",\"arena_roundWin\":\"{{winner}} LANDS A BLOW!\",\"arena_tie\":\"IT'S A TIE!\",\"status_choose\":\"Choose your attack!\",\"status_lockIn\":\"Locking in move...\",\"status_prepare\":\"Prepare your next move...\",\"status_ready\":\"Get ready...\",\"status_roundResult\":\"You played {{playerMove}}. Computer played {{computerMove}}.\"}");
+module.exports = JSON.parse("{\"arena_doubleKo\":\"MUTUAL DESTRUCTION!\",\"arena_gameDraw\":\"GAME OVER! IT'S A DRAW!\",\"arena_gameLose\":\"GAME OVER! YOU LOSE!\",\"arena_gameWin\":\"GAME OVER! YOU WIN!\",\"arena_matchDoubleKo\":\"DOUBLE KO! NOBODY WINS!\",\"arena_matchDraw\":\"IT'S A DRAW! NOBODY WINS!\",\"arena_matchWinner\":\"{{winner}} WON THE MATCH!\",\"arena_roundWin\":\"{{winner}} LANDS A BLOW!\",\"arena_tie\":\"IT'S A TIE!\",\"status_choose\":\"Choose your attack!\",\"status_lockIn\":\"Locking in move...\",\"status_matchLimitReached\":\"Match limit reached. Game over.\",\"status_prepare\":\"Prepare your next move...\",\"status_roundLimitReached\":\"Round limit reached. Match resolved by remaining health.\",\"status_ready\":\"Get ready...\",\"status_roundResult\":\"You played {{playerMove}}. Computer played {{computerMove}}.\"}");
 
 },{}],"h40xR":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -2452,7 +2477,9 @@ const STATUS_EVENT_TRANSLATION_KEYS = {
     READY: "status_ready",
     LOCK_IN: "status_lockIn",
     PREPARE: "status_prepare",
-    CHOOSE: "status_choose"
+    CHOOSE: "status_choose",
+    ROUND_LIMIT_REACHED: "status_roundLimitReached",
+    MATCH_LIMIT_REACHED: "status_matchLimitReached"
 };
 class StatusView extends (0, _viewDefault.default) {
     _messageElement = null;
