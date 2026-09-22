@@ -20,7 +20,7 @@ describe("MenuView", () => {
 
     view = new MenuView();
 
-    view.render({ isMatchActive: false });
+    view.render({ isMatchActive: false, hasDataToReset: true });
   });
 
   describe("Rendering Logic", () => {
@@ -31,8 +31,14 @@ describe("MenuView", () => {
       expect(getStartBtn().textContent?.trim()).toBe("Continue Match");
     });
 
-    test("always ensures reset button is present", () => {
+    test("renders reset button when there is data to reset", () => {
       expect(getResetBtn()).toBeTruthy();
+    });
+
+    test("does not render reset button when there is no data to reset", () => {
+      view.updateMenu({ hasDataToReset: false });
+
+      expect(document.getElementById("reset-game-state")).toBeNull();
     });
   });
 

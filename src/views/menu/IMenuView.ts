@@ -1,5 +1,6 @@
 export interface MenuViewData {
   isMatchActive: boolean;
+  hasDataToReset: boolean;
 }
 
 export interface IMenuView {

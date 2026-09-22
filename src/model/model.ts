@@ -157,7 +157,32 @@ export class Model {
     return this.gameStorage.getMatch() !== null;
   }
 
+  private hasNonZeroValue(values: Record<string, number>): boolean {
+    return Object.values(values).some((value) => value !== 0);
+  }
+
+  private hasResettableMatchData(): boolean {
+    return (
+      this.state.globalMatchNumber !== null || this.state.currentMatch !== null
+    );
+  }
+
+  hasDataToReset(): boolean {
+    return (
+      this.hasNonZeroValue(this.state.scores) ||
+      this.hasNonZeroValue(this.state.taras) ||
+      Object.values(this.state.mostCommonMove).some(
+        (move) => move !== null,
+      ) ||
+      Object.values(this.state.moveCounts).some((moveCounts) =>
+        this.hasNonZeroValue(moveCounts),
+      ) ||
+      this.hasResettableMatchData()
+    );
+  }
+
   resetGame(): void {
+    // Keep these categories aligned with hasDataToReset and its reset contract test.
     this.resetScores();
     this.resetTaras();
     this.resetMostCommonMoves();

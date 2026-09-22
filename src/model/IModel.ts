@@ -54,6 +54,7 @@ export interface IModel {
   // Health
   getHealth(participant: Participant): Health;
 
-  // Reset all match data
+  // Reset all persisted game data
+  hasDataToReset(): boolean;
   resetGame(): void;
 }

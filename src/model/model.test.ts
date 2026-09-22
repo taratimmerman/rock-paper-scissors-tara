@@ -490,6 +490,19 @@ describe("Model", () => {
   });
 
   describe("Reset", () => {
+    test("reports no resettable data for a fresh model", () => {
+      mockGameStorage.getGlobalMatchNumber.mockReturnValue(null);
+      const freshModel = new Model(mockGameStorage);
+
+      expect(freshModel.hasDataToReset()).toBe(false);
+    });
+
+    test("reports resettable data when game state has been populated", () => {
+      model.setPlayerScore(1);
+
+      expect(model.hasDataToReset()).toBe(true);
+    });
+
     test("resetGame should completely wipe all game state, scores, and restore match defaults", () => {
       // 1. Arrange: Populate the model and localStorage with dirty session data
       model.setPlayerScore(3);
@@ -514,6 +527,8 @@ describe("Model", () => {
       } as Match;
       model.setMatch(dirtyMatch);
       model.setMatchNumber(5);
+
+      expect(model.hasDataToReset()).toBe(true);
 
       // 2. Act: Call the single public entry point
       model.resetGame();
@@ -542,6 +557,7 @@ describe("Model", () => {
       expect(localStorage.getItem("computerMoveCounts")).toBeNull();
       expect(localStorage.getItem("globalMatchNumber")).toBeNull();
       expect(localStorage.getItem("currentMatch")).toBeNull();
+      expect(model.hasDataToReset()).toBe(false);
     });
   });
 
