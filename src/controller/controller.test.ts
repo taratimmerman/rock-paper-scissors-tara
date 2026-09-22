@@ -41,9 +41,11 @@ describe("Controller", () => {
       getComputerMostCommonMove: jest.fn().mockReturnValue(MOVES.PAPER),
       getHealth: jest.fn().mockReturnValue(100),
       isDoubleKO: jest.fn().mockReturnValue(false),
-      handleMatchWin: jest.fn().mockReturnValue("player"),
+      incrementWinnerScore: jest.fn(),
       incrementMatchNumber: jest.fn(),
       increaseRoundNumber: jest.fn(),
+      forceMatchWinner: jest.fn().mockReturnValue("player"),
+      getMatchWinner: jest.fn().mockReturnValue("player"),
       resetMoves: jest.fn(),
       registerPlayerMove: jest.fn(),
       registerComputerMove: jest.fn(),
@@ -113,12 +115,12 @@ describe("Controller", () => {
   describe("endRound", () => {
     test("updates scores and sets 'Start New Match' button when match is over", () => {
       mockModel.isMatchOver.mockReturnValue(true);
-      mockModel.handleMatchWin.mockReturnValue("player");
 
       // @ts-ignore
       controller.endRound();
 
-      expect(mockModel.handleMatchWin).toHaveBeenCalled();
+      expect(mockModel.getMatchWinner).toHaveBeenCalled();
+      expect(mockModel.incrementWinnerScore).toHaveBeenCalledWith("player");
 
       expect(mockViews.statsView.update).toHaveBeenCalled();
 
@@ -144,10 +146,34 @@ describe("Controller", () => {
       jest.useRealTimers();
     });
 
+    test("forces a match winner when the round limit is reached", () => {
+      mockModel.getRoundNumber.mockReturnValue(99);
+      mockModel.isMatchOver.mockReturnValue(false);
+
+      // @ts-ignore
+      controller.endRound();
+
+      expect(mockModel.forceMatchWinner).toHaveBeenCalled();
+      expect(mockModel.incrementWinnerScore).toHaveBeenCalledWith("player");
+      expect(mockModel.increaseRoundNumber).not.toHaveBeenCalled();
+    });
+
+    test("does not increment a score when the forced match result is a draw", () => {
+      mockModel.getRoundNumber.mockReturnValue(99);
+      mockModel.isMatchOver.mockReturnValue(false);
+      mockModel.forceMatchWinner.mockReturnValue("draw");
+
+      // @ts-ignore
+      controller.endRound();
+
+      expect(mockModel.forceMatchWinner).toHaveBeenCalled();
+      expect(mockModel.incrementWinnerScore).not.toHaveBeenCalled();
+      expect(mockModel.setMatch).toHaveBeenCalledWith(null);
+    });
+
     test("announces game over and resets the model after the final match", async () => {
       mockModel.isMatchOver.mockReturnValue(true);
       mockModel.getMatchNumber.mockReturnValue(99);
-      mockModel.handleMatchWin.mockReturnValue("player");
 
       await (
         controller as unknown as { endRound: () => Promise<void> }

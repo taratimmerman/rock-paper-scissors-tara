@@ -315,6 +315,44 @@ test("Match ends with a double KO", async ({ gamePage, landingPage, seed }) => {
   });
 });
 
+test("Match resolves by health when the round limit is reached", async ({
+  gamePage,
+  landingPage,
+  seed,
+}) => {
+  const initialStats: Stats = {
+    availableTaraMoves: 0,
+    commonMove: Move.PAPER,
+    health: 100,
+    wins: 0,
+  };
+  const initialProgress: Progress = { match: 1, round: 99 };
+
+  await seed({
+    progress: initialProgress,
+    playerStats: initialStats,
+    computerStats: { ...initialStats, health: 50 },
+  });
+  await landingPage.continueMatch();
+
+  await gamePage.setComputerMove(Move.PAPER);
+  await gamePage.choosePlayerAction(Move.PAPER);
+
+  await test.step("Verify the higher-health participant wins the match", async () => {
+    await gamePage.verifyAnnouncement(/player won the match/i);
+    await gamePage.verifyProgress(initialProgress);
+    await gamePage.verifyStats(Participant.PLAYER, {
+      ...initialStats,
+      health: 90,
+      wins: 1,
+    });
+    await gamePage.verifyStats(Participant.COMPUTER, {
+      ...initialStats,
+      health: 40,
+    });
+  });
+});
+
 interface GameOutcomeTestCase {
   description: string;
   playerHealth: number;

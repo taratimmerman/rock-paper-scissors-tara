@@ -92,12 +92,15 @@ export class Controller {
     this.model.resetGame();
   }
 
-  private handleMatchOver(): void {
-    const result = this.model.handleMatchWin();
+  private handleMatchOver(result: Participant | "draw"): void {
     const matchNumber = this.model.getMatchNumber();
     const isDoubleKO = this.model.isDoubleKO();
 
     this.arenaView.playMatchResult(result as Participant, isDoubleKO);
+
+    if (result !== "draw") {
+      this.model.incrementWinnerScore(result as Participant);
+    }
 
     this.updateStatsView();
     this.updateControlsView();
@@ -116,11 +119,20 @@ export class Controller {
 
     // --- MATCH END ---
     if (matchOver) {
-      this.handleMatchOver();
+      const result = this.model.getMatchWinner();
+      this.handleMatchOver(result);
       return;
     }
 
-    // --- ROUND CONTINUES ---
+    // --- MAYBE FORCE MATCH END ---
+    const roundNumber = this.model.getRoundNumber();
+    if (roundNumber >= MAX_PROGRESS) {
+      const result = this.model.forceMatchWinner();
+      this.handleMatchOver(result);
+      return;
+    }
+
+    // --- NEXT ROUND ---
     this.model.increaseRoundNumber();
     this.updateStatsView();
 

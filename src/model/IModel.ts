@@ -40,12 +40,14 @@ export interface IModel {
   isDoubleKO(): boolean;
   isMatchActive(): boolean;
   isMatchOver(): boolean;
-  handleMatchWin(): Participant;
+  incrementWinnerScore(winner: Participant): void;
   incrementMatchNumber(): void;
   setMatchNumber(matchNumber: number | null): void;
   increaseRoundNumber(): void;
+  forceMatchWinner(): Participant | "draw";
   getRoundNumber(): number;
   getMatchNumber(): number;
+  getMatchWinner(): Participant | "draw";
   setMatch(match: Match | null): void;
   setDefaultMatchData(): void;
 
