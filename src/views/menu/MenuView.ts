@@ -17,7 +17,11 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
         <h1 id="game-title" class="title-large">Rock Paper Scissors Tara</h1>
         <div class="menu-controls">
           <button id="start" class="btn-primary">${startText}</button>
-          <button id="reset-game-state" class="btn-secondary">Reset Game State</button>
+          ${
+            this._data.hasDataToReset
+              ? '<button id="reset-game-state" class="btn-secondary">Reset Game State</button>'
+              : ""
+          }
         </div>
       </div>
     `;
@@ -33,9 +37,11 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
     this._ensureParentElement();
     super.render(data);
 
-    // Cache the elements immediately after they are injected into the DOM
+    // The reset control is conditional, so only the start control is required.
     this._startBtn = this._getElement<HTMLButtonElement>("start");
-    this._resetBtn = this._getElement<HTMLButtonElement>("reset-game-state");
+    this._resetBtn = document.getElementById(
+      "reset-game-state",
+    ) as HTMLButtonElement | undefined;
   }
 
   // ===== Event Bindings (Much more efficient now) =====
@@ -61,10 +67,12 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
 
   public updateMenu(data: Partial<MenuViewData>): void {
     this._data = { ...this._data, ...data };
-    this.update(this._data);
+    super.render(this._data);
 
-    // After an update, re-cache in case elements were replaced
+    // Re-render because conditional controls may need to be added or removed.
     this._startBtn = this._getElement<HTMLButtonElement>("start");
-    this._resetBtn = this._getElement<HTMLButtonElement>("reset-game-state");
+    this._resetBtn = document.getElementById(
+      "reset-game-state",
+    ) as HTMLButtonElement | undefined;
   }
 }

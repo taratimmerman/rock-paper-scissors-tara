@@ -14,6 +14,7 @@ test("loads default match UI with no saved game state", async ({
 }) => {
   await test.step("Start match from landing page", async () => {
     await landingPage.verifyHeadingVisible();
+    await landingPage.verifyResetButtonVisible(false);
     await landingPage.startMatch();
     await landingPage.verifyHeadingVisible(false);
   });
@@ -122,7 +123,7 @@ test("resets an active game to default state", async ({
 
   await test.step("Verify game defaults are restored", async () => {
     await landingPage.verifyContinueButtonVisible(false);
-    await landingPage.verifyResetButtonVisible();
+    await landingPage.verifyResetButtonVisible(false);
 
     await landingPage.startMatch();
 

@@ -159,7 +159,10 @@ export class Controller {
   async resetGameState(): Promise<void> {
     this.model.resetGame();
 
-    this.menuView.updateMenu({ isMatchActive: false });
+    this.menuView.updateMenu({
+      isMatchActive: false,
+      hasDataToReset: this.model.hasDataToReset(),
+    });
     this.menuView.bindStartMatch(() => this.startGame());
     this.menuView.bindResetGame(() => this.resetGameState());
 
@@ -218,7 +221,10 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
-    this.menuView.render({ isMatchActive });
+    this.menuView.render({
+      isMatchActive,
+      hasDataToReset: this.model.hasDataToReset(),
+    });
 
     this.arenaView.render({ phase: "waiting" });
     this.statusView.render({ message: "" });

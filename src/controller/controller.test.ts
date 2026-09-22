@@ -54,6 +54,7 @@ describe("Controller", () => {
       doesMoveBeat: jest.fn().mockReturnValue(true),
       setMatch: jest.fn(),
       isMatchActive: jest.fn().mockReturnValue(false),
+      hasDataToReset: jest.fn().mockReturnValue(true),
       determineGameOutcome: jest.fn().mockReturnValue("gameWin"),
       resetGame: jest.fn(),
     } as any;
