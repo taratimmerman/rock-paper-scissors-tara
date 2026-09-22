@@ -845,7 +845,17 @@ class Model {
     isMatchActive() {
         return this.gameStorage.getMatch() !== null;
     }
+    hasNonZeroValue(values) {
+        return Object.values(values).some((value)=>value !== 0);
+    }
+    hasResettableMatchData() {
+        return this.state.globalMatchNumber !== null || this.state.currentMatch !== null;
+    }
+    hasDataToReset() {
+        return this.hasNonZeroValue(this.state.scores) || this.hasNonZeroValue(this.state.taras) || Object.values(this.state.mostCommonMove).some((move)=>move !== null) || Object.values(this.state.moveCounts).some((moveCounts)=>this.hasNonZeroValue(moveCounts)) || this.hasResettableMatchData();
+    }
     resetGame() {
+        // Keep these categories aligned with hasDataToReset and its reset contract test.
         this.resetScores();
         this.resetTaras();
         this.resetMostCommonMoves();
@@ -1687,7 +1697,8 @@ class Controller {
     async resetGameState() {
         this.model.resetGame();
         this.menuView.updateMenu({
-            isMatchActive: false
+            isMatchActive: false,
+            hasDataToReset: this.model.hasDataToReset()
         });
         this.menuView.bindStartMatch(()=>this.startGame());
         this.menuView.bindResetGame(()=>this.resetGameState());
@@ -1730,7 +1741,8 @@ class Controller {
     async initialize() {
         const isMatchActive = this.model.isMatchActive();
         this.menuView.render({
-            isMatchActive
+            isMatchActive,
+            hasDataToReset: this.model.hasDataToReset()
         });
         this.arenaView.render({
             phase: "waiting"
@@ -2315,7 +2327,7 @@ class MenuView extends (0, _viewDefault.default) {
         <h1 id="game-title" class="title-large">Rock Paper Scissors Tara</h1>
         <div class="menu-controls">
           <button id="start" class="btn-primary">${startText}</button>
-          <button id="reset-game-state" class="btn-secondary">Reset Game State</button>
+          ${this._data.hasDataToReset ? '<button id="reset-game-state" class="btn-secondary">Reset Game State</button>' : ""}
         </div>
       </div>
     `;
@@ -2326,9 +2338,9 @@ class MenuView extends (0, _viewDefault.default) {
     render(data) {
         this._ensureParentElement();
         super.render(data);
-        // Cache the elements immediately after they are injected into the DOM
+        // The reset control is conditional, so only the start control is required.
         this._startBtn = this._getElement("start");
-        this._resetBtn = this._getElement("reset-game-state");
+        this._resetBtn = document.getElementById("reset-game-state");
     }
     // ===== Event Bindings (Much more efficient now) =====
     bindStartMatch(handler) {
@@ -2352,10 +2364,10 @@ class MenuView extends (0, _viewDefault.default) {
             ...this._data,
             ...data
         };
-        this.update(this._data);
-        // After an update, re-cache in case elements were replaced
+        super.render(this._data);
+        // Re-render because conditional controls may need to be added or removed.
         this._startBtn = this._getElement("start");
-        this._resetBtn = this._getElement("reset-game-state");
+        this._resetBtn = document.getElementById("reset-game-state");
     }
 }
 exports.default = MenuView;
