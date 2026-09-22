@@ -46,6 +46,24 @@ describe("StatusView Interpretation Logic", () => {
       expect(message).toBe("Choose your attack!");
     });
 
+    it("translates ROUND_LIMIT_REACHED event to an explanatory message", () => {
+      const message = (view as any).translateEvent({
+        type: "ROUND_LIMIT_REACHED",
+      });
+
+      expect(message).toBe(
+        "Round limit reached. Match resolved by remaining health.",
+      );
+    });
+
+    it("translates MATCH_LIMIT_REACHED event to a game-over message", () => {
+      const message = (view as any).translateEvent({
+        type: "MATCH_LIMIT_REACHED",
+      });
+
+      expect(message).toBe("Match limit reached. Game over.");
+    });
+
     it("returns raw message for CUSTOM event without translation", () => {
       const customMessage = "This is a custom message";
       const event: StatusViewEvent = {
@@ -82,6 +100,8 @@ describe("StatusView Interpretation Logic", () => {
         { type: "LOCK_IN" },
         { type: "PREPARE" },
         { type: "CHOOSE" },
+        { type: "ROUND_LIMIT_REACHED" },
+        { type: "MATCH_LIMIT_REACHED" },
         { type: "CUSTOM", message: "Test" },
       ];
 

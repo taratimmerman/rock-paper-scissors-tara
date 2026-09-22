@@ -42,10 +42,10 @@ export class Controller {
     this.statusView = views.statusView;
   }
 
-  private updateControlsView(): void {
+  private updateControlsView(isMatchOver = this.model.isMatchOver()): void {
     this.controlsView.render({
       playerMove: this.model.getPlayerMove(),
-      isMatchOver: this.model.isMatchOver(),
+      isMatchOver,
       taraIsEnabled: this.model.taraIsEnabled(),
       moves: PLAYER_MOVES_DATA,
     });
@@ -92,17 +92,21 @@ export class Controller {
     this.model.resetGame();
   }
 
-  private handleMatchOver(): void {
-    const result = this.model.handleMatchWin();
+  private handleMatchOver(result: Participant | "draw"): void {
     const matchNumber = this.model.getMatchNumber();
     const isDoubleKO = this.model.isDoubleKO();
 
     this.arenaView.playMatchResult(result as Participant, isDoubleKO);
 
+    if (result !== "draw") {
+      this.model.incrementWinnerScore(result as Participant);
+    }
+
     this.updateStatsView();
-    this.updateControlsView();
+    this.updateControlsView(true);
 
     if (matchNumber >= MAX_PROGRESS) {
+      this.statusView.handleEvent({ type: "MATCH_LIMIT_REACHED" });
       this.handleGameOver();
       return;
     }
@@ -116,11 +120,21 @@ export class Controller {
 
     // --- MATCH END ---
     if (matchOver) {
-      this.handleMatchOver();
+      const result = this.model.getMatchWinner();
+      this.handleMatchOver(result);
       return;
     }
 
-    // --- ROUND CONTINUES ---
+    // --- MAYBE FORCE MATCH END ---
+    const roundNumber = this.model.getRoundNumber();
+    if (roundNumber >= MAX_PROGRESS) {
+      this.statusView.handleEvent({ type: "ROUND_LIMIT_REACHED" });
+      const result = this.model.forceMatchWinner();
+      this.handleMatchOver(result);
+      return;
+    }
+
+    // --- NEXT ROUND ---
     this.model.increaseRoundNumber();
     this.updateStatsView();
 

@@ -19,6 +19,7 @@ export type ArenaAnnouncementEvent =
   | { type: "ROUND_WIN"; payload: { winner: Participant } }
   | { type: "TIE" }
   | { type: "MATCH_DOUBLE_KO" }
+  | { type: "MATCH_DRAW" }
   | { type: "MATCH_WIN"; payload: { winner: Participant } }
   | { type: "GAME_OVER"; outcome: GameOutcome }
   | { type: "CUSTOM"; message: string };
@@ -62,5 +63,5 @@ export interface IArenaView {
    * @param winner - The match winner (player or computer)
    * @param isDoubleKO - Whether both participants were double KO'd
    */
-  playMatchResult(winner: Participant, isDoubleKO: boolean): void;
+  playMatchResult(winner: Participant | "draw", isDoubleKO: boolean): void;
 }

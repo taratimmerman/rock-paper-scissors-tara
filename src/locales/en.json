@@ -4,12 +4,15 @@
   "arena_gameLose": "GAME OVER! YOU LOSE!",
   "arena_gameWin": "GAME OVER! YOU WIN!",
   "arena_matchDoubleKo": "DOUBLE KO! NOBODY WINS!",
+  "arena_matchDraw": "IT'S A DRAW! NOBODY WINS!",
   "arena_matchWinner": "{{winner}} WON THE MATCH!",
   "arena_roundWin": "{{winner}} LANDS A BLOW!",
   "arena_tie": "IT'S A TIE!",
   "status_choose": "Choose your attack!",
   "status_lockIn": "Locking in move...",
+  "status_matchLimitReached": "Match limit reached. Game over.",
   "status_prepare": "Prepare your next move...",
+  "status_roundLimitReached": "Round limit reached. Match resolved by remaining health.",
   "status_ready": "Get ready...",
   "status_roundResult": "You played {{playerMove}}. Computer played {{computerMove}}."
 }

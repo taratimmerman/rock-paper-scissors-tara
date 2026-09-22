@@ -430,17 +430,29 @@ export class Model {
 
   // ===== Match Methods =====
 
-  handleMatchWin(): Participant | "draw" {
-    const result = this.getMatchWinner();
-    if (result !== "draw") {
-      this.setScore(result, this.getScore(result) + 1);
+  forceMatchWinner(): Participant | "draw" {
+    const playerHealth = this.getHealth(PARTICIPANTS.PLAYER);
+    const computerHealth = this.getHealth(PARTICIPANTS.COMPUTER);
+
+    if (playerHealth === null || computerHealth === null) {
+      throw new Error("Cannot force match win without valid health values.");
     }
-    return result;
+
+    if (playerHealth > computerHealth) {
+      return PARTICIPANTS.PLAYER;
+    } else if (computerHealth > playerHealth) {
+      return PARTICIPANTS.COMPUTER;
+    } else {
+      return "draw";
+    }
+  }
+
+  incrementWinnerScore(winner: Participant): void {
+    this.setScore(winner, this.getScore(winner) + 1);
   }
 
   isDoubleKO(): boolean {
     return (
-      this.isMatchOver() &&
       this.getHealth(PARTICIPANTS.PLAYER) === 0 &&
       this.getHealth(PARTICIPANTS.COMPUTER) === 0
     );

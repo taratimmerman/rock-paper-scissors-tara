@@ -7,6 +7,8 @@ export type StatusViewEvent =
   | { type: "LOCK_IN" }
   | { type: "PREPARE" }
   | { type: "CHOOSE" }
+  | { type: "ROUND_LIMIT_REACHED" }
+  | { type: "MATCH_LIMIT_REACHED" }
   | { type: "CUSTOM"; message: string };
 
 export interface StatusViewData {

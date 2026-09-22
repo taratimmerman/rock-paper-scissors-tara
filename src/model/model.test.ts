@@ -1050,8 +1050,8 @@ describe("Model", () => {
     });
   });
 
-  describe("handleMatchWin", () => {
-    test("should increment the player's score and return PLAYER if player wins the match", () => {
+  describe("incrementWinnerScore", () => {
+    test("should increment the player's score when the player wins the match", () => {
       // Setup the model state to make the Player the match winner
       model.setMatch({ ...DEFAULT_MATCH });
       model.setPlayerMove(MOVES.ROCK);
@@ -1068,14 +1068,15 @@ describe("Model", () => {
       const initialPlayerScore = model.getPlayerScore();
       const initialComputerScore = model.getComputerScore();
 
-      const winner = model.handleMatchWin(); // Call the method being tested
+      const winner = model.getMatchWinner();
+      model.incrementWinnerScore(winner as Participant);
 
       expect(model.getPlayerScore()).toBe(initialPlayerScore + 1);
       expect(model.getComputerScore()).toBe(initialComputerScore);
       expect(winner).toBe(PARTICIPANTS.PLAYER);
     });
 
-    test("should increment the computer's score and return COMPUTER if computer wins the match", () => {
+    test("should increment the computer's score when the computer wins the match", () => {
       // Setup the model state to make the Computer the match winner
       model.setMatch({ ...DEFAULT_MATCH });
       model.setComputerTaraCount(1);
@@ -1094,11 +1095,44 @@ describe("Model", () => {
       const initialPlayerScore = model.getPlayerScore();
       const initialComputerScore = model.getComputerScore();
 
-      const winner = model.handleMatchWin(); // Call the method being tested
+      const winner = model.getMatchWinner();
+      model.incrementWinnerScore(winner as Participant);
 
       expect(model.getPlayerScore()).toBe(initialPlayerScore);
       expect(model.getComputerScore()).toBe(initialComputerScore + 1);
       expect(winner).toBe(PARTICIPANTS.COMPUTER);
+    });
+  });
+
+  describe("forceMatchWinner", () => {
+    test("returns the player when the player has more health", () => {
+      model.setMatch({
+        ...DEFAULT_MATCH,
+        playerHealth: 80,
+        computerHealth: 70,
+      });
+
+      expect(model.forceMatchWinner()).toBe(PARTICIPANTS.PLAYER);
+    });
+
+    test("returns the computer when the computer has more health", () => {
+      model.setMatch({
+        ...DEFAULT_MATCH,
+        playerHealth: 70,
+        computerHealth: 80,
+      });
+
+      expect(model.forceMatchWinner()).toBe(PARTICIPANTS.COMPUTER);
+    });
+
+    test("returns a draw when both participants have equal health", () => {
+      model.setMatch({
+        ...DEFAULT_MATCH,
+        playerHealth: 70,
+        computerHealth: 70,
+      });
+
+      expect(model.forceMatchWinner()).toBe("draw");
     });
   });
 
