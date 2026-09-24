@@ -47,6 +47,9 @@ export default class ControlsView
           <button id="play-again" class="btn-primary">
             Start New Match
           </button>
+          <button id="go-home" class="btn-secondary">
+            Go to Homepage
+          </button>
         </div>`;
     }
 
@@ -100,6 +103,13 @@ export default class ControlsView
   public bindStartNewMatch(handler: () => void): void {
     this._parentElement.addEventListener("click", (e) => {
       const btn = (e.target as HTMLElement).closest("#play-again");
+      if (btn) handler();
+    });
+  }
+
+  public bindGoHome(handler: () => void): void {
+    this._parentElement.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest("#go-home");
       if (btn) handler();
     });
   }
