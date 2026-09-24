@@ -2220,7 +2220,8 @@ class ControlsView extends (0, _viewDefault.default) {
         if (cards.length === 0) return;
         this._parentElement.classList.toggle("interaction-locked", !faceUp);
         cards.forEach((card)=>{
-            faceUp ? card.classList.add("is-flipped") : card.classList.remove("is-flipped");
+            if (faceUp) card.classList.add("is-flipped");
+            else card.classList.remove("is-flipped");
         });
         await this._waitForAnimation(cards[0]);
     }
