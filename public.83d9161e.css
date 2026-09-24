@@ -676,6 +676,23 @@ button:focus-visible {
   display: flex;
 }
 
+#progression-zone {
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  width: calc(90% - 2rem);
+}
+
+#progression-zone button {
+  width: 100%;
+}
+
+@media (width >= 768px) {
+  #progression-zone {
+    width: calc(400px - 4rem);
+  }
+}
+
 .stance-rock {
   animation: .5s cubic-bezier(.36, 0, .66, -.56) forwards rock-slam;
 }

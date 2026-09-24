@@ -1759,6 +1759,7 @@ class Controller {
         this.menuView.bindResetGame(()=>this.resetGameState());
         this.controlsView.bindPlayerMove((move)=>this.handlePlayerMove(move));
         this.controlsView.bindStartNewMatch(()=>this.startGame());
+        this.controlsView.bindGoHome(()=>window.location.reload());
     }
 }
 
@@ -2230,6 +2231,9 @@ class ControlsView extends (0, _viewDefault.default) {
           <button id="play-again" class="btn-primary">
             Start New Match
           </button>
+          <button id="go-home" class="btn-secondary">
+            Go to Homepage
+          </button>
         </div>`;
         return `
       <div id="choices" role="group" aria-label="Select your move">
@@ -2272,6 +2276,12 @@ class ControlsView extends (0, _viewDefault.default) {
      */ bindStartNewMatch(handler) {
         this._parentElement.addEventListener("click", (e)=>{
             const btn = e.target.closest("#play-again");
+            if (btn) handler();
+        });
+    }
+    bindGoHome(handler) {
+        this._parentElement.addEventListener("click", (e)=>{
+            const btn = e.target.closest("#go-home");
             if (btn) handler();
         });
     }
