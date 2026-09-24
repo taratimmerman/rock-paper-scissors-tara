@@ -30,9 +30,11 @@ export default class ControlsView
     this._parentElement.classList.toggle("interaction-locked", !faceUp);
 
     cards.forEach((card) => {
-      faceUp
-        ? card.classList.add("is-flipped")
-        : card.classList.remove("is-flipped");
+      if (faceUp) {
+        card.classList.add("is-flipped");
+      } else {
+        card.classList.remove("is-flipped");
+      }
     });
 
     await this._waitForAnimation(cards[0] as HTMLElement);

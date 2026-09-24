@@ -9,6 +9,19 @@
  */
 import ArenaView from "./ArenaView";
 import { RoundResult } from "../../utils/dataObjectUtils";
+import { ArenaAnnouncementEvent } from "./IArenaView";
+import { Participant } from "../../utils/dataObjectUtils";
+
+type ArenaInterpretationView = {
+  _waitForAnimation: jest.Mock;
+  determineRoundAnnouncement: (
+    roundResult: RoundResult,
+  ) => ArenaAnnouncementEvent;
+  determineMatchAnnouncement: (
+    winner: Participant | "draw",
+    isDoubleKO: boolean,
+  ) => ArenaAnnouncementEvent;
+};
 
 describe("ArenaView Interpretation Logic", () => {
   let view: ArenaView;
@@ -16,7 +29,9 @@ describe("ArenaView Interpretation Logic", () => {
   beforeEach(() => {
     document.body.innerHTML = `<div id="arena"></div>`;
     view = new ArenaView();
-    (view as any)._waitForAnimation = jest.fn().mockResolvedValue(undefined);
+    (view as unknown as ArenaInterpretationView)._waitForAnimation = jest
+      .fn()
+      .mockResolvedValue(undefined);
   });
 
   describe("determineRoundAnnouncement", () => {
@@ -27,7 +42,9 @@ describe("ArenaView Interpretation Logic", () => {
         damageCalculated: 25,
       };
 
-      const event = (view as any).determineRoundAnnouncement(roundResult);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineRoundAnnouncement(roundResult);
 
       expect(event.type).toBe("DOUBLE_KO");
     });
@@ -39,10 +56,14 @@ describe("ArenaView Interpretation Logic", () => {
         damageCalculated: 30,
       };
 
-      const event = (view as any).determineRoundAnnouncement(roundResult);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineRoundAnnouncement(roundResult);
 
       expect(event.type).toBe("ROUND_WIN");
-      expect((event as any).payload.winner).toBe("player");
+      expect(
+        (event as { payload: { winner: Participant } }).payload.winner,
+      ).toBe("player");
     });
 
     it("returns ROUND_WIN event when computer wins the round", () => {
@@ -52,10 +73,14 @@ describe("ArenaView Interpretation Logic", () => {
         damageCalculated: 30,
       };
 
-      const event = (view as any).determineRoundAnnouncement(roundResult);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineRoundAnnouncement(roundResult);
 
       expect(event.type).toBe("ROUND_WIN");
-      expect((event as any).payload.winner).toBe("computer");
+      expect(
+        (event as { payload: { winner: Participant } }).payload.winner,
+      ).toBe("computer");
     });
 
     it("returns TIE event when round is a tie (non-double-KO)", () => {
@@ -65,7 +90,9 @@ describe("ArenaView Interpretation Logic", () => {
         damageCalculated: 0,
       };
 
-      const event = (view as any).determineRoundAnnouncement(roundResult);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineRoundAnnouncement(roundResult);
 
       expect(event.type).toBe("TIE");
     });
@@ -78,7 +105,9 @@ describe("ArenaView Interpretation Logic", () => {
         damageCalculated: 25,
       };
 
-      const event = (view as any).determineRoundAnnouncement(roundResult);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineRoundAnnouncement(roundResult);
 
       // Should emit DOUBLE_KO, not TIE
       expect(event.type).toBe("DOUBLE_KO");
@@ -87,37 +116,51 @@ describe("ArenaView Interpretation Logic", () => {
 
   describe("determineMatchAnnouncement", () => {
     it("returns MATCH_DOUBLE_KO when isDoubleKO is true", () => {
-      const event = (view as any).determineMatchAnnouncement("player", true);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineMatchAnnouncement("player", true);
 
       expect(event.type).toBe("MATCH_DOUBLE_KO");
     });
 
     it("returns MATCH_WIN with winner=player when player wins", () => {
-      const event = (view as any).determineMatchAnnouncement("player", false);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineMatchAnnouncement("player", false);
 
       expect(event.type).toBe("MATCH_WIN");
-      expect((event as any).payload.winner).toBe("player");
+      expect(
+        (event as { payload: { winner: Participant } }).payload.winner,
+      ).toBe("player");
     });
 
     it("returns MATCH_WIN with winner=computer when computer wins", () => {
-      const event = (view as any).determineMatchAnnouncement("computer", false);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineMatchAnnouncement("computer", false);
 
       expect(event.type).toBe("MATCH_WIN");
-      expect((event as any).payload.winner).toBe("computer");
+      expect(
+        (event as { payload: { winner: Participant } }).payload.winner,
+      ).toBe("computer");
     });
 
     it("returns MATCH_DRAW when health forces a draw", () => {
-      const event = (view as any).determineMatchAnnouncement("draw", false);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineMatchAnnouncement("draw", false);
 
       expect(event.type).toBe("MATCH_DRAW");
     });
 
     it("ignores winner parameter when isDoubleKO is true", () => {
       // Even though player is passed, should emit MATCH_DOUBLE_KO
-      const event = (view as any).determineMatchAnnouncement("player", true);
+      const event = (
+        view as unknown as ArenaInterpretationView
+      ).determineMatchAnnouncement("player", true);
 
       expect(event.type).toBe("MATCH_DOUBLE_KO");
-      expect((event as any).payload).toBeUndefined();
+      expect((event as { payload?: unknown }).payload).toBeUndefined();
     });
   });
 

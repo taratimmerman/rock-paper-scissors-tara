@@ -44,6 +44,8 @@ describe("StatusView", () => {
   it("should maintain the message in internal state", () => {
     view.setMessage(status);
 
-    expect((view as any)._data.message).toBe(status);
+    expect(
+      (view as unknown as { _data: { message: string } })._data.message,
+    ).toBe(status);
   });
 });

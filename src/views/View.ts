@@ -1,4 +1,4 @@
-export default abstract class View<T = any> {
+export default abstract class View<T = unknown> {
   protected _data!: T;
   protected _parentElement!: HTMLElement;
 

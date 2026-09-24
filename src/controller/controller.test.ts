@@ -57,7 +57,7 @@ describe("Controller", () => {
       hasDataToReset: jest.fn().mockReturnValue(true),
       determineGameOutcome: jest.fn().mockReturnValue("gameWin"),
       resetGame: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<IModel>;
 
     // 2. Setup Mock Views
     mockViews = {
@@ -69,7 +69,7 @@ describe("Controller", () => {
         setAnnouncement: jest.fn(),
         playRoundResult: jest.fn(),
         playMatchResult: jest.fn(),
-      } as any,
+      } as unknown as jest.Mocked<IArenaView>,
       controlsView: {
         render: jest.fn(),
         toggleVisibility: jest.fn(),
@@ -77,27 +77,29 @@ describe("Controller", () => {
         bindPlayerMove: jest.fn(),
         bindStartNewMatch: jest.fn(),
         bindGoHome: jest.fn(),
-      } as any,
-      gameView: { toggleVisibility: jest.fn() } as any,
+      } as unknown as jest.Mocked<IControlsView>,
+      gameView: {
+        toggleVisibility: jest.fn(),
+      } as unknown as jest.Mocked<IGameView>,
       menuView: {
         render: jest.fn(),
         toggleMenuVisibility: jest.fn(),
         updateMenu: jest.fn(),
         bindStartMatch: jest.fn(),
         bindResetGame: jest.fn(),
-      } as any,
+      } as unknown as jest.Mocked<IMenuView>,
       statsView: {
         hasData: false,
         render: jest.fn(),
         update: jest.fn(),
         toggleGameStatsVisibility: jest.fn(),
-      } as any,
+      } as unknown as jest.Mocked<IStatsView>,
       statusView: {
         render: jest.fn(),
         setMessage: jest.fn(),
         handleEvent: jest.fn(),
         announceRound: jest.fn(),
-      } as any,
+      } as unknown as jest.Mocked<IStatusView>,
     };
 
     controller = new Controller(mockModel, mockViews);
@@ -105,7 +107,7 @@ describe("Controller", () => {
 
   describe("startGame", () => {
     test("Initializes model and resets arena visuals", async () => {
-      // @ts-ignore - accessing private for testing
+      // @ts-expect-error - accessing private for testing
       await controller.startGame();
 
       expect(mockModel.setDefaultMatchData).toHaveBeenCalled();
@@ -118,7 +120,7 @@ describe("Controller", () => {
     test("updates scores and sets 'Start New Match' button when match is over", () => {
       mockModel.isMatchOver.mockReturnValue(true);
 
-      // @ts-ignore
+      // @ts-expect-error - accessing private for testing
       controller.endRound();
 
       expect(mockModel.getMatchWinner).toHaveBeenCalled();
@@ -138,7 +140,7 @@ describe("Controller", () => {
       jest.useFakeTimers();
       mockModel.isMatchOver.mockReturnValue(false);
 
-      // @ts-ignore
+      // @ts-expect-error - accessing private for testing
       controller.endRound();
 
       expect(mockModel.increaseRoundNumber).toHaveBeenCalled();
@@ -152,7 +154,7 @@ describe("Controller", () => {
       mockModel.getRoundNumber.mockReturnValue(99);
       mockModel.isMatchOver.mockReturnValue(false);
 
-      // @ts-ignore
+      // @ts-expect-error - accessing private for testing
       controller.endRound();
 
       expect(mockModel.forceMatchWinner).toHaveBeenCalled();
@@ -173,7 +175,7 @@ describe("Controller", () => {
       mockModel.isMatchOver.mockReturnValue(false);
       mockModel.forceMatchWinner.mockReturnValue("draw");
 
-      // @ts-ignore
+      // @ts-expect-error - accessing private for testing
       controller.endRound();
 
       expect(mockModel.forceMatchWinner).toHaveBeenCalled();
