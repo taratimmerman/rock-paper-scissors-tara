@@ -10,6 +10,10 @@
 import StatusView from "./StatusView";
 import { StatusViewEvent } from "./IStatusView";
 
+type StatusInterpretationView = {
+  translateEvent: (event: StatusViewEvent) => string;
+};
+
 describe("StatusView Interpretation Logic", () => {
   let view: StatusView;
 
@@ -23,31 +27,41 @@ describe("StatusView Interpretation Logic", () => {
 
   describe("translateEvent", () => {
     it("translates READY event to status_ready message", () => {
-      const message = (view as any).translateEvent({ type: "READY" });
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent({ type: "READY" });
 
       expect(message).toBe("Get ready...");
     });
 
     it("translates LOCK_IN event to status_lockIn message", () => {
-      const message = (view as any).translateEvent({ type: "LOCK_IN" });
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent({ type: "LOCK_IN" });
 
       expect(message).toBe("Locking in move...");
     });
 
     it("translates PREPARE event to status_prepare message", () => {
-      const message = (view as any).translateEvent({ type: "PREPARE" });
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent({ type: "PREPARE" });
 
       expect(message).toBe("Prepare your next move...");
     });
 
     it("translates CHOOSE event to status_choose message", () => {
-      const message = (view as any).translateEvent({ type: "CHOOSE" });
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent({ type: "CHOOSE" });
 
       expect(message).toBe("Choose your attack!");
     });
 
     it("translates ROUND_LIMIT_REACHED event to an explanatory message", () => {
-      const message = (view as any).translateEvent({
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent({
         type: "ROUND_LIMIT_REACHED",
       });
 
@@ -57,7 +71,9 @@ describe("StatusView Interpretation Logic", () => {
     });
 
     it("translates MATCH_LIMIT_REACHED event to a game-over message", () => {
-      const message = (view as any).translateEvent({
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent({
         type: "MATCH_LIMIT_REACHED",
       });
 
@@ -71,7 +87,9 @@ describe("StatusView Interpretation Logic", () => {
         message: customMessage,
       };
 
-      const message = (view as any).translateEvent(event);
+      const message = (
+        view as unknown as StatusInterpretationView
+      ).translateEvent(event);
 
       expect(message).toBe(customMessage);
     });
@@ -80,7 +98,9 @@ describe("StatusView Interpretation Logic", () => {
       const unknownEvent = { type: "UNKNOWN" };
 
       expect(() => {
-        (view as any).translateEvent(unknownEvent);
+        (view as unknown as StatusInterpretationView).translateEvent(
+          unknownEvent as StatusViewEvent,
+        );
       }).toThrow("Unhandled event type");
     });
   });

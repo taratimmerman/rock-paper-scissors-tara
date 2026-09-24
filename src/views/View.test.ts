@@ -40,20 +40,22 @@ describe("View Base Class", () => {
   test("_clear() should empty the parent element", () => {
     parentElement.innerHTML = "<span>Old Content</span>";
 
-    // We can cast to 'any' to test protected methods in isolation
-    (view as any)._clear();
+    // @ts-expect-error - accessing protected method for testing
+    view._clear();
 
     expect(parentElement.innerHTML).toBe("");
   });
 
   test("_getElement() should return an element or throw error", () => {
     // Test success
-    const el = (view as any)._getElement("container");
+    // @ts-expect-error - accessing protected method for testing
+    const el = view._getElement("container");
     expect(el).toBe(parentElement);
 
     // Test failure
-    expect(() => (view as any)._getElement("non-existent")).toThrow(
-      "Element #non-existent not found."
+    // @ts-expect-error - accessing protected method for testing
+    expect(() => view._getElement("non-existent")).toThrow(
+      "Element #non-existent not found.",
     );
   });
 
@@ -109,7 +111,7 @@ describe("View Base Class", () => {
     }
 
     const attrView = new AttributeView();
-    // @ts-ignore - reaching into protected for test
+    // @ts-expect-error - reaching into protected for test
     attrView._parentElement = parentElement;
 
     attrView.render({ active: false });

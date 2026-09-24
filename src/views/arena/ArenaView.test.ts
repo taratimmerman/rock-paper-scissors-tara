@@ -18,7 +18,8 @@ describe("ArenaView", () => {
 
     // Mock the animation helper to avoid hanging tests
     // If your View base class has a _waitForAnimation method, we mock it:
-    (view as any)._waitForAnimation = jest.fn().mockResolvedValue(undefined);
+    (view as unknown as { _waitForAnimation: jest.Mock })._waitForAnimation =
+      jest.fn().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -127,7 +128,7 @@ describe("ArenaView", () => {
     it("should handle invalid moves gracefully", () => {
       view.render({
         phase: "combat",
-        playerMoveId: "invalid-id" as any,
+        playerMoveId: "invalid-id" as Move,
         computerMoveId: "rock",
       });
 
@@ -255,19 +256,20 @@ describe("ArenaView", () => {
       let stanceAnimationsTriggered = false;
 
       // Track calls to _waitForAnimation during the sequence
-      (view as any)._waitForAnimation = jest.fn(function (
-        element: HTMLElement,
-      ) {
-        // If we're waiting for animation on a card with a stance class, animations are firing
-        if (
-          (element.id === "reveal-player" ||
-            element.id === "reveal-computer") &&
-          Array.from(element.classList).some((cls) => cls.startsWith("stance-"))
-        ) {
-          stanceAnimationsTriggered = true;
-        }
-        return Promise.resolve();
-      });
+      (view as unknown as { _waitForAnimation: jest.Mock })._waitForAnimation =
+        jest.fn(function (element: HTMLElement) {
+          // If we're waiting for animation on a card with a stance class, animations are firing
+          if (
+            (element.id === "reveal-player" ||
+              element.id === "reveal-computer") &&
+            Array.from(element.classList).some((cls) =>
+              cls.startsWith("stance-"),
+            )
+          ) {
+            stanceAnimationsTriggered = true;
+          }
+          return Promise.resolve();
+        });
 
       await view.playRoundSequence(data);
 
@@ -286,17 +288,16 @@ describe("ArenaView", () => {
 
       let arenaShakeTriggered = false;
 
-      (view as any)._waitForAnimation = jest.fn(function (
-        element: HTMLElement,
-      ) {
-        if (
-          element.id === "move-reveal" &&
-          element.classList.contains("arena-shake")
-        ) {
-          arenaShakeTriggered = true;
-        }
-        return Promise.resolve();
-      });
+      (view as unknown as { _waitForAnimation: jest.Mock })._waitForAnimation =
+        jest.fn(function (element: HTMLElement) {
+          if (
+            element.id === "move-reveal" &&
+            element.classList.contains("arena-shake")
+          ) {
+            arenaShakeTriggered = true;
+          }
+          return Promise.resolve();
+        });
 
       await view.playRoundSequence(data);
 
@@ -315,17 +316,16 @@ describe("ArenaView", () => {
 
       let arenaShakeTriggered = false;
 
-      (view as any)._waitForAnimation = jest.fn(function (
-        element: HTMLElement,
-      ) {
-        if (
-          element.id === "move-reveal" &&
-          element.classList.contains("arena-shake")
-        ) {
-          arenaShakeTriggered = true;
-        }
-        return Promise.resolve();
-      });
+      (view as unknown as { _waitForAnimation: jest.Mock })._waitForAnimation =
+        jest.fn(function (element: HTMLElement) {
+          if (
+            element.id === "move-reveal" &&
+            element.classList.contains("arena-shake")
+          ) {
+            arenaShakeTriggered = true;
+          }
+          return Promise.resolve();
+        });
 
       await view.playRoundSequence(data);
 
