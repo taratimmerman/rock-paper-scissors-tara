@@ -11,6 +11,7 @@ export class GamePage {
   readonly page: Page;
 
   readonly announcementContainer: Locator;
+  readonly homeButton: Locator;
   readonly newMatchButton: Locator;
   readonly progressContainer: Locator;
   readonly progressMatchHeading: Locator;
@@ -21,6 +22,7 @@ export class GamePage {
     this.page = page;
 
     this.announcementContainer = page.locator("#announcement-container");
+    this.homeButton = page.getByRole("button", { name: /^home$/i });
     this.newMatchButton = page.getByRole("button", {
       name: /start new match/i,
     });
@@ -85,6 +87,10 @@ export class GamePage {
     await this.newMatchButton.click();
   }
 
+  async goHome(): Promise<void> {
+    await this.homeButton.click();
+  }
+
   async setComputerMove(move: Move): Promise<void> {
     await this.page.evaluate((m) => {
       sessionStorage.setItem("__E2E_NEXT_COMPUTER_MOVE__", m);
@@ -105,6 +111,10 @@ export class GamePage {
 
   async verifyNewMatchButtonVisible(isVisible = true): Promise<void> {
     await expect(this.newMatchButton).toBeVisible({ visible: isVisible });
+  }
+
+  async verifyHomeButtonVisible(isVisible = true): Promise<void> {
+    await expect(this.homeButton).toBeVisible({ visible: isVisible });
   }
 
   async verifyPlayerButtonsVisible(isVisible = true): Promise<void> {

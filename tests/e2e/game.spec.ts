@@ -524,3 +524,30 @@ test("Starting a new match after game over resets progress to Match 1", async ({
     gamePage.verifyStatus("Choose your attack!"),
   ]);
 });
+
+test("Home returns to the landing menu after match over", async ({
+  gamePage,
+  landingPage,
+  seed,
+}) => {
+  await seed({
+    progress: { match: 99, round: 2 },
+    playerStats: { health: 100, wins: 0 },
+    computerStats: { health: 1, wins: 0 },
+  });
+  await landingPage.continueMatch();
+
+  await gamePage.setComputerMove(Move.ROCK);
+  await gamePage.choosePlayerAction(Move.PAPER);
+  await expect(gamePage.announcementContainer).toContainText(
+    "GAME OVER! YOU WIN!",
+    { timeout: 15000 },
+  );
+  await gamePage.verifyHomeButtonVisible();
+
+  await gamePage.goHome();
+
+  await landingPage.verifyHeadingVisible();
+  await landingPage.verifyStartButtonVisible();
+  await landingPage.verifyContinueButtonVisible(false);
+});

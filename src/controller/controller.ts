@@ -240,5 +240,6 @@ export class Controller {
     this.menuView.bindResetGame(() => this.resetGameState());
     this.controlsView.bindPlayerMove((move) => this.handlePlayerMove(move));
     this.controlsView.bindStartNewMatch(() => this.startGame());
+    this.controlsView.bindGoHome(() => window.location.reload());
   }
 }

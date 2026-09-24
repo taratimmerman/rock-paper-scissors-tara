@@ -208,6 +208,27 @@ describe("ControlsView", () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  test("renders and binds a home action beneath Start New Match", () => {
+    const handler = jest.fn();
+    view.render({
+      playerMove: MOVES.ROCK,
+      isMatchOver: true,
+      taraIsEnabled: true,
+      moves: mockMoves,
+    });
+
+    view.bindGoHome(handler);
+
+    const homeButton = document.getElementById("go-home");
+    expect(homeButton).toBeTruthy();
+    expect(homeButton?.textContent?.trim()).toBe("Go to Homepage");
+    expect(homeButton?.previousElementSibling?.id).toBe("play-again");
+
+    homeButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
   // ===== RE-RENDERING / DOM DIFFING =====
 
   test("maintains flipped state in markup across multiple renders", async () => {

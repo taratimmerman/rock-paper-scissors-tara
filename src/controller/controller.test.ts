@@ -76,6 +76,7 @@ describe("Controller", () => {
         flipAll: jest.fn().mockResolvedValue(undefined),
         bindPlayerMove: jest.fn(),
         bindStartNewMatch: jest.fn(),
+        bindGoHome: jest.fn(),
       } as any,
       gameView: { toggleVisibility: jest.fn() } as any,
       menuView: {
@@ -237,6 +238,7 @@ describe("Controller", () => {
       expect(mockViews.menuView.render).toHaveBeenCalled();
       expect(mockViews.menuView.bindStartMatch).toHaveBeenCalled();
       expect(mockViews.controlsView.bindStartNewMatch).toHaveBeenCalled();
+      expect(mockViews.controlsView.bindGoHome).toHaveBeenCalled();
       expect(
         mockViews.statsView.toggleGameStatsVisibility,
       ).toHaveBeenCalledWith(false);
