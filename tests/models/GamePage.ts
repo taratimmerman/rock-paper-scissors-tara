@@ -22,7 +22,9 @@ export class GamePage {
     this.page = page;
 
     this.announcementContainer = page.locator("#announcement-container");
-    this.homeButton = page.getByRole("button", { name: /^home$/i });
+    this.homeButton = page.getByRole("button", {
+      name: /go to homepage/i,
+    });
     this.newMatchButton = page.getByRole("button", {
       name: /start new match/i,
     });
