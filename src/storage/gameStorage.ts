@@ -5,6 +5,8 @@ import {
   StandardMove,
 } from "../utils/dataObjectUtils";
 
+export type ThemePreference = "system" | "light" | "dark";
+
 /**
  * Interface for game state storage.
  * Abstracts the localStorage browser API
@@ -18,6 +20,7 @@ export interface IGameStorage {
   getMoveCounts(participant: Participant): MoveCount;
   getGlobalMatchNumber(): number | null;
   getMatch(): Match | null;
+  getThemePreference(): ThemePreference | null;
 
   // ===== Setters =====
 
@@ -27,6 +30,7 @@ export interface IGameStorage {
   setMoveCounts(participant: Participant, moveCounts: MoveCount): void;
   setGlobalMatchNumber(match: number | null): void;
   setMatch(match: Match | null): void;
+  setThemePreference(theme: ThemePreference): void;
 
   // ===== Removers =====
 

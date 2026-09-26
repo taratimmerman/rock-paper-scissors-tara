@@ -12,6 +12,8 @@ export interface ModalOptions {
   message: string;
   actions: ModalAction[];
   initialFocusActionId?: string;
+  content?: HTMLElement;
+  initialFocusElement?: HTMLElement;
 }
 
 export interface IModal {

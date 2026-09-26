@@ -24,10 +24,12 @@ import {
 import { IComputerBrain } from "../utils/computer/IComputerBrain";
 import { AdaptiveComputer } from "../utils/computer/AdaptiveComputer";
 import { RoundResult } from "../utils/dataObjectUtils";
-import { IGameStorage } from "../storage/gameStorage";
+import { IGameStorage, ThemePreference } from "../storage/gameStorage";
 import { LocalStorageGameStorage } from "../storage/localStorageGameStorage";
 
 export class Model {
+  private themePreference: ThemePreference = "system";
+
   private state: GameState = {
     scores: { player: 0, computer: 0 },
     moves: { player: null, computer: null },
@@ -50,6 +52,7 @@ export class Model {
   ) {
     this.gameStorage = gameStorage;
     this.computer = computer;
+    this.themePreference = this.gameStorage.getThemePreference() ?? "system";
 
     this.state.scores.player = this.gameStorage.getScore(PARTICIPANTS.PLAYER);
     this.state.scores.computer = this.gameStorage.getScore(
@@ -78,6 +81,15 @@ export class Model {
   }
 
   // ===== General Methods =====
+
+  getThemePreference(): ThemePreference {
+    return this.themePreference;
+  }
+
+  setThemePreference(theme: ThemePreference): void {
+    this.themePreference = theme;
+    this.gameStorage.setThemePreference(theme);
+  }
 
   doesMoveBeat(a: Move, b: Move): boolean {
     return MOVE_DATA_MAP.get(a)?.beats.includes(b) ?? false;
@@ -171,9 +183,7 @@ export class Model {
     return (
       this.hasNonZeroValue(this.state.scores) ||
       this.hasNonZeroValue(this.state.taras) ||
-      Object.values(this.state.mostCommonMove).some(
-        (move) => move !== null,
-      ) ||
+      Object.values(this.state.mostCommonMove).some((move) => move !== null) ||
       Object.values(this.state.moveCounts).some((moveCounts) =>
         this.hasNonZeroValue(moveCounts),
       ) ||

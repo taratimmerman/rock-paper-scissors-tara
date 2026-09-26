@@ -24,8 +24,11 @@ describe("Controller", () => {
   };
 
   beforeEach(() => {
+    delete document.documentElement.dataset.theme;
     // 1. Setup Mock Model
     mockModel = {
+      getThemePreference: jest.fn().mockReturnValue("system"),
+      setThemePreference: jest.fn(),
       setDefaultMatchData: jest.fn(),
       getPlayerMove: jest.fn().mockReturnValue(MOVES.ROCK),
       getComputerMove: jest.fn().mockReturnValue(MOVES.PAPER),
@@ -87,6 +90,10 @@ describe("Controller", () => {
         updateMenu: jest.fn(),
         bindStartMatch: jest.fn(),
         bindResetGame: jest.fn(),
+        bindSettings: jest.fn(),
+        bindThemePreference: jest.fn(),
+        openSettings: jest.fn(),
+        updateThemePreference: jest.fn(),
       } as unknown as jest.Mocked<IMenuView>,
       statsView: {
         hasData: false,
@@ -103,6 +110,25 @@ describe("Controller", () => {
     };
 
     controller = new Controller(mockModel, mockViews);
+  });
+
+  test("applies the model preference and coordinates theme selection", async () => {
+    await controller.initialize();
+
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(mockViews.menuView.render).toHaveBeenCalledWith(
+      expect.objectContaining({ themePreference: "system" }),
+    );
+
+    const onThemePreference =
+      mockViews.menuView.bindThemePreference.mock.calls[0][0];
+    onThemePreference("dark");
+
+    expect(mockModel.setThemePreference).toHaveBeenCalledWith("dark");
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(mockViews.menuView.updateThemePreference).toHaveBeenCalledWith(
+      "dark",
+    );
   });
 
   describe("startGame", () => {

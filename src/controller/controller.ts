@@ -6,6 +6,7 @@ import { IMenuView } from "../views/menu/IMenuView";
 import { IStatsView, StatsViewData } from "../views/stats/IStatsView";
 import { IStatusView } from "../views/status/IStatusView";
 import { Move, Participant } from "../utils/dataObjectUtils";
+import { ThemePreference } from "../storage/gameStorage";
 import {
   MAX_PROGRESS,
   MOVE_DISPLAY_NAMES,
@@ -21,6 +22,7 @@ export class Controller {
   private menuView: IMenuView;
   private statsView: IStatsView;
   private statusView: IStatusView;
+  private systemThemeQuery?: MediaQueryList;
 
   constructor(
     model: IModel,
@@ -174,9 +176,47 @@ export class Controller {
     this.updateStatsView();
   }
 
+  private applyTheme(themePreference: ThemePreference): void {
+    const prefersDark =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme =
+      themePreference === "system"
+        ? prefersDark
+          ? "dark"
+          : "light"
+        : themePreference;
+  }
+
+  private handleSystemThemeChange = (): void => {
+    if (this.model.getThemePreference() === "system") {
+      this.applyTheme("system");
+    }
+  };
+
+  private bindSystemThemeChanges(): void {
+    if (typeof window.matchMedia !== "function") return;
+
+    this.systemThemeQuery?.removeEventListener(
+      "change",
+      this.handleSystemThemeChange,
+    );
+    this.systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    this.systemThemeQuery.addEventListener(
+      "change",
+      this.handleSystemThemeChange,
+    );
+  }
+
   private bindMenuActions(): void {
     this.menuView.bindStartMatch(() => this.startGame());
     this.menuView.bindResetGame(() => void this.resetGameState());
+    this.menuView.bindSettings(() => this.menuView.openSettings());
+    this.menuView.bindThemePreference((theme) => {
+      this.model.setThemePreference(theme);
+      this.applyTheme(theme);
+      this.menuView.updateThemePreference(theme);
+    });
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
@@ -225,9 +265,13 @@ export class Controller {
 
   async initialize(): Promise<void> {
     const isMatchActive = this.model.isMatchActive();
+    const themePreference = this.model.getThemePreference();
+    this.applyTheme(themePreference);
+    this.bindSystemThemeChanges();
     this.menuView.render({
       isMatchActive,
       hasDataToReset: this.model.hasDataToReset(),
+      themePreference,
     });
 
     this.arenaView.render({ phase: "waiting" });

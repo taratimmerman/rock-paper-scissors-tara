@@ -2,34 +2,115 @@
    0. VARIABLES (THEME)
    ============================================================================= */
 :root {
-  /* Colors */
-  --color-text: #333;
-  --color-bg: #fff;
-  --color-surface: #f9f9f9;
-  --color-primary: #333;
-  --color-primary-hover: #000;
-  --color-border: rgba(0, 0, 0, 0.1);
-
-  /* Status Colors */
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-danger: #f44336;
+  color-scheme: light;
+  --color-text: #1b2528;
+  --color-text-muted: #5e6d70;
+  --color-bg: #f2f6f4;
+  --color-surface: #ffffff;
+  --color-surface-muted: #e8eeeb;
+  --color-disabled-surface: #e3e9e6;
+  --color-primary: #176b65;
+  --color-primary-hover: #10504b;
+  --color-primary-contrast: #ffffff;
+  --color-border: rgba(27, 48, 44, 0.18);
+  --color-border-strong: rgba(27, 48, 44, 0.32);
+  --color-success: #2b8a65;
+  --color-warning: #c4811c;
+  --color-danger: #ce4c4c;
+  --color-danger-hover: #b93434;
+  --color-on-status: #ffffff;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-label: #566366;
+  --color-vs: #acb6b7;
+  --color-gold: #b8860b;
+  --color-gold-highlight: #ffd700;
+  --color-defeated-mark: rgba(255, 255, 255, 0.2);
+  --color-card-texture: rgba(255, 255, 255, 0.03);
+  --color-card-glint: rgba(255, 255, 255, 0.3);
+  --color-card-highlight: rgba(255, 255, 255, 0.12);
+  --color-card-clear: rgba(255, 255, 255, 0);
+  --color-card-shadow: rgba(0, 0, 0, 0.08);
+  --color-gold-glow: rgba(184, 134, 11, 0.6);
+  --color-gold-fill: rgba(255, 215, 0, 0.3);
+  --color-gold-bright-glow: rgba(255, 215, 0, 0.8);
+  --color-damage-glow: rgba(255, 0, 0, 0.8);
+  --color-subtle-fill: rgba(27, 48, 44, 0.03);
+  --color-shadow: rgba(0, 0, 0, 0.25);
+  --color-shadow-soft: rgba(0, 0, 0, 0.1);
+  --color-modal-backdrop: rgba(0, 0, 0, 0.58);
 
   /* Spacing & Layout */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 6px var(--color-shadow-soft);
 
   /* Card Colors */
   --color-player-card: #2e5a88;
   --color-computer-card: #a64452;
   --card-gradient-overlay: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0) 50%,
-    rgba(0, 0, 0, 0.08) 100%
+    var(--color-card-highlight) 0%,
+    var(--color-card-clear) 50%,
+    var(--color-card-shadow) 100%
   );
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-text: #e6eeeb;
+  --color-text-muted: #a9b8b3;
+  --color-bg: #17211f;
+  --color-surface: #222f2c;
+  --color-surface-muted: #2b3935;
+  --color-disabled-surface: #303a37;
+  --color-primary: #61b8a8;
+  --color-primary-hover: #469d8e;
+  --color-primary-contrast: #10201d;
+  --color-border: rgba(224, 242, 235, 0.2);
+  --color-border-strong: rgba(224, 242, 235, 0.36);
+  --color-success: #3eaa7b;
+  --color-warning: #e0a644;
+  --color-danger: #e56c69;
+  --color-danger-hover: #f17c78;
+  --color-label: #bdcbc6;
+  --color-vs: #62716c;
+  --color-subtle-fill: rgba(224, 242, 235, 0.06);
+  --color-shadow: rgba(0, 0, 0, 0.48);
+  --color-shadow-soft: rgba(0, 0, 0, 0.28);
+  --color-modal-backdrop: rgba(0, 0, 0, 0.72);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-text: #e6eeeb;
+    --color-text-muted: #a9b8b3;
+    --color-bg: #17211f;
+    --color-surface: #222f2c;
+    --color-surface-muted: #2b3935;
+    --color-disabled-surface: #303a37;
+    --color-primary: #61b8a8;
+    --color-primary-hover: #469d8e;
+    --color-primary-contrast: #10201d;
+    --color-border: rgba(224, 242, 235, 0.2);
+    --color-border-strong: rgba(224, 242, 235, 0.36);
+    --color-success: #3eaa7b;
+    --color-warning: #e0a644;
+    --color-danger: #e56c69;
+    --color-danger-hover: #f17c78;
+    --color-label: #bdcbc6;
+    --color-vs: #62716c;
+    --color-subtle-fill: rgba(224, 242, 235, 0.06);
+    --color-shadow: rgba(0, 0, 0, 0.48);
+    --color-shadow-soft: rgba(0, 0, 0, 0.28);
+    --color-modal-backdrop: rgba(0, 0, 0, 0.72);
+  }
 }
 
 /* =============================================================================
@@ -137,8 +218,8 @@ main {
   border-radius: var(--radius-sm);
   background-color: var(--color-danger);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.25),
-    inset 0 -4px 6px rgba(10, 10, 10, 0.2);
+    inset 0 2px 4px var(--color-shadow),
+    inset 0 -4px 6px var(--color-shadow-soft);
   overflow: hidden;
 }
 
@@ -158,9 +239,9 @@ main {
   transform: translateY(-50%);
   font-size: 0.9rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--color-on-status);
   z-index: 5;
-  text-shadow: 1px 1px 2px #000;
+  text-shadow: 1px 1px 2px var(--color-black);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -276,8 +357,8 @@ main {
 .card-back {
   transform: rotateY(0deg) translateZ(1px);
   backface-visibility: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 8px var(--color-shadow-soft);
   overflow: hidden;
 }
 
@@ -294,8 +375,8 @@ main {
   background-color: var(--color-surface);
   transform: rotateY(180deg) translateZ(1px);
   backface-visibility: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 0 15px var(--color-subtle-fill);
 }
 
 /* Player Theme */
@@ -305,8 +386,8 @@ main {
     var(--card-gradient-overlay),
     repeating-linear-gradient(
       45deg,
-      rgba(255, 255, 255, 0.03) 0px,
-      rgba(255, 255, 255, 0.03) 1px,
+      var(--color-card-texture) 0px,
+      var(--color-card-texture) 1px,
       transparent 1px,
       transparent 4px
     );
@@ -319,8 +400,8 @@ main {
     var(--card-gradient-overlay),
     repeating-linear-gradient(
       -45deg,
-      rgba(255, 255, 255, 0.03) 0px,
-      rgba(255, 255, 255, 0.03) 1px,
+      var(--color-card-texture) 0px,
+      var(--color-card-texture) 1px,
       transparent 1px,
       transparent 4px
     );
@@ -341,8 +422,8 @@ main {
     transform: translateY(-5px);
   }
   .card-button:not(:disabled):hover .card-front {
-    border-color: rgba(0, 0, 0, 0.3);
-    background-color: #fff;
+    border-color: var(--color-border-strong);
+    background-color: var(--color-surface);
   }
 }
 
@@ -361,7 +442,7 @@ main {
 .card-button:disabled .card-front {
   filter: grayscale(0.9) contrast(0.9);
   opacity: 0.7;
-  background-color: #eee;
+  background-color: var(--color-disabled-surface);
   cursor: not-allowed;
 }
 
@@ -378,7 +459,7 @@ main {
   height: 2.25rem;
   font-size: 2.25rem;
   line-height: 1;
-  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 4px var(--color-shadow-soft));
 }
 
 .icon-image {
@@ -401,7 +482,7 @@ main {
 .label {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #666;
+  color: var(--color-label);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -409,7 +490,7 @@ main {
 .vs-label {
   font-size: 1.25rem;
   font-weight: 900;
-  color: #ddd;
+  color: var(--color-vs);
   font-style: italic;
   margin: 0 0.25rem;
 }
@@ -445,9 +526,9 @@ main {
 .winner-highlight {
   transform: scale(1.05) rotate(-2deg);
   box-shadow:
-    0 0 0 3px #b8860b,
-    0 0 20px rgba(184, 134, 11, 0.6),
-    inset 0 0 20px rgba(255, 215, 0, 0.3);
+    0 0 0 3px var(--color-gold),
+    0 0 20px var(--color-gold-glow),
+    inset 0 0 20px var(--color-gold-fill);
   border-radius: 12px;
   border: none !important;
   z-index: 100;
@@ -467,14 +548,14 @@ main {
   0%,
   100% {
     box-shadow:
-      0 0 0 3px #b8860b,
-      0 0 15px rgba(184, 134, 11, 0.6);
+      0 0 0 3px var(--color-gold),
+      0 0 15px var(--color-gold-glow);
   }
   50% {
     box-shadow:
-      0 0 0 5px #ffd700,
-      0 0 30px rgba(255, 215, 0, 0.8),
-      inset 0 0 10px rgba(255, 255, 255, 0.5);
+      0 0 0 5px var(--color-gold-highlight),
+      0 0 30px var(--color-gold-bright-glow),
+      inset 0 0 10px var(--color-card-glint);
   }
 }
 
@@ -488,7 +569,7 @@ main {
   background: linear-gradient(
     45deg,
     transparent 45%,
-    rgba(255, 255, 255, 0.3) 50%,
+    var(--color-card-glint) 50%,
     transparent 55%
   );
   animation: sweep 3s infinite;
@@ -540,7 +621,11 @@ main {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0 20 L30 40 L10 70 M50 0 L40 50 L80 100 M100 20 L70 30" stroke="rgba(255,255,255,0.2)" fill="none"/></svg>');
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 14px,
+    var(--color-defeated-mark) 14px 15px
+  );
   background-size: cover;
   z-index: 10;
   pointer-events: none;
@@ -648,7 +733,7 @@ button:focus-visible {
 .btn-primary,
 #play-again {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-primary-contrast);
   border: 2px solid var(--color-primary);
 }
 
@@ -657,14 +742,14 @@ button:focus-visible {
   background-color: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--color-shadow-soft);
 }
 
 .btn-danger:hover {
-  background-color: #d32f2f;
-  border-color: #d32f2f;
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--color-shadow-soft);
 }
 
 .btn-secondary {
@@ -675,12 +760,12 @@ button:focus-visible {
 
 .btn-secondary:hover {
   border-color: var(--color-primary);
-  background-color: #fff;
+  background-color: var(--color-surface);
 }
 
 .btn-danger {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--color-primary-contrast);
   border: 2px solid var(--color-danger);
 }
 
@@ -698,11 +783,11 @@ button:focus-visible {
   border-radius: var(--radius-md);
   background: var(--color-bg);
   color: var(--color-text);
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1rem 3rem var(--color-shadow);
 }
 
 .modal::backdrop {
-  background: rgba(0, 0, 0, 0.58);
+  background: var(--color-modal-backdrop);
 }
 
 .modal[open].is-open {
@@ -741,6 +826,31 @@ button:focus-visible {
 
 .modal-message {
   line-height: 1.5;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem 1rem;
+}
+
+.theme-options legend {
+  padding: 0 0.35rem;
+  font-weight: 700;
+}
+
+.theme-options input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-primary);
+}
+
+.theme-options label {
+  cursor: pointer;
 }
 
 .modal-actions {
@@ -996,11 +1106,11 @@ button:focus-visible {
   font-family: sans-serif;
   font-weight: 900;
   font-size: 1.75rem;
-  color: #fff;
+  color: var(--color-on-status);
 
   /* Harder stroke to cut through dark/gray defeated cards */
   -webkit-text-stroke: 2px var(--color-danger);
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+  text-shadow: 0 0 10px var(--color-damage-glow);
 
   animation: float-damage 1.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
 }
@@ -1078,7 +1188,7 @@ button:focus-visible {
 
 /* Full color and slightly elevated for available moves */
 .tara-active {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 2px 4px var(--color-shadow-soft));
   transform: scale(1);
 }
 
@@ -1121,7 +1231,7 @@ button:focus-visible {
 .common-move-label {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #666;
+  color: var(--color-label);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -1136,10 +1246,10 @@ button:focus-visible {
   justify-content: center;
 
   /* Creates the "empty slot" look */
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: var(--color-subtle-fill);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 3px var(--color-shadow-soft);
   transition: all 0.3s ease;
 }
 
