@@ -112,9 +112,8 @@ describe("MenuView", () => {
 
       view.openSettings();
       const options = modal.open.mock.calls[0][0] as ModalOptions;
-      const darkOption = options.content?.querySelector<HTMLInputElement>(
-        "#theme-dark",
-      );
+      const darkOption =
+        options.content?.querySelector<HTMLInputElement>("#theme-dark");
       expect(options.title).toBe("Settings");
       expect(options.content?.tagName).toBe("FIELDSET");
 

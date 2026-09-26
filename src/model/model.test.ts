@@ -107,7 +107,9 @@ describe("Model", () => {
       getMatch: jest.fn(() => null),
       getThemePreference: jest.fn(() => {
         const preference = localStorage.getItem("themePreference");
-        return preference === "light" || preference === "dark" || preference === "system"
+        return preference === "light" ||
+          preference === "dark" ||
+          preference === "system"
           ? preference
           : null;
       }),

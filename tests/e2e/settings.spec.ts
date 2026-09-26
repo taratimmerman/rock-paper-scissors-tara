@@ -28,9 +28,9 @@ test("uses system appearance by default and allows an explicit theme", async ({
   await page.emulateMedia({ colorScheme: "light" });
   await page.reload();
   await expect(root).toHaveAttribute("data-theme", "dark");
-  expect(await page.evaluate(() => localStorage.getItem("themePreference"))).toBe(
-    "dark",
-  );
+  expect(
+    await page.evaluate(() => localStorage.getItem("themePreference")),
+  ).toBe("dark");
 });
 
 test("system selection follows the current system color scheme", async ({

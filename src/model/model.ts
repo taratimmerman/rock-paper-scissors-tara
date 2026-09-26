@@ -183,9 +183,7 @@ export class Model {
     return (
       this.hasNonZeroValue(this.state.scores) ||
       this.hasNonZeroValue(this.state.taras) ||
-      Object.values(this.state.mostCommonMove).some(
-        (move) => move !== null,
-      ) ||
+      Object.values(this.state.mostCommonMove).some((move) => move !== null) ||
       Object.values(this.state.moveCounts).some((moveCounts) =>
         this.hasNonZeroValue(moveCounts),
       ) ||

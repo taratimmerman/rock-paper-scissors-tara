@@ -4,7 +4,7 @@ import { IMenuView, MenuViewData } from "./IMenuView";
 import { ThemePreference } from "../../storage/gameStorage";
 
 export default class MenuView extends View<MenuViewData> implements IMenuView {
-  protected declare _parentElement: HTMLElement;
+  declare protected _parentElement: HTMLElement;
   private readonly modal: IModal;
   // Cache the specific buttons
   private _startBtn?: HTMLButtonElement;
@@ -50,9 +50,9 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
 
     // The reset control is conditional, so only the start control is required.
     this._startBtn = this._getElement<HTMLButtonElement>("start");
-    this._resetBtn = document.getElementById(
-      "reset-game-state",
-    ) as HTMLButtonElement | undefined;
+    this._resetBtn = document.getElementById("reset-game-state") as
+      | HTMLButtonElement
+      | undefined;
     this._settingsBtn = this._getElement<HTMLButtonElement>("open-settings");
   }
 
@@ -79,9 +79,7 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
     });
   }
 
-  public bindThemePreference(
-    handler: (theme: ThemePreference) => void,
-  ): void {
+  public bindThemePreference(handler: (theme: ThemePreference) => void): void {
     this._themePreferenceHandler = handler;
   }
 
@@ -136,8 +134,7 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
   private _showResetConfirmation(onConfirm: () => void): void {
     this.modal.open({
       title: "Reset saved game data?",
-      message:
-        "This permanently clears your saved progress and statistics.",
+      message: "This permanently clears your saved progress and statistics.",
       actions: [
         {
           id: "cancel",
@@ -167,9 +164,9 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
 
     // Re-render because conditional controls may need to be added or removed.
     this._startBtn = this._getElement<HTMLButtonElement>("start");
-    this._resetBtn = document.getElementById(
-      "reset-game-state",
-    ) as HTMLButtonElement | undefined;
+    this._resetBtn = document.getElementById("reset-game-state") as
+      | HTMLButtonElement
+      | undefined;
     this._settingsBtn = this._getElement<HTMLButtonElement>("open-settings");
   }
 }

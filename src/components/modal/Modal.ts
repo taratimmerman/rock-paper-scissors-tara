@@ -94,10 +94,7 @@ export default class Modal implements IModal {
 
     this.dialog.classList.remove("is-open");
     this.dialog.classList.add("is-closing");
-    this.closeTimer = window.setTimeout(
-      this.finishClose,
-      CLOSE_ANIMATION_MS,
-    );
+    this.closeTimer = window.setTimeout(this.finishClose, CLOSE_ANIMATION_MS);
   }
 
   private handleCancel = (event: Event): void => {
