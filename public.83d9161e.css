@@ -570,7 +570,7 @@ button:focus-visible {
   border-radius: var(--radius-md);
 }
 
-.btn-primary, .btn-secondary, #play-again {
+.btn-primary, .btn-secondary, .btn-danger, #play-again {
   border-radius: var(--radius-md);
   cursor: pointer;
   text-transform: uppercase;
@@ -593,6 +593,13 @@ button:focus-visible {
   box-shadow: 0 4px 12px #00000026;
 }
 
+.btn-danger:hover {
+  background-color: #d32f2f;
+  border-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px #00000026;
+}
+
 .btn-secondary {
   color: var(--color-text);
   border: 2px solid var(--color-border);
@@ -604,7 +611,105 @@ button:focus-visible {
   background-color: #fff;
 }
 
-.btn-primary:active, .card-button:active {
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+  border: 2px solid var(--color-danger);
+}
+
+.modal {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  width: min(92vw, 30rem);
+  max-width: none;
+  max-height: min(85vh, 40rem);
+  color: var(--color-text);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  box-shadow: 0 1rem 3rem #00000040;
+}
+
+.modal::backdrop {
+  background: #00000094;
+}
+
+.modal[open].is-open {
+  animation: .16s ease-out both modal-enter;
+}
+
+.modal[open].is-closing {
+  pointer-events: none;
+  animation: .18s ease-in both modal-exit;
+}
+
+.modal-content {
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  display: flex;
+}
+
+.modal-header {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  display: flex;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.modal-close {
+  flex: none;
+  padding: .35rem .6rem;
+  font-size: .8rem;
+}
+
+.modal-message {
+  line-height: 1.5;
+}
+
+.modal-actions {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+  display: flex;
+}
+
+.modal-action {
+  max-width: 100%;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(.5rem) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-exit {
+  to {
+    opacity: 0;
+    transform: translateY(.25rem) scale(.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open].is-open, .modal[open].is-closing {
+    animation-duration: 1ms;
+  }
+}
+
+.btn-primary:active, .btn-danger:active, .card-button:active {
   filter: brightness(.9);
   transform: scale(.98);
 }

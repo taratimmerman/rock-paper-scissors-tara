@@ -717,6 +717,8 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _model = require("./model/model");
 var _controller = require("./controller/controller");
+var _modal = require("./components/modal/Modal");
+var _modalDefault = parcelHelpers.interopDefault(_modal);
 var _arenaView = require("./views/arena/ArenaView");
 var _arenaViewDefault = parcelHelpers.interopDefault(_arenaView);
 var _controlsView = require("./views/controls/ControlsView");
@@ -735,14 +737,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
         arenaView: new (0, _arenaViewDefault.default)(),
         controlsView: new (0, _controlsViewDefault.default)(),
         gameView: new (0, _gameViewDefault.default)(),
-        menuView: new (0, _menuViewDefault.default)(),
+        menuView: new (0, _menuViewDefault.default)(new (0, _modalDefault.default)()),
         statsView: new (0, _statsViewDefault.default)(),
         statusView: new (0, _statusViewDefault.default)()
     });
     controller.initialize();
 });
 
-},{"./model/model":"04Yt3","./controller/controller":"gC2t0","./views/arena/ArenaView":"3JtbA","./views/controls/ControlsView":"h40xR","./views/game/GameView":"6jvBq","./views/menu/MenuView":"bsCwB","./views/stats/StatsView":"gGdhp","./views/status/StatusView":"1xK0k","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"04Yt3":[function(require,module,exports,__globalThis) {
+},{"./model/model":"04Yt3","./controller/controller":"gC2t0","./components/modal/Modal":"fs8YJ","./views/arena/ArenaView":"3JtbA","./views/controls/ControlsView":"h40xR","./views/game/GameView":"6jvBq","./views/menu/MenuView":"bsCwB","./views/stats/StatsView":"gGdhp","./views/status/StatusView":"1xK0k","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"04Yt3":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Model", ()=>Model);
@@ -1700,14 +1702,17 @@ class Controller {
             isMatchActive: false,
             hasDataToReset: this.model.hasDataToReset()
         });
-        this.menuView.bindStartMatch(()=>this.startGame());
-        this.menuView.bindResetGame(()=>this.resetGameState());
+        this.bindMenuActions();
         this.resetArenaVisuals();
         this.controlsView.toggleVisibility(false);
     }
     resetArenaVisuals() {
         this.arenaView.clear();
         this.updateStatsView();
+    }
+    bindMenuActions() {
+        this.menuView.bindStartMatch(()=>this.startGame());
+        this.menuView.bindResetGame(()=>void this.resetGameState());
     }
     async handlePlayerMove(move) {
         this.statusView.handleEvent({
@@ -1755,15 +1760,111 @@ class Controller {
         this.statsView.toggleGameStatsVisibility(false);
         this.controlsView.toggleVisibility(false);
         this.menuView.toggleMenuVisibility(true);
-        this.menuView.bindStartMatch(()=>this.startGame());
-        this.menuView.bindResetGame(()=>this.resetGameState());
+        this.bindMenuActions();
         this.controlsView.bindPlayerMove((move)=>this.handlePlayerMove(move));
         this.controlsView.bindStartNewMatch(()=>this.startGame());
         this.controlsView.bindGoHome(()=>window.location.reload());
     }
 }
 
-},{"../utils/dataUtils":"hnBcW","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"3JtbA":[function(require,module,exports,__globalThis) {
+},{"../utils/dataUtils":"hnBcW","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"fs8YJ":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+const CLOSE_ANIMATION_MS = 180;
+let nextModalId = 0;
+class Modal {
+    dialog;
+    titleId = `modal-title-${nextModalId++}`;
+    previousFocus = null;
+    closeTimer;
+    constructor(){
+        this.dialog = document.createElement("dialog");
+        this.dialog.className = "modal";
+        this.dialog.setAttribute("aria-labelledby", this.titleId);
+        this.dialog.addEventListener("cancel", this.handleCancel);
+        this.dialog.addEventListener("click", this.handleDialogClick);
+        this.dialog.addEventListener("animationend", this.handleAnimationEnd);
+        document.body.append(this.dialog);
+    }
+    open(options) {
+        if (this.dialog.open) this.finishClose();
+        this.previousFocus = document.activeElement;
+        this.dialog.replaceChildren();
+        const content = document.createElement("div");
+        content.className = "modal-content";
+        const title = document.createElement("h2");
+        title.id = this.titleId;
+        title.className = "modal-title";
+        title.textContent = options.title;
+        const message = document.createElement("p");
+        message.className = "modal-message";
+        message.textContent = options.message;
+        message.id = `${this.titleId}-description`;
+        this.dialog.setAttribute("aria-describedby", message.id);
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "btn-secondary modal-close";
+        closeButton.textContent = "Close";
+        closeButton.addEventListener("click", ()=>this.close());
+        const header = document.createElement("div");
+        header.className = "modal-header";
+        header.append(title, closeButton);
+        const actions = document.createElement("div");
+        actions.className = "modal-actions";
+        options.actions.forEach((action)=>{
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `btn-${action.variant ?? "secondary"} modal-action`;
+            button.textContent = action.label;
+            button.dataset.actionId = action.id;
+            button.addEventListener("click", ()=>{
+                try {
+                    action.onSelect();
+                } finally{
+                    this.close();
+                }
+            });
+            actions.append(button);
+        });
+        content.append(header, message, actions);
+        this.dialog.append(content);
+        this.dialog.showModal();
+        this.dialog.classList.remove("is-closing");
+        this.dialog.classList.add("is-open");
+        const actionButtons = Array.from(actions.querySelectorAll("button"));
+        const initialFocus = options.initialFocusActionId ? actionButtons.find((button)=>button.dataset.actionId === options.initialFocusActionId) : actionButtons[0];
+        (initialFocus ?? closeButton).focus();
+    }
+    close() {
+        if (!this.dialog.open || this.dialog.classList.contains("is-closing")) return;
+        this.dialog.classList.remove("is-open");
+        this.dialog.classList.add("is-closing");
+        this.closeTimer = window.setTimeout(this.finishClose, CLOSE_ANIMATION_MS);
+    }
+    handleCancel = (event)=>{
+        event.preventDefault();
+        this.close();
+    };
+    handleDialogClick = (event)=>{
+        if (event.target === this.dialog) this.close();
+    };
+    handleAnimationEnd = (event)=>{
+        if (event.target === this.dialog && this.dialog.classList.contains("is-closing")) this.finishClose();
+    };
+    finishClose = ()=>{
+        if (this.closeTimer !== undefined) {
+            window.clearTimeout(this.closeTimer);
+            this.closeTimer = undefined;
+        }
+        if (this.dialog.open) this.dialog.close();
+        this.dialog.classList.remove("is-open", "is-closing");
+        if (this.previousFocus?.isConnected) this.previousFocus.focus();
+        this.previousFocus = null;
+    };
+}
+exports.default = Modal;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"3JtbA":[function(require,module,exports,__globalThis) {
 // ArenaView.ts
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -2328,9 +2429,14 @@ parcelHelpers.defineInteropFlag(exports);
 var _view = require("../View");
 var _viewDefault = parcelHelpers.interopDefault(_view);
 class MenuView extends (0, _viewDefault.default) {
+    modal;
     // Cache the specific buttons
     _startBtn;
     _resetBtn;
+    constructor(modal){
+        super();
+        this.modal = modal;
+    }
     _generateMarkup() {
         const startText = this._data.isMatchActive ? "Continue Match" : "Start Match";
         return `
@@ -2363,7 +2469,28 @@ class MenuView extends (0, _viewDefault.default) {
     bindResetGame(handler) {
         this._resetBtn?.addEventListener("click", (e)=>{
             e.preventDefault();
-            handler();
+            this._showResetConfirmation(handler);
+        });
+    }
+    _showResetConfirmation(onConfirm) {
+        this.modal.open({
+            title: "Reset saved game data?",
+            message: "This permanently clears your saved progress and statistics.",
+            actions: [
+                {
+                    id: "cancel",
+                    label: "Cancel",
+                    onSelect: ()=>{},
+                    variant: "secondary"
+                },
+                {
+                    id: "reset",
+                    label: "Reset Game State",
+                    onSelect: onConfirm,
+                    variant: "danger"
+                }
+            ],
+            initialFocusActionId: "cancel"
         });
     }
     toggleMenuVisibility(show) {
