@@ -752,6 +752,7 @@ var _dataUtils = require("../utils/dataUtils");
 var _adaptiveComputer = require("../utils/computer/AdaptiveComputer");
 var _localStorageGameStorage = require("../storage/localStorageGameStorage");
 class Model {
+    themePreference = "system";
     state = {
         scores: {
             player: 0,
@@ -789,6 +790,7 @@ class Model {
     constructor(gameStorage = new (0, _localStorageGameStorage.LocalStorageGameStorage)(), computer = new (0, _adaptiveComputer.AdaptiveComputer)()){
         this.gameStorage = gameStorage;
         this.computer = computer;
+        this.themePreference = this.gameStorage.getThemePreference() ?? "system";
         this.state.scores.player = this.gameStorage.getScore((0, _dataUtils.PARTICIPANTS).PLAYER);
         this.state.scores.computer = this.gameStorage.getScore((0, _dataUtils.PARTICIPANTS).COMPUTER);
         this.state.taras.player = this.gameStorage.getTaraCount((0, _dataUtils.PARTICIPANTS).PLAYER);
@@ -800,6 +802,13 @@ class Model {
         this._loadMatchState();
     }
     // ===== General Methods =====
+    getThemePreference() {
+        return this.themePreference;
+    }
+    setThemePreference(theme) {
+        this.themePreference = theme;
+        this.gameStorage.setThemePreference(theme);
+    }
     doesMoveBeat(a, b) {
         return (0, _dataUtils.MOVE_DATA_MAP).get(a)?.beats.includes(b) ?? false;
     }
@@ -1463,6 +1472,7 @@ const KEY_SUFFIX_MOST_COMMON_MOVE = "MostCommonMove";
 const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
 const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
 const KEY_CURRENT_MATCH = "currentMatch";
+const KEY_THEME_PREFERENCE = "themePreference";
 const DEFAULT_NUMERIC_VALUE = 0;
 const DEFAULT_MOVE_COUNTS = {
     [(0, _dataUtils.MOVES).ROCK]: 0,
@@ -1527,6 +1537,10 @@ class LocalStorageGameStorage {
             return null;
         }
     }
+    getThemePreference() {
+        const stored = localStorage.getItem(KEY_THEME_PREFERENCE);
+        return stored === "light" || stored === "dark" || stored === "system" ? stored : null;
+    }
     // ===== Setters =====
     setScore(participant, score) {
         const key = this.formatKey(participant, KEY_SUFFIX_SCORE);
@@ -1552,6 +1566,9 @@ class LocalStorageGameStorage {
     setMatch(match) {
         if (match) this.safelySetItem(KEY_CURRENT_MATCH, JSON.stringify(match));
         else localStorage.removeItem(KEY_CURRENT_MATCH);
+    }
+    setThemePreference(theme) {
+        this.safelySetItem(KEY_THEME_PREFERENCE, theme);
     }
     // ===== Removers =====
     removeScore(participant) {
@@ -1588,6 +1605,7 @@ class Controller {
     menuView;
     statsView;
     statusView;
+    systemThemeQuery;
     constructor(model, views){
         this.model = model;
         this.arenaView = views.arenaView;
@@ -1710,9 +1728,28 @@ class Controller {
         this.arenaView.clear();
         this.updateStatsView();
     }
+    applyTheme(themePreference) {
+        const prefersDark = typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = themePreference === "system" ? prefersDark ? "dark" : "light" : themePreference;
+    }
+    handleSystemThemeChange = ()=>{
+        if (this.model.getThemePreference() === "system") this.applyTheme("system");
+    };
+    bindSystemThemeChanges() {
+        if (typeof window.matchMedia !== "function") return;
+        this.systemThemeQuery?.removeEventListener("change", this.handleSystemThemeChange);
+        this.systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        this.systemThemeQuery.addEventListener("change", this.handleSystemThemeChange);
+    }
     bindMenuActions() {
         this.menuView.bindStartMatch(()=>this.startGame());
         this.menuView.bindResetGame(()=>void this.resetGameState());
+        this.menuView.bindSettings(()=>this.menuView.openSettings());
+        this.menuView.bindThemePreference((theme)=>{
+            this.model.setThemePreference(theme);
+            this.applyTheme(theme);
+            this.menuView.updateThemePreference(theme);
+        });
     }
     async handlePlayerMove(move) {
         this.statusView.handleEvent({
@@ -1745,9 +1782,13 @@ class Controller {
     }
     async initialize() {
         const isMatchActive = this.model.isMatchActive();
+        const themePreference = this.model.getThemePreference();
+        this.applyTheme(themePreference);
+        this.bindSystemThemeChanges();
         this.menuView.render({
             isMatchActive,
-            hasDataToReset: this.model.hasDataToReset()
+            hasDataToReset: this.model.hasDataToReset(),
+            themePreference
         });
         this.arenaView.render({
             phase: "waiting"
@@ -1826,14 +1867,16 @@ class Modal {
             });
             actions.append(button);
         });
-        content.append(header, message, actions);
+        content.append(header, message);
+        if (options.content) content.append(options.content);
+        content.append(actions);
         this.dialog.append(content);
         this.dialog.showModal();
         this.dialog.classList.remove("is-closing");
         this.dialog.classList.add("is-open");
         const actionButtons = Array.from(actions.querySelectorAll("button"));
         const initialFocus = options.initialFocusActionId ? actionButtons.find((button)=>button.dataset.actionId === options.initialFocusActionId) : actionButtons[0];
-        (initialFocus ?? closeButton).focus();
+        (options.initialFocusElement ?? initialFocus ?? closeButton).focus();
     }
     close() {
         if (!this.dialog.open || this.dialog.classList.contains("is-closing")) return;
@@ -2433,6 +2476,8 @@ class MenuView extends (0, _viewDefault.default) {
     // Cache the specific buttons
     _startBtn;
     _resetBtn;
+    _settingsBtn;
+    _themePreferenceHandler;
     constructor(modal){
         super();
         this.modal = modal;
@@ -2444,6 +2489,7 @@ class MenuView extends (0, _viewDefault.default) {
         <h1 id="game-title" class="title-large">Rock Paper Scissors Tara</h1>
         <div class="menu-controls">
           <button id="start" class="btn-primary">${startText}</button>
+          <button id="open-settings" class="btn-secondary">Settings</button>
           ${this._data.hasDataToReset ? '<button id="reset-game-state" class="btn-secondary">Reset Game State</button>' : ""}
         </div>
       </div>
@@ -2458,6 +2504,7 @@ class MenuView extends (0, _viewDefault.default) {
         // The reset control is conditional, so only the start control is required.
         this._startBtn = this._getElement("start");
         this._resetBtn = document.getElementById("reset-game-state");
+        this._settingsBtn = this._getElement("open-settings");
     }
     // ===== Event Bindings (Much more efficient now) =====
     bindStartMatch(handler) {
@@ -2471,6 +2518,65 @@ class MenuView extends (0, _viewDefault.default) {
             e.preventDefault();
             this._showResetConfirmation(handler);
         });
+    }
+    bindSettings(handler) {
+        this._settingsBtn?.addEventListener("click", (event)=>{
+            event.preventDefault();
+            handler();
+        });
+    }
+    bindThemePreference(handler) {
+        this._themePreferenceHandler = handler;
+    }
+    openSettings() {
+        const options = [
+            {
+                value: "system",
+                label: "System"
+            },
+            {
+                value: "light",
+                label: "Light"
+            },
+            {
+                value: "dark",
+                label: "Dark"
+            }
+        ];
+        const fieldset = document.createElement("fieldset");
+        fieldset.className = "theme-options";
+        const legend = document.createElement("legend");
+        legend.textContent = "Color theme";
+        fieldset.append(legend);
+        let initialFocusElement;
+        options.forEach(({ value, label })=>{
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "theme-preference";
+            input.id = `theme-${value}`;
+            input.value = value;
+            input.checked = this._data.themePreference === value;
+            if (input.checked) initialFocusElement = input;
+            input.addEventListener("change", ()=>{
+                this._themePreferenceHandler?.(value);
+            });
+            const optionLabel = document.createElement("label");
+            optionLabel.htmlFor = input.id;
+            optionLabel.textContent = label;
+            fieldset.append(input, optionLabel);
+        });
+        this.modal.open({
+            title: "Settings",
+            message: "Choose how the game looks.",
+            actions: [],
+            content: fieldset,
+            initialFocusElement
+        });
+    }
+    updateThemePreference(theme) {
+        this._data.themePreference = theme;
+        const selected = document.querySelector(`input[name="theme-preference"][value="${theme}"]`);
+        if (selected) selected.checked = true;
     }
     _showResetConfirmation(onConfirm) {
         this.modal.open({
@@ -2506,6 +2612,7 @@ class MenuView extends (0, _viewDefault.default) {
         // Re-render because conditional controls may need to be added or removed.
         this._startBtn = this._getElement("start");
         this._resetBtn = document.getElementById("reset-game-state");
+        this._settingsBtn = this._getElement("open-settings");
     }
 }
 exports.default = MenuView;
