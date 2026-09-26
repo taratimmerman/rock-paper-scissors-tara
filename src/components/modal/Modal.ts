@@ -68,7 +68,9 @@ export default class Modal implements IModal {
       actions.append(button);
     });
 
-    content.append(header, message, actions);
+    content.append(header, message);
+    if (options.content) content.append(options.content);
+    content.append(actions);
     this.dialog.append(content);
     this.dialog.showModal();
     this.dialog.classList.remove("is-closing");
@@ -82,7 +84,7 @@ export default class Modal implements IModal {
           (button) => button.dataset.actionId === options.initialFocusActionId,
         )
       : actionButtons[0];
-    (initialFocus ?? closeButton).focus();
+    (options.initialFocusElement ?? initialFocus ?? closeButton).focus();
   }
 
   public close(): void {

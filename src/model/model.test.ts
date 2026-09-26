@@ -105,12 +105,34 @@ describe("Model", () => {
         localStorage.removeItem(`${participant}History`);
       }),
       getMatch: jest.fn(() => null),
+      getThemePreference: jest.fn(() => {
+        const preference = localStorage.getItem("themePreference");
+        return preference === "light" || preference === "dark" || preference === "system"
+          ? preference
+          : null;
+      }),
       setMatch: jest.fn(),
+      setThemePreference: jest.fn((preference: "system" | "light" | "dark") => {
+        localStorage.setItem("themePreference", preference);
+      }),
       getGlobalMatchNumber: jest.fn(() => 1),
       setGlobalMatchNumber: jest.fn(),
       removeGlobalMatchNumber: jest.fn(),
     } as jest.Mocked<IGameStorage>;
     model = new Model(mockGameStorage);
+  });
+
+  describe("Theme preference", () => {
+    test("defaults to the system preference when none is saved", () => {
+      expect(model.getThemePreference()).toBe("system");
+    });
+
+    test("saves and reloads the selected preference", () => {
+      model.setThemePreference("dark");
+
+      expect(localStorage.getItem("themePreference")).toBe("dark");
+      expect(new Model(mockGameStorage).getThemePreference()).toBe("dark");
+    });
   });
 
   test("uses independent default move counts for each participant after a fresh load", () => {
@@ -1165,6 +1187,7 @@ describe("Model", () => {
         getMostCommonMove: jest.fn(() => null),
         getMoveCounts: jest.fn(() => ({ rock: 0, paper: 0, scissors: 0 })),
         getMatch: jest.fn(() => null),
+        getThemePreference: jest.fn(() => null),
         getGlobalMatchNumber: jest.fn(() => null),
       } as unknown as jest.Mocked<IGameStorage>;
 

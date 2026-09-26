@@ -7,8 +7,12 @@ import {
   RoundResult,
   StandardMove,
 } from "../utils/dataObjectUtils";
+import { ThemePreference } from "../storage/gameStorage";
 
 export interface IModel {
+  getThemePreference(): ThemePreference;
+  setThemePreference(theme: ThemePreference): void;
+
   // Score
   getPlayerScore(): number;
   getComputerScore(): number;

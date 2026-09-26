@@ -1,4 +1,4 @@
-import { IGameStorage } from "./gameStorage";
+import { IGameStorage, ThemePreference } from "./gameStorage";
 import {
   Match,
   MoveCount,
@@ -14,6 +14,7 @@ const KEY_SUFFIX_MOVE_COUNTS = "MoveCounts";
 
 const KEY_GLOBAL_MATCH_NUMBER = "globalMatchNumber";
 const KEY_CURRENT_MATCH = "currentMatch";
+const KEY_THEME_PREFERENCE = "themePreference";
 
 const DEFAULT_NUMERIC_VALUE = 0;
 
@@ -100,6 +101,13 @@ export class LocalStorageGameStorage implements IGameStorage {
     }
   }
 
+  getThemePreference(): ThemePreference | null {
+    const stored = localStorage.getItem(KEY_THEME_PREFERENCE);
+    return stored === "light" || stored === "dark" || stored === "system"
+      ? stored
+      : null;
+  }
+
   // ===== Setters =====
 
   setScore(participant: Participant, score: number): void {
@@ -140,6 +148,10 @@ export class LocalStorageGameStorage implements IGameStorage {
     } else {
       localStorage.removeItem(KEY_CURRENT_MATCH);
     }
+  }
+
+  setThemePreference(theme: ThemePreference): void {
+    this.safelySetItem(KEY_THEME_PREFERENCE, theme);
   }
 
   // ===== Removers =====
