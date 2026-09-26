@@ -634,6 +634,7 @@ button:focus-visible {
 
 .btn-primary,
 .btn-secondary,
+.btn-danger,
 #play-again {
   padding: 0.75rem 1.25rem;
   border-radius: var(--radius-md);
@@ -659,6 +660,13 @@ button:focus-visible {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.btn-danger:hover {
+  background-color: #d32f2f;
+  border-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .btn-secondary {
   background-color: transparent;
   color: var(--color-text);
@@ -670,7 +678,109 @@ button:focus-visible {
   background-color: #fff;
 }
 
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+  border: 2px solid var(--color-danger);
+}
+
+/* =============================================================================
+   5a. REUSABLE MODAL
+   ============================================================================= */
+.modal {
+  width: min(92vw, 30rem);
+  max-width: none;
+  max-height: min(85vh, 40rem);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.modal[open].is-open {
+  animation: modal-enter 160ms ease-out both;
+}
+
+.modal[open].is-closing {
+  animation: modal-exit 180ms ease-in both;
+  pointer-events: none;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.modal-close {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.modal-message {
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.modal-action {
+  max-width: 100%;
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-exit {
+  to {
+    opacity: 0;
+    transform: translateY(0.25rem) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open].is-open,
+  .modal[open].is-closing {
+    animation-duration: 1ms;
+  }
+}
+
 .btn-primary:active,
+.btn-danger:active,
 .card-button:active {
   transform: scale(0.98);
   filter: brightness(0.9);

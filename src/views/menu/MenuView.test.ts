@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 import MenuView from "./MenuView";
+import { IModal, ModalOptions } from "../../components/modal/IModal";
 
 describe("MenuView", () => {
   let view: MenuView;
   let container: HTMLElement;
+  let modal: jest.Mocked<IModal>;
 
   const getStartBtn = () =>
     document.getElementById("start") as HTMLButtonElement;
@@ -18,7 +20,8 @@ describe("MenuView", () => {
     `;
     container = document.getElementById("main-menu")!;
 
-    view = new MenuView();
+    modal = { open: jest.fn(), close: jest.fn() };
+    view = new MenuView(modal);
 
     view.render({ isMatchActive: false, hasDataToReset: true });
   });
@@ -66,7 +69,22 @@ describe("MenuView", () => {
       view.bindResetGame(handler);
 
       getResetBtn().click();
-      expect(handler).toHaveBeenCalled();
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(modal.open).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: expect.any(String),
+          actions: expect.arrayContaining([
+            expect.objectContaining({ id: "cancel" }),
+            expect.objectContaining({ id: "reset" }),
+          ]),
+          initialFocusActionId: "cancel",
+        }),
+      );
+
+      const options = modal.open.mock.calls[0][0] as ModalOptions;
+      options.actions.find((action) => action.id === "reset")?.onSelect();
+      expect(handler).toHaveBeenCalledTimes(1);
     });
   });
 });

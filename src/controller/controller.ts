@@ -163,8 +163,7 @@ export class Controller {
       isMatchActive: false,
       hasDataToReset: this.model.hasDataToReset(),
     });
-    this.menuView.bindStartMatch(() => this.startGame());
-    this.menuView.bindResetGame(() => this.resetGameState());
+    this.bindMenuActions();
 
     this.resetArenaVisuals();
     this.controlsView.toggleVisibility(false);
@@ -173,6 +172,11 @@ export class Controller {
   private resetArenaVisuals(): void {
     this.arenaView.clear();
     this.updateStatsView();
+  }
+
+  private bindMenuActions(): void {
+    this.menuView.bindStartMatch(() => this.startGame());
+    this.menuView.bindResetGame(() => void this.resetGameState());
   }
 
   async handlePlayerMove(move: Move): Promise<void> {
@@ -236,8 +240,7 @@ export class Controller {
     this.controlsView.toggleVisibility(false);
     this.menuView.toggleMenuVisibility(true);
 
-    this.menuView.bindStartMatch(() => this.startGame());
-    this.menuView.bindResetGame(() => this.resetGameState());
+    this.bindMenuActions();
     this.controlsView.bindPlayerMove((move) => this.handlePlayerMove(move));
     this.controlsView.bindStartNewMatch(() => this.startGame());
     this.controlsView.bindGoHome(() => window.location.reload());
