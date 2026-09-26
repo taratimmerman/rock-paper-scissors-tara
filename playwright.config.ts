@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = process.env.PLAYWRIGHT_PORT ?? "1234";
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -17,7 +19,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
 
   use: {
-    baseURL: "http://localhost:1234",
+    baseURL: `http://localhost:${port}`,
 
     /* Capture debugging contexts only on failure to optimize CI artifact storage */
     trace: "retain-on-failure",
@@ -42,8 +44,8 @@ export default defineConfig({
 
   /* Automate the local Parcel server lifecycle during execution */
   webServer: {
-    command: "npm run start",
-    url: "http://localhost:1234",
+    command: `npm run start -- --port ${port}`,
+    url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000 /* Allow sufficient time for cold start bundling */,
   },

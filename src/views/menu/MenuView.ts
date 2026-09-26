@@ -1,11 +1,18 @@
 import View from "../View";
+import { IModal } from "../../components/modal/IModal";
 import { IMenuView, MenuViewData } from "./IMenuView";
 
 export default class MenuView extends View<MenuViewData> implements IMenuView {
   protected declare _parentElement: HTMLElement;
+  private readonly modal: IModal;
   // Cache the specific buttons
   private _startBtn?: HTMLButtonElement;
   private _resetBtn?: HTMLButtonElement;
+
+  constructor(modal: IModal) {
+    super();
+    this.modal = modal;
+  }
 
   protected _generateMarkup(): string {
     const startText = this._data.isMatchActive
@@ -56,7 +63,30 @@ export default class MenuView extends View<MenuViewData> implements IMenuView {
   public bindResetGame(handler: () => void): void {
     this._resetBtn?.addEventListener("click", (e) => {
       e.preventDefault();
-      handler();
+      this._showResetConfirmation(handler);
+    });
+  }
+
+  private _showResetConfirmation(onConfirm: () => void): void {
+    this.modal.open({
+      title: "Reset saved game data?",
+      message:
+        "This permanently clears your saved progress and statistics.",
+      actions: [
+        {
+          id: "cancel",
+          label: "Cancel",
+          onSelect: () => {},
+          variant: "secondary",
+        },
+        {
+          id: "reset",
+          label: "Reset Game State",
+          onSelect: onConfirm,
+          variant: "danger",
+        },
+      ],
+      initialFocusActionId: "cancel",
     });
   }
 

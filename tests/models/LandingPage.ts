@@ -31,6 +31,10 @@ export class LandingPage {
 
   async resetGame(): Promise<void> {
     await this.resetGameButton.click();
+    await this.page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Reset Game State", exact: true })
+      .click();
   }
 
   async startMatch(): Promise<void> {

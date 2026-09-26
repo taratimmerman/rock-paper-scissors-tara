@@ -17,8 +17,8 @@ export interface IModel {
 
   // Moves
   doesMoveBeat(a: Move, b: Move): boolean;
-  getPlayerMove(): Move;
-  getComputerMove(): Move;
+  getPlayerMove(): Move | null;
+  getComputerMove(): Move | null;
   registerPlayerMove(move: Move): void;
   registerComputerMove(move: Move): void;
   getCalculatedComputerMove(): Move;

@@ -1,5 +1,6 @@
 import { Model } from "./model/model";
 import { Controller } from "./controller/controller";
+import Modal from "./components/modal/Modal";
 
 import ArenaView from "./views/arena/ArenaView";
 import ControlsView from "./views/controls/ControlsView";
@@ -11,14 +12,17 @@ import StatusView from "./views/status/StatusView";
 document.addEventListener("DOMContentLoaded", () => {
   const model = new Model();
 
-  const controller = new Controller(model, {
-    arenaView: new ArenaView(),
-    controlsView: new ControlsView(),
-    gameView: new GameView(),
-    menuView: new MenuView(),
-    statsView: new StatsView(),
-    statusView: new StatusView(),
-  });
+  const controller = new Controller(
+    model,
+    {
+      arenaView: new ArenaView(),
+      controlsView: new ControlsView(),
+      gameView: new GameView(),
+      menuView: new MenuView(new Modal()),
+      statsView: new StatsView(),
+      statusView: new StatusView(),
+    },
+  );
 
   controller.initialize();
 });
