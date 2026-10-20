@@ -1203,10 +1203,16 @@ parcelHelpers.export(exports, "HEALTH_KEYS", ()=>HEALTH_KEYS);
 parcelHelpers.export(exports, "GAME_OUTCOME", ()=>GAME_OUTCOME);
 var _taraPng = require("url:../../public/images/tara.png");
 var _taraPngDefault = parcelHelpers.interopDefault(_taraPng);
-var _cardBluePng = require("url:../../public/images/card-blue.png");
-var _cardBluePngDefault = parcelHelpers.interopDefault(_cardBluePng);
-var _cardRedPng = require("url:../../public/images/card-red.png");
-var _cardRedPngDefault = parcelHelpers.interopDefault(_cardRedPng);
+var _rockPng = require("url:../../public/images/rock.png");
+var _rockPngDefault = parcelHelpers.interopDefault(_rockPng);
+var _paperPng = require("url:../../public/images/paper.png");
+var _paperPngDefault = parcelHelpers.interopDefault(_paperPng);
+var _scissorsPng = require("url:../../public/images/scissors.png");
+var _scissorsPngDefault = parcelHelpers.interopDefault(_scissorsPng);
+var _cardBluePixelPng = require("url:../../public/images/card_blue_pixel.png");
+var _cardBluePixelPngDefault = parcelHelpers.interopDefault(_cardBluePixelPng);
+var _cardRedPixelPng = require("url:../../public/images/card_red_pixel.png");
+var _cardRedPixelPngDefault = parcelHelpers.interopDefault(_cardRedPixelPng);
 const MOVES_DATABASE = {
     ROCK: {
         id: "rock",
@@ -1215,7 +1221,7 @@ const MOVES_DATABASE = {
         ],
         isStandard: true,
         text: "Rock",
-        icon: "\uD83E\uDEA8"
+        icon: (0, _rockPngDefault.default)
     },
     PAPER: {
         id: "paper",
@@ -1224,7 +1230,7 @@ const MOVES_DATABASE = {
         ],
         isStandard: true,
         text: "Paper",
-        icon: "\uD83D\uDCC4"
+        icon: (0, _paperPngDefault.default)
     },
     SCISSORS: {
         id: "scissors",
@@ -1233,7 +1239,7 @@ const MOVES_DATABASE = {
         ],
         isStandard: true,
         text: "Scissors",
-        icon: "\u2702\uFE0F"
+        icon: (0, _scissorsPngDefault.default)
     },
     TARA: {
         id: "tara",
@@ -1250,11 +1256,11 @@ const MOVES_DATABASE = {
 const CARD_BACKS_DATABASE = {
     PLAYER: {
         id: "player",
-        image: (0, _cardBluePngDefault.default)
+        image: (0, _cardBluePixelPngDefault.default)
     },
     COMPUTER: {
         id: "computer",
-        image: (0, _cardRedPngDefault.default)
+        image: (0, _cardRedPixelPngDefault.default)
     }
 };
 // -----------------------------------------------------------------------------
@@ -1320,14 +1326,23 @@ const GAME_OUTCOME = {
     PLAYER_WIN: "gameWin"
 };
 
-},{"url:../../public/images/tara.png":"7LenK","url:../../public/images/card-blue.png":"hBpbE","url:../../public/images/card-red.png":"38ONL","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"7LenK":[function(require,module,exports,__globalThis) {
+},{"url:../../public/images/tara.png":"7LenK","url:../../public/images/rock.png":"jyAj5","url:../../public/images/paper.png":"fid4j","url:../../public/images/scissors.png":"512JQ","url:../../public/images/card_blue_pixel.png":"8SoT4","url:../../public/images/card_red_pixel.png":"bnAp8","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"7LenK":[function(require,module,exports,__globalThis) {
 module.exports = module.bundle.resolve("tara.62cce216.png") + "?" + Date.now();
 
-},{}],"hBpbE":[function(require,module,exports,__globalThis) {
-module.exports = module.bundle.resolve("card-blue.d427fcde.png") + "?" + Date.now();
+},{}],"jyAj5":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("rock.0d3e689a.png") + "?" + Date.now();
 
-},{}],"38ONL":[function(require,module,exports,__globalThis) {
-module.exports = module.bundle.resolve("card-red.17cb6649.png") + "?" + Date.now();
+},{}],"fid4j":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("paper.492f6e02.png") + "?" + Date.now();
+
+},{}],"512JQ":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("scissors.926ec0e7.png") + "?" + Date.now();
+
+},{}],"8SoT4":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("card_blue_pixel.58384d28.png") + "?" + Date.now();
+
+},{}],"bnAp8":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("card_red_pixel.4f0c717a.png") + "?" + Date.now();
 
 },{}],"jnFvT":[function(require,module,exports,__globalThis) {
 exports.interopDefault = function(a) {
@@ -1967,7 +1982,7 @@ class ArenaView extends (0, _viewDefault.default) {
                   aria-hidden="true"
                 />
               </div>
-              <div class="card-front">
+              <div class="card-front player-theme">
                 ${getCardContent(playerMoveId)}
               </div>
             </div>
@@ -1985,7 +2000,7 @@ class ArenaView extends (0, _viewDefault.default) {
                   aria-hidden="true"
                 />
               </div>
-              <div class="card-front">
+              <div class="card-front computer-theme">
                  ${getCardContent(computerMoveId)}
               </div>
             </div>
@@ -2400,7 +2415,7 @@ class ControlsView extends (0, _viewDefault.default) {
                     aria-hidden="true"
                   />
                 </div>
-                <div class="card-front">
+                <div class="card-front player-theme">
                   <span class="icon" aria-hidden="true">${(0, _imageUtils.renderIcon)(move.icon)}</span>
                   <span class="label">${move.text}</span>
                 </div>
@@ -2747,7 +2762,7 @@ class StatusView extends (0, _viewDefault.default) {
         this._messageElement = this._parentElement.querySelector("#status");
     }
     _generateMarkup() {
-        return `<p id="status">${this._data.message}</p>`;
+        return `<p id="status" class="dot-matrix-display">${this._data.message}</p>`;
     }
     setMessage(message) {
         this._data = {
