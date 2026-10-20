@@ -42,7 +42,7 @@ export default class StatusView
   }
 
   protected _generateMarkup(): string {
-    return `<p id="status">${this._data.message}</p>`;
+    return `<p id="status" class="dot-matrix-display">${this._data.message}</p>`;
   }
 
   public setMessage(message: string): void {

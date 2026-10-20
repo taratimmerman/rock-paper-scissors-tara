@@ -7,8 +7,11 @@
 // =============================================================================
 
 import taraImage from "url:../../public/images/tara.png";
-import cardBlueImage from "url:../../public/images/card-blue.png";
-import cardRedImage from "url:../../public/images/card-red.png";
+import rockImage from "url:../../public/images/rock.png";
+import paperImage from "url:../../public/images/paper.png";
+import scissorsImage from "url:../../public/images/scissors.png";
+import cardBlueImage from "url:../../public/images/card_blue_pixel.png";
+import cardRedImage from "url:../../public/images/card_red_pixel.png";
 import { Match, MoveData } from "./dataObjectUtils";
 
 // -----------------------------------------------------------------------------
@@ -23,21 +26,21 @@ export const MOVES_DATABASE = {
     beats: ["scissors"],
     isStandard: true, // Flag used to filter standard vs. special moves
     text: "Rock",
-    icon: "🪨",
+    icon: rockImage,
   },
   PAPER: {
     id: "paper",
     beats: ["rock"],
     isStandard: true,
     text: "Paper",
-    icon: "📄",
+    icon: paperImage,
   },
   SCISSORS: {
     id: "scissors",
     beats: ["paper"],
     isStandard: true,
     text: "Scissors",
-    icon: "✂️",
+    icon: scissorsImage,
   },
   TARA: {
     id: "tara",

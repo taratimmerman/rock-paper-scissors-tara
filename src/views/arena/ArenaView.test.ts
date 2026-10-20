@@ -68,6 +68,12 @@ describe("ArenaView", () => {
 
       expect(playerCard).not.toBeNull();
       expect(computerCard).not.toBeNull();
+      expect(
+        playerCard?.querySelector(".card-front.player-theme"),
+      ).not.toBeNull();
+      expect(
+        computerCard?.querySelector(".card-front.computer-theme"),
+      ).not.toBeNull();
 
       // Check for specific icons (using your dataUtils data)
       const rockData = PLAYER_MOVES_DATA.find((m) => m.id === "rock");

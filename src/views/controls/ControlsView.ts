@@ -77,7 +77,7 @@ export default class ControlsView
                     aria-hidden="true"
                   />
                 </div>
-                <div class="card-front">
+                <div class="card-front player-theme">
                   <span class="icon" aria-hidden="true">${renderIcon(move.icon)}</span>
                   <span class="label">${move.text}</span>
                 </div>

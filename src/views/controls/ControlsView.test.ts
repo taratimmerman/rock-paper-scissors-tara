@@ -86,6 +86,12 @@ describe("ControlsView", () => {
 
     const cardBackImages = document.querySelectorAll(".card-back-image");
     expect(cardBackImages.length).toBeGreaterThan(0);
+    expect(document.querySelectorAll(".card-back.player-theme")).toHaveLength(
+      mockMoves.length,
+    );
+    expect(document.querySelectorAll(".card-front.player-theme")).toHaveLength(
+      mockMoves.length,
+    );
   });
 
   test("renders Tara with an image icon when provided by move data", () => {
