@@ -22,6 +22,7 @@ describe("StatusView", () => {
     const statusElement = document.querySelector("#status");
     expect(statusElement).not.toBeNull();
     expect(statusElement?.textContent).toBe(status);
+    expect(statusElement?.classList.contains("dot-matrix-display")).toBe(true);
   });
 
   it("should update only the textContent when setMessage is called", () => {

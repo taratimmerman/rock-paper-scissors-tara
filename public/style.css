@@ -26,6 +26,13 @@
   --color-gold: #b8860b;
   --color-gold-highlight: #ffd700;
   --color-defeated-mark: rgba(255, 255, 255, 0.2);
+  --color-dot-matrix-surface: #f2e6d0;
+  --color-dot-matrix-dot: rgba(153, 75, 0, 0.3);
+  --color-dot-matrix-ink: #713500;
+  --color-dot-matrix-glow: rgba(255, 136, 0, 0.3);
+  --color-dot-matrix-scanline: rgba(76, 42, 12, 0.08);
+  --color-dot-matrix-frame: #8e7861;
+  --color-pixel-grid: rgba(20, 35, 45, 0.045);
   --color-card-texture: rgba(255, 255, 255, 0.03);
   --color-card-glint: rgba(255, 255, 255, 0.3);
   --color-card-highlight: rgba(255, 255, 255, 0.12);
@@ -49,6 +56,8 @@
   /* Card Colors */
   --color-player-card: #2e5a88;
   --color-computer-card: #a64452;
+  --color-player-card-overlay: rgba(35, 105, 190, 0.42);
+  --color-computer-card-overlay: rgba(190, 45, 60, 0.42);
   --card-gradient-overlay: linear-gradient(
     145deg,
     var(--color-card-highlight) 0%,
@@ -80,6 +89,13 @@
   --color-danger-hover: #f17c78;
   --color-label: #bdcbc6;
   --color-vs: #62716c;
+  --color-dot-matrix-surface: #110800;
+  --color-dot-matrix-dot: rgba(255, 136, 0, 0.22);
+  --color-dot-matrix-ink: #ffb000;
+  --color-dot-matrix-glow: rgba(255, 102, 0, 0.68);
+  --color-dot-matrix-scanline: rgba(0, 0, 0, 0.28);
+  --color-dot-matrix-frame: #514235;
+  --color-pixel-grid: rgba(255, 190, 95, 0.055);
   --color-subtle-fill: rgba(224, 242, 235, 0.06);
   --color-shadow: rgba(0, 0, 0, 0.48);
   --color-shadow-soft: rgba(0, 0, 0, 0.28);
@@ -106,6 +122,13 @@
     --color-danger-hover: #f17c78;
     --color-label: #bdcbc6;
     --color-vs: #62716c;
+    --color-dot-matrix-surface: #110800;
+    --color-dot-matrix-dot: rgba(255, 136, 0, 0.22);
+    --color-dot-matrix-ink: #ffb000;
+    --color-dot-matrix-glow: rgba(255, 102, 0, 0.68);
+    --color-dot-matrix-scanline: rgba(0, 0, 0, 0.28);
+    --color-dot-matrix-frame: #514235;
+    --color-pixel-grid: rgba(255, 190, 95, 0.055);
     --color-subtle-fill: rgba(224, 242, 235, 0.06);
     --color-shadow: rgba(0, 0, 0, 0.48);
     --color-shadow-soft: rgba(0, 0, 0, 0.28);
@@ -140,6 +163,25 @@ body {
   overflow-x: hidden;
   /* Prevent bounce on mobile */
   overscroll-behavior: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--color-pixel-grid) 0 1px,
+      transparent 1px 5px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--color-pixel-grid) 0 1px,
+      transparent 1px 5px
+    );
 }
 
 header,
@@ -351,7 +393,7 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-radius: var(--radius-lg);
+  border-radius: 5px;
 }
 
 .card-back {
@@ -362,6 +404,22 @@ main {
   overflow: hidden;
 }
 
+.card-back.player-theme::after,
+.card-back.computer-theme::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.card-back.player-theme::after {
+  background-color: var(--color-player-card-overlay);
+}
+
+.card-back.computer-theme::after {
+  background-color: var(--color-computer-card-overlay);
+}
+
 .card-back-image {
   display: block;
   width: 100%;
@@ -369,6 +427,7 @@ main {
   object-fit: cover;
   object-position: center;
   border-radius: inherit;
+  image-rendering: pixelated;
 }
 
 .card-front {
@@ -377,6 +436,22 @@ main {
   backface-visibility: hidden;
   border: 1px solid var(--color-border);
   box-shadow: inset 0 0 15px var(--color-subtle-fill);
+}
+
+.card-front.player-theme {
+  background-image:
+    linear-gradient(
+      var(--color-player-card-overlay),
+      var(--color-player-card-overlay)
+    );
+}
+
+.card-front.computer-theme {
+  background-image:
+    linear-gradient(
+      var(--color-computer-card-overlay),
+      var(--color-computer-card-overlay)
+    );
 }
 
 /* Player Theme */
@@ -469,6 +544,10 @@ main {
   object-fit: contain;
 }
 
+.card-front .icon-image {
+  image-rendering: pixelated;
+}
+
 .icon-emoji {
   display: inline-flex;
   align-items: center;
@@ -485,6 +564,13 @@ main {
   color: var(--color-label);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.card-front .label {
+  font-family: ui-monospace, "Courier New", monospace;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-shadow: 1px 0 currentColor;
 }
 
 .vs-label {
@@ -951,6 +1037,49 @@ button:focus-visible {
   align-items: center;
   text-align: center;
   min-height: 2.5rem;
+}
+
+.dot-matrix-display {
+  width: 100%;
+  height: 5rem;
+  padding: 0.5rem clamp(0.75rem, 4vw, 1.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-dot-matrix-frame);
+  border-radius: 3px;
+  background-color: var(--color-dot-matrix-surface);
+  background-image:
+    radial-gradient(
+      circle,
+      var(--color-dot-matrix-dot) 1.2px,
+      transparent 1.6px
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 50%,
+      var(--color-dot-matrix-scanline) 50%
+    );
+  background-size: 7px 7px, 100% 4px;
+  box-shadow:
+    inset 0 0 0 2px rgb(0 0 0 / 8%),
+    inset 0 0 14px rgb(0 0 0 / 35%),
+    0 0 12px var(--color-dot-matrix-glow),
+    0 2px 5px var(--color-shadow-soft);
+  color: var(--color-dot-matrix-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(0.75rem, 3.5vw, 1rem);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-shadow:
+    0 0 1px #fff0bd,
+    0 0 5px var(--color-dot-matrix-glow),
+    0 0 12px var(--color-dot-matrix-glow),
+    2px 0 2px var(--color-dot-matrix-glow);
+  overflow-wrap: anywhere;
+  overflow-y: auto;
 }
 
 /* =============================================================================

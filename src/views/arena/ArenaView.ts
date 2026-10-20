@@ -96,7 +96,7 @@ export default class ArenaView
                   aria-hidden="true"
                 />
               </div>
-              <div class="card-front">
+              <div class="card-front player-theme">
                 ${getCardContent(playerMoveId)}
               </div>
             </div>
@@ -114,7 +114,7 @@ export default class ArenaView
                   aria-hidden="true"
                 />
               </div>
-              <div class="card-front">
+              <div class="card-front computer-theme">
                  ${getCardContent(computerMoveId)}
               </div>
             </div>
